@@ -653,6 +653,8 @@ export class CourseDetailComponent implements OnInit {
   }
 
   startLesson(lessonId: string): void {
-    this.router.navigate(['/lessons', lessonId]);
+    this.router.navigate(['/lessons', lessonId], {
+      queryParams: { view: 'presentation' },
+    });
   }
 }

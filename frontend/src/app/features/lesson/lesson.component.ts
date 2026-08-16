@@ -1340,6 +1340,12 @@ export class LessonComponent implements OnInit {
       next: (data) => {
         this.lesson.set(data);
         this.isLoading.set(false);
+        const requestedView = this.route.snapshot.queryParams['view'];
+        if (requestedView === 'presentation' || (data.presentationUrl && requestedView !== 'content')) {
+          this.activeLessonView.set('presentation');
+        } else {
+          this.activeLessonView.set('content');
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: (err) => {

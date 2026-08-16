@@ -77,9 +77,24 @@ import { CourseSummary } from '../../core/models';
             *ngFor="let course of courses()"
             class="course-card glass-card animate-fade-in"
           >
-            <!-- Card Thumbnail -->
-            <div class="card-image-wrapper">
+            <!-- Card Thumbnail (Clickable to open Class & PowerPoint) -->
+            <div
+              class="card-image-wrapper clickable-thumb"
+              (click)="openCourseClassWithPowerPoint(course.id)"
+              role="button"
+              tabindex="0"
+              title="Haz clic para abrir la clase y ver el PowerPoint"
+            >
               <img [src]="course.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=60'" [alt]="course.title" class="course-thumb" />
+              
+              <!-- Hover Overlay with PowerPoint Action Callout -->
+              <div class="thumb-hover-overlay">
+                <div class="thumb-cta-pill">
+                  <span class="pill-icon">📊</span>
+                  <span class="pill-text">Abrir Clase y PowerPoint</span>
+                </div>
+              </div>
+
               <div class="progress-badge">
                 <span [class.text-success]="course.progressPercentage === 100">
                   {{ course.progressPercentage }}% Completado
@@ -89,7 +104,9 @@ import { CourseSummary } from '../../core/models';
 
             <!-- Card Body -->
             <div class="card-body">
-              <h3 class="course-title">{{ course.title }}</h3>
+              <h3 class="course-title" (click)="openCourseClassWithPowerPoint(course.id)" style="cursor: pointer;">
+                {{ course.title }}
+              </h3>
               <p class="course-desc">{{ course.description }}</p>
 
               <!-- Progress Bar -->
@@ -118,16 +135,31 @@ import { CourseSummary } from '../../core/models';
                 <span>🔴 Unirse a Clase en Vivo (Meet)</span>
               </a>
 
-              <!-- Action Button -->
-              <button
-                (click)="openCourse(course.id)"
-                class="btn btn-primary w-full"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <span>Ver Clases del Curso ({{ course.totalLessons }}) ➔</span>
-              </button>
+              <!-- Action Buttons -->
+              <div class="card-buttons-group">
+                <button
+                  (click)="openCourseClassWithPowerPoint(course.id)"
+                  class="btn btn-primary w-full btn-open-ppt"
+                >
+                  <span class="btn-emoji">📊</span>
+                  <span>Abrir Clase y Ver PowerPoint ➔</span>
+                </button>
+
+                <button
+                  (click)="openCourseSyllabus(course.id)"
+                  class="btn btn-secondary w-full btn-view-syllabus"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                  </svg>
+                  <span>Temario de Clases ({{ course.totalLessons }})</span>
+                </button>
+              </div>
             </div>
           </article>
         </div>
@@ -296,6 +328,10 @@ import { CourseSummary } from '../../core/models';
       background: #1e293b;
     }
 
+    .clickable-thumb {
+      cursor: pointer;
+    }
+
     .course-thumb {
       width: 100%;
       height: 100%;
@@ -304,7 +340,41 @@ import { CourseSummary } from '../../core/models';
     }
 
     .course-card:hover .course-thumb {
-      transform: scale(1.05);
+      transform: scale(1.08);
+    }
+
+    .thumb-hover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.85) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .course-card:hover .thumb-hover-overlay {
+      opacity: 1;
+    }
+
+    .thumb-cta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(245, 158, 11, 0.9);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.84rem;
+      border-radius: var(--radius-full);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+      transform: translateY(10px);
+      transition: transform 0.3s ease;
+    }
+
+    .course-card:hover .thumb-cta-pill {
+      transform: translateY(0);
     }
 
     .progress-badge {
@@ -319,6 +389,7 @@ import { CourseSummary } from '../../core/models';
       font-weight: 600;
       color: #818cf8;
       border: 1px solid var(--border-subtle);
+      z-index: 2;
     }
 
     .text-success {
@@ -422,6 +493,45 @@ import { CourseSummary } from '../../core/models';
       50% { opacity: 0.4; transform: scale(0.75); }
     }
 
+    .card-buttons-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn-open-ppt {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+      border: none !important;
+      color: #fff !important;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 12px 18px;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-open-ppt:hover {
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-view-syllabus {
+      font-size: 0.85rem;
+      padding: 10px 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-emoji {
+      font-size: 1.1rem;
+    }
+
     .w-full {
       width: 100%;
     }
@@ -493,7 +603,35 @@ export class DashboardComponent implements OnInit {
     return this.courses().reduce((sum, c) => sum + (c.completedLessons || 0), 0);
   }
 
-  openCourse(courseId: string): void {
+  openCourseClassWithPowerPoint(courseId: string): void {
+    this.isLoading.set(true);
+    this.coursesService.getCourseById(courseId).subscribe({
+      next: (course) => {
+        this.isLoading.set(false);
+        if (course && course.lessons && course.lessons.length > 0) {
+          // Find first available or first completed or fallback to first
+          const targetLesson =
+            course.lessons.find((l) => l.status === 'AVAILABLE') ||
+            course.lessons.find((l) => l.status === 'COMPLETED') ||
+            course.lessons[0];
+
+          if (targetLesson) {
+            this.router.navigate(['/lessons', targetLesson.id], {
+              queryParams: { view: 'presentation' },
+            });
+            return;
+          }
+        }
+        this.router.navigate(['/courses', courseId]);
+      },
+      error: () => {
+        this.isLoading.set(false);
+        this.router.navigate(['/courses', courseId]);
+      },
+    });
+  }
+
+  openCourseSyllabus(courseId: string): void {
     this.router.navigate(['/courses', courseId]);
   }
 }

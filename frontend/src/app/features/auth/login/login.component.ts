@@ -14,24 +14,24 @@ import { AuthService } from '../../../core/services/auth.service';
         <!-- Header -->
         <div class="auth-header">
           <div class="auth-logo-badge">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
               <path d="M6 12v5c3 3 9 3 12 0v-5"/>
             </svg>
           </div>
           <h2>Iniciar Sesión</h2>
-          <p>Ingresa a tu cuenta para continuar tus clases</p>
+          <p>Ingresa a tu cuenta de estudiante para continuar tus clases</p>
         </div>
 
         <!-- Quick Demo Credentials Fill -->
         <div class="demo-box">
-          <span class="demo-title">Acceso rápido de prueba:</span>
+          <span class="demo-title">💡 Acceso Rápido de Prueba:</span>
           <div class="demo-buttons">
             <button type="button" (click)="fillCredentials('alumno@instituto.com', 'student123')" class="demo-btn">
-              Alumno Demo
+              🧑‍🎓 Alumno Demo
             </button>
             <button type="button" (click)="fillCredentials('admin@instituto.com', 'admin123')" class="demo-btn">
-              Profesor Demo
+              👨‍🏫 Profesor Demo
             </button>
           </div>
         </div>
@@ -101,14 +101,13 @@ import { AuthService } from '../../../core/services/auth.service';
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background-color: var(--bg-main);
     }
 
     .auth-card {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       padding: 36px 32px;
-      background: #ffffff;
+      background: rgba(18, 24, 38, 0.85);
       border: 1px solid var(--border-subtle);
     }
 
@@ -118,42 +117,42 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .auth-logo-badge {
-      width: 48px;
-      height: 48px;
-      margin: 0 auto 14px;
-      background: #0f172a;
-      border-radius: var(--radius-sm);
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      background: var(--accent-gradient);
+      border-radius: var(--radius-md);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
+      color: #fff;
+      box-shadow: var(--shadow-glow);
     }
 
     .auth-header h2 {
-      font-size: 1.5rem;
-      margin-bottom: 4px;
-      color: #0f172a;
+      font-size: 1.6rem;
+      margin-bottom: 6px;
     }
 
     .auth-header p {
       color: var(--text-secondary);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
     }
 
     .demo-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px dashed rgba(99, 102, 241, 0.3);
       border-radius: var(--radius-sm);
       padding: 12px;
       margin-bottom: 20px;
     }
 
     .demo-title {
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      color: #475569;
+      color: #818cf8;
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .demo-buttons {
@@ -163,60 +162,59 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .demo-btn {
       flex: 1;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #334155;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
       padding: 6px 10px;
-      border-radius: var(--radius-sm);
+      border-radius: 6px;
       font-size: 0.78rem;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.2s;
     }
 
     .demo-btn:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-      border-color: #94a3b8;
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--primary);
     }
 
     .alert-error {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #b91c1c;
-      padding: 10px 12px;
+      gap: 10px;
+      background: var(--status-danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 12px 14px;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      margin-bottom: 18px;
+      font-size: 0.88rem;
+      margin-bottom: 20px;
     }
 
     .w-full {
       width: 100%;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .auth-footer {
       text-align: center;
       margin-top: 24px;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--text-secondary);
     }
 
     .auth-link {
       font-weight: 600;
-      margin-left: 4px;
-      color: #0f172a;
+      margin-left: 6px;
+      color: #818cf8;
     }
 
     .spinner {
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255, 255, 255, 0.4);
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
       border-radius: 50%;
-      border-top-color: #ffffff;
+      border-top-color: #fff;
       animation: spin 0.6s linear infinite;
     }
 

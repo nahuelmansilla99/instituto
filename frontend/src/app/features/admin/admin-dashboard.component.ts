@@ -19,20 +19,20 @@ import { CourseSummary } from '../../core/models';
         <!-- Hero Section -->
         <section class="admin-hero glass-card animate-fade-in">
           <div class="hero-content">
-            <span class="hero-badge">Área de Gestión Docente</span>
-            <h1>Panel del Profesor</h1>
-            <p>Gestiona cursos, sube clases y exámenes, adjunta presentaciones PowerPoint y matricula a tus alumnos.</p>
+            <span class="hero-badge">⚙️ Área de Administración</span>
+            <h1>Panel del <span class="gradient-text">Profesor</span></h1>
+            <p>Gestiona los cursos, sube clases y exámenes mediante Excel, comparte enlaces a Google Meet y administra los cuestionarios de opción múltiple.</p>
           </div>
           <div class="hero-actions">
             <button (click)="openCreateModal()" class="btn btn-primary">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               <span>Crear Nuevo Curso</span>
             </button>
             <button (click)="downloadExcelTemplate()" class="btn btn-secondary" title="Descargar archivo Excel de ejemplo para subir clases masivamente">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -80,10 +80,10 @@ import { CourseSummary } from '../../core/models';
               <div class="meet-status-row" *ngIf="course.meetUrl">
                 <span class="badge-meet-active">
                   <span class="meet-dot"></span>
-                  Google Meet activo
+                  Google Meet configurado
                 </span>
                 <a [href]="course.meetUrl" target="_blank" class="meet-link-btn" title="Abrir sala de Meet">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="23 7 16 12 23 17 23 7"></polygon>
                     <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
                   </svg>
@@ -101,15 +101,15 @@ import { CourseSummary } from '../../core/models';
                 <a
                   [routerLink]="['/admin/courses', course.id]"
                   [queryParams]="{ tab: 'students' }"
-                  class="btn btn-primary w-full"
+                  class="btn btn-primary w-full btn-students-cta"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="9" cy="7" r="4"></circle>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                     <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                   </svg>
-                  <span>👥 Gestionar Alumnos</span>
+                  <span>👥 Gestionar Alumnos Matriculados</span>
                 </a>
 
                 <a
@@ -117,7 +117,7 @@ import { CourseSummary } from '../../core/models';
                   [queryParams]="{ tab: 'content' }"
                   class="btn btn-secondary w-full"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 20h9"></path>
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                   </svg>
@@ -183,7 +183,7 @@ import { CourseSummary } from '../../core/models';
 
           <div class="form-group">
             <label class="form-label" for="meetUrl">
-              <span>Enlace de Google Meet para Clases en Vivo (Opcional)</span>
+              <span>🔴 Enlace de Google Meet para Clases en Vivo (Opcional)</span>
             </label>
             <input
               id="meetUrl"
@@ -213,19 +213,19 @@ import { CourseSummary } from '../../core/models';
   `,
   styles: [`
     .admin-page {
-      padding: 28px 0 64px;
-      background-color: var(--bg-main);
+      padding: 32px 0 64px;
     }
 
     .admin-hero {
-      padding: 32px 36px;
-      margin-bottom: 32px;
+      padding: 36px 40px;
+      margin-bottom: 40px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 24px;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.2);
     }
 
     .hero-content {
@@ -234,69 +234,71 @@ import { CourseSummary } from '../../core/models';
 
     .hero-badge {
       display: inline-block;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       font-weight: 600;
-      color: #475569;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      padding: 3px 10px;
+      color: #c084fc;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 4px 12px;
       border-radius: var(--radius-full);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      margin-bottom: 12px;
     }
 
     .admin-hero h1 {
-      font-size: 1.75rem;
-      margin-bottom: 6px;
-      color: #0f172a;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #ec4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .hero-actions {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .section-header {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .section-header h2 {
-      font-size: 1.35rem;
-      margin-bottom: 2px;
-      color: #0f172a;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
     }
 
     .section-desc {
       color: var(--text-secondary);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
     }
 
     .courses-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 28px;
     }
 
     .course-card {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
+      transition: all 0.3s ease;
     }
 
     .course-card:hover {
-      border-color: #cbd5e1;
-      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(139, 92, 246, 0.4);
     }
 
     .card-image-wrapper {
       position: relative;
       width: 100%;
-      height: 180px;
-      background: #f1f5f9;
+      height: 190px;
+      background: #1e293b;
     }
 
     .course-thumb {
@@ -307,57 +309,63 @@ import { CourseSummary } from '../../core/models';
 
     .lesson-count-badge {
       position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: #ffffff;
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
-      font-size: 0.72rem;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(11, 15, 25, 0.9);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #0f172a;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.3);
     }
 
     .card-body {
-      padding: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       flex-grow: 1;
     }
 
     .course-title {
-      font-size: 1.1rem;
-      margin-bottom: 8px;
+      font-size: 1.2rem;
+      margin-bottom: 10px;
       line-height: 1.35;
-      color: #0f172a;
     }
 
     .meet-status-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
 
     .badge-meet-active {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: 0.72rem;
+      gap: 6px;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #16a34a;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
     }
 
     .meet-dot {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #16a34a;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
     }
 
     .meet-link-btn {
@@ -366,34 +374,32 @@ import { CourseSummary } from '../../core/models';
       gap: 4px;
       font-size: 0.75rem;
       font-weight: 500;
-      color: #2563eb;
+      color: #818cf8;
     }
 
     .badge-meet-none {
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 2px 7px;
-      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
     }
 
     .course-desc {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--text-secondary);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
       flex-grow: 1;
-      line-height: 1.45;
     }
 
     .card-actions {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .w-full {
@@ -403,38 +409,38 @@ import { CourseSummary } from '../../core/models';
     .sub-actions {
       display: flex;
       gap: 8px;
-      margin-top: 2px;
     }
 
     .btn-sub-edit, .btn-sub-delete {
       flex: 1;
-      padding: 6px 10px;
-      font-size: 0.78rem;
+      padding: 8px 12px;
+      font-size: 0.82rem;
       font-weight: 500;
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.2s;
     }
 
     .btn-sub-edit {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      color: #334155;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
     }
 
     .btn-sub-edit:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .btn-sub-delete {
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #f87171;
     }
 
     .btn-sub-delete:hover {
-      background: #fee2e2;
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
     }
 
     /* Modal */
@@ -444,7 +450,8 @@ import { CourseSummary } from '../../core/models';
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(15, 23, 42, 0.4);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
       z-index: 200;
       display: flex;
       align-items: center;
@@ -454,53 +461,48 @@ import { CourseSummary } from '../../core/models';
 
     .modal-content {
       width: 100%;
-      max-width: 500px;
-      padding: 28px;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-lg);
+      max-width: 540px;
+      padding: 32px;
+      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid rgba(139, 92, 246, 0.4);
     }
 
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .modal-header h3 {
-      font-size: 1.2rem;
-      color: #0f172a;
+      font-size: 1.3rem;
     }
 
     .btn-close {
       background: transparent;
       border: none;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       color: var(--text-muted);
       cursor: pointer;
     }
 
     .btn-close:hover {
-      color: #0f172a;
+      color: #fff;
+    }
+
+    .form-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
     .modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-top: 20px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-subtle);
-    }
-
-    .form-hint {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 4px;
+      gap: 12px;
+      margin-top: 28px;
     }
 
     .loading-state {
@@ -510,17 +512,27 @@ import { CourseSummary } from '../../core/models';
     }
 
     .spinner-large {
-      width: 36px;
-      height: 36px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #0f172a;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(139, 92, 246, 0.2);
+      border-top-color: #a855f7;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 14px;
+      margin: 0 auto 16px;
     }
 
     @keyframes spin {
       to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .admin-hero {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-actions {
+        width: 100%;
+      }
     }
   `],
 })
@@ -528,7 +540,6 @@ export class AdminDashboardComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly coursesService = inject(CoursesService);
   private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
 
   readonly courses = signal<CourseSummary[]>([]);
   readonly isLoading = signal(true);
@@ -538,7 +549,7 @@ export class AdminDashboardComponent implements OnInit {
   readonly currentEditingId = signal<string | null>(null);
 
   readonly courseForm: FormGroup = this.fb.group({
-    title: ['', [Validators.required, Validators.minLength(3)]],
+    title: ['', [Validators.required]],
     description: ['', [Validators.required]],
     thumbnailUrl: [''],
     meetUrl: [''],
@@ -561,6 +572,10 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  downloadExcelTemplate(): void {
+    this.adminService.downloadExcelTemplate();
+  }
+
   openCreateModal(): void {
     this.isEditing.set(false);
     this.currentEditingId.set(null);
@@ -574,63 +589,62 @@ export class AdminDashboardComponent implements OnInit {
     this.courseForm.patchValue({
       title: course.title,
       description: course.description,
-      thumbnailUrl: course.thumbnailUrl,
-      meetUrl: course.meetUrl,
+      thumbnailUrl: course.thumbnailUrl || '',
+      meetUrl: course.meetUrl || '',
     });
     this.showModal.set(true);
   }
 
   closeModal(): void {
     this.showModal.set(false);
+    this.courseForm.reset();
   }
 
   saveCourse(): void {
     if (this.courseForm.invalid) return;
 
     this.isSaving.set(true);
-    const formVal = this.courseForm.value;
+    const formValue = this.courseForm.value;
 
     if (this.isEditing() && this.currentEditingId()) {
-      this.adminService.updateCourse(this.currentEditingId()!, formVal).subscribe({
+      this.adminService.updateCourse(this.currentEditingId()!, formValue).subscribe({
         next: () => {
           this.isSaving.set(false);
           this.closeModal();
           this.loadCourses();
         },
-        error: () => {
+        error: (err) => {
           this.isSaving.set(false);
-          alert('Error al actualizar el curso.');
+          alert('Error al actualizar el curso: ' + (err.error?.message || 'Error desconocido'));
         },
       });
     } else {
-      this.adminService.createCourse(formVal).subscribe({
+      this.adminService.createCourse(formValue).subscribe({
         next: () => {
           this.isSaving.set(false);
           this.closeModal();
           this.loadCourses();
         },
-        error: () => {
+        error: (err) => {
           this.isSaving.set(false);
-          alert('Error al crear el curso.');
+          alert('Error al crear el curso: ' + (err.error?.message || 'Error desconocido'));
         },
       });
     }
   }
 
   deleteCourse(course: CourseSummary): void {
-    if (confirm(`¿Estás seguro de eliminar el curso "${course.title}" y todo su contenido?`)) {
-      this.adminService.deleteCourse(course.id).subscribe({
-        next: () => {
-          this.loadCourses();
-        },
-        error: () => {
-          alert('Error al eliminar el curso.');
-        },
-      });
+    if (!confirm(`¿Estás seguro de eliminar el curso "${course.title}" y todas sus clases?`)) {
+      return;
     }
-  }
 
-  downloadExcelTemplate(): void {
-    this.adminService.downloadExcelTemplate();
+    this.adminService.deleteCourse(course.id).subscribe({
+      next: () => {
+        this.loadCourses();
+      },
+      error: (err) => {
+        alert('Error al eliminar curso: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
   }
 }

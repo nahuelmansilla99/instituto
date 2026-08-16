@@ -15,52 +15,58 @@ import { CourseSummary } from '../../core/models';
 
     <main class="dashboard-page">
       <div class="container">
-        <!-- Welcome Hero Banner -->
-        <header class="hero-section glass-card animate-fade-in">
-          <div class="hero-content">
-            <span class="hero-badge">Portal de Aprendizaje</span>
-            <h1>Bienvenido, {{ authService.currentUser()?.name }}</h1>
-            <p>Accede a tus cursos matriculados, estudia las clases y rinde las evaluaciones.</p>
+        <!-- Teacher Role Banner if Admin -->
+        <div *ngIf="authService.currentUser()?.role === 'ADMIN'" class="teacher-admin-banner glass-card animate-fade-in">
+          <div class="teacher-banner-text">
+            <span class="badge-role-tag">👨‍🏫 Perfil de Profesor Activo</span>
+            <h3>Panel de Gestión de Cursos, Clases y Alumnos</h3>
+            <p>Puedes matricular estudiantes, ver el rendimiento clase por clase, subir exámenes por Excel y configurar salas de Google Meet.</p>
           </div>
+          <a routerLink="/admin" class="btn btn-primary btn-teacher-portal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <span>Ir al Panel del Profesor (Gestión de Alumnos) ➔</span>
+          </a>
+        </div>
 
+        <!-- Hero Section -->
+        <section class="hero-section glass-card animate-fade-in" *ngIf="authService.currentUser() as user">
+          <div class="hero-content">
+            <span class="hero-badge">🎓 Panel del Estudiante</span>
+            <h1>¡Hola de nuevo, <span class="gradient-text">{{ user.name }}</span>!</h1>
+            <p>Continúa con tus clases y responde los cuestionarios para desbloquear los siguientes módulos.</p>
+          </div>
           <div class="hero-stats">
             <div class="stat-box">
               <span class="stat-number">{{ courses().length }}</span>
-              <span class="stat-label">Cursos Asignados</span>
+              <span class="stat-label">Cursos Activos</span>
             </div>
             <div class="stat-box">
               <span class="stat-number">{{ getTotalCompletedLessons() }}</span>
               <span class="stat-label">Clases Aprobadas</span>
             </div>
           </div>
-        </header>
+        </section>
 
-        <!-- Teacher Notice Banner (If Admin / Teacher) -->
-        <div *ngIf="authService.currentUser()?.role === 'ADMIN'" class="teacher-admin-banner glass-card animate-fade-in">
-          <div class="teacher-banner-info">
-            <strong>👨‍🏫 Modo Profesor / Administrador</strong>
-            <p>Puedes crear nuevos cursos, subir presentaciones PowerPoint (.pptx), organizar exámenes y matricular alumnos desde el panel de gestión.</p>
-          </div>
-          <a routerLink="/admin" class="btn btn-secondary btn-sm">
-            Ir al Panel del Profesor ➔
-          </a>
-        </div>
-
-        <!-- Section Title -->
+        <!-- Courses Grid Header -->
         <div class="section-header">
-          <h2>Mis Cursos Matriculados</h2>
-          <p class="section-subtitle">Selecciona un curso para continuar tu aprendizaje o abrir directamente la presentación de la clase.</p>
+          <div>
+            <h2>Cursos Disponibles</h2>
+            <p class="section-desc">Selecciona un curso para continuar tu aprendizaje paso a paso</p>
+          </div>
         </div>
 
         <!-- Loading State -->
         <div *ngIf="isLoading()" class="loading-state">
           <div class="spinner-large"></div>
-          <p>Cargando tus cursos asignados...</p>
+          <p>Cargando tus cursos...</p>
         </div>
 
-        <!-- Empty State (No courses assigned yet) -->
-        <div *ngIf="!isLoading() && courses().length === 0" class="empty-state-card glass-card animate-fade-in">
-          <div class="empty-icon">📂</div>
+        <!-- Empty State if no enrolled courses -->
+        <div *ngIf="!isLoading() && courses().length === 0" class="empty-state glass-card animate-fade-in">
+          <div class="empty-icon">📚</div>
           <h3>Aún no tienes cursos asignados</h3>
           <p>El profesor debe matricularte en los cursos correspondientes para que puedas acceder al contenido y rendir los exámenes.</p>
         </div>
@@ -81,7 +87,7 @@ import { CourseSummary } from '../../core/models';
             >
               <img [src]="course.thumbnailUrl || 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=60'" [alt]="course.title" class="course-thumb" />
               
-              <!-- Hover Overlay -->
+              <!-- Hover Overlay with PowerPoint Action Callout -->
               <div class="thumb-hover-overlay">
                 <div class="thumb-cta-pill">
                   <span class="pill-icon">📊</span>
@@ -162,173 +168,164 @@ import { CourseSummary } from '../../core/models';
   `,
   styles: [`
     .dashboard-page {
-      padding: 28px 0 64px;
-      background-color: var(--bg-main);
-    }
-
-    .hero-section {
-      padding: 32px 36px;
-      margin-bottom: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
-    }
-
-    .hero-badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #475569;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      padding: 3px 10px;
-      border-radius: var(--radius-full);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .hero-content h1 {
-      font-size: 1.75rem;
-      margin-bottom: 6px;
-      color: #0f172a;
-    }
-
-    .hero-content p {
-      color: var(--text-secondary);
-      font-size: 0.92rem;
-    }
-
-    .hero-stats {
-      display: flex;
-      gap: 12px;
-    }
-
-    .stat-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      padding: 14px 20px;
-      border-radius: var(--radius-sm);
-      text-align: center;
-      min-width: 110px;
-    }
-
-    .stat-number {
-      display: block;
-      font-size: 1.6rem;
-      font-weight: 700;
-      font-family: var(--font-heading);
-      color: #0f172a;
-    }
-
-    .stat-label {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      padding: 32px 0 64px;
     }
 
     .teacher-admin-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 16px 20px;
-      margin-bottom: 28px;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: var(--radius-sm);
+      gap: 20px;
+      padding: 24px 32px;
+      margin-bottom: 32px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 41, 59, 0.9) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.45);
+      box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
       flex-wrap: wrap;
     }
 
-    .teacher-banner-info strong {
-      font-size: 0.9rem;
-      color: #0f172a;
-      display: block;
-      margin-bottom: 2px;
+    .badge-role-tag {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #c084fc;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      margin-bottom: 6px;
     }
 
-    .teacher-banner-info p {
-      font-size: 0.82rem;
+    .teacher-banner-text h3 {
+      font-size: 1.25rem;
+      margin-bottom: 4px;
+    }
+
+    .teacher-banner-text p {
       color: var(--text-secondary);
+      font-size: 0.88rem;
+      max-width: 650px;
       margin: 0;
     }
 
-    .btn-sm {
-      padding: 8px 14px;
-      font-size: 0.82rem;
+    .btn-teacher-portal {
+      padding: 12px 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
 
-    .empty-state-card {
-      padding: 48px 24px;
-      text-align: center;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      margin-top: 16px;
+    .hero-section {
+      padding: 36px 40px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid var(--border-active);
     }
 
-    .empty-icon {
-      font-size: 2.5rem;
+    .hero-content {
+      max-width: 600px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #818cf8;
+      background: var(--primary-light);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
       margin-bottom: 12px;
     }
 
-    .empty-state-card h3 {
-      font-size: 1.2rem;
-      margin-bottom: 6px;
-      color: #0f172a;
+    .hero-content h1 {
+      font-size: 2rem;
+      margin-bottom: 8px;
     }
 
-    .empty-state-card p {
+    .gradient-text {
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-content p {
       color: var(--text-secondary);
-      font-size: 0.88rem;
-      max-width: 500px;
-      margin: 0 auto;
+      font-size: 1rem;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 16px;
+    }
+
+    .stat-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      padding: 16px 24px;
+      border-radius: var(--radius-md);
+      text-align: center;
+      min-width: 120px;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: 800;
+      font-family: var(--font-heading);
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .section-header {
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .section-header h2 {
-      font-size: 1.35rem;
-      margin-bottom: 2px;
-      color: #0f172a;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
     }
 
-    .section-subtitle {
+    .section-desc {
       color: var(--text-secondary);
-      font-size: 0.88rem;
+      font-size: 0.9rem;
     }
 
     .courses-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 28px;
     }
 
     .course-card {
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .course-card:hover {
-      border-color: #cbd5e1;
-      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(99, 102, 241, 0.4);
     }
 
     .card-image-wrapper {
       position: relative;
       width: 100%;
-      height: 180px;
+      height: 200px;
       overflow: hidden;
-      background: #f1f5f9;
+      background: #1e293b;
     }
 
     .clickable-thumb {
@@ -339,22 +336,22 @@ import { CourseSummary } from '../../core/models';
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s ease;
+      transition: transform 0.4s ease;
     }
 
     .course-card:hover .course-thumb {
-      transform: scale(1.04);
+      transform: scale(1.08);
     }
 
     .thumb-hover-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.4);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.85) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.3s ease;
     }
 
     .course-card:hover .thumb-hover-overlay {
@@ -364,172 +361,175 @@ import { CourseSummary } from '../../core/models';
     .thumb-cta-pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      background: #0f172a;
-      color: #ffffff;
-      font-weight: 600;
-      font-size: 0.8rem;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(245, 158, 11, 0.9);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.84rem;
       border-radius: var(--radius-full);
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+      transform: translateY(10px);
+      transition: transform 0.3s ease;
+    }
+
+    .course-card:hover .thumb-cta-pill {
+      transform: translateY(0);
     }
 
     .progress-badge {
       position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: #ffffff;
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
-      font-size: 0.72rem;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #0f172a;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      color: #818cf8;
+      border: 1px solid var(--border-subtle);
       z-index: 2;
     }
 
     .text-success {
-      color: #16a34a !important;
+      color: #34d399 !important;
     }
 
     .card-body {
-      padding: 20px;
+      padding: 24px;
       display: flex;
       flex-direction: column;
       flex-grow: 1;
     }
 
     .course-title {
-      font-size: 1.1rem;
-      margin-bottom: 6px;
+      font-size: 1.2rem;
+      margin-bottom: 8px;
       line-height: 1.35;
-      color: #0f172a;
-    }
-
-    .course-title:hover {
-      color: #2563eb;
     }
 
     .course-desc {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--text-secondary);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
       flex-grow: 1;
-      line-height: 1.45;
     }
 
     .course-progress-section {
-      margin-bottom: 14px;
+      margin-bottom: 20px;
     }
 
     .progress-info {
       display: flex;
       justify-content: space-between;
-      font-size: 0.78rem;
-      color: var(--text-secondary);
+      font-size: 0.8rem;
+      color: var(--text-muted);
       margin-bottom: 6px;
     }
 
     .progress-count {
       font-weight: 600;
-      color: #0f172a;
+      color: var(--text-secondary);
     }
 
     .progress-track {
-      height: 6px;
-      background: #f1f5f9;
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
       border-radius: var(--radius-full);
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: #0f172a;
+      background: var(--accent-gradient);
       border-radius: var(--radius-full);
-      transition: width 0.4s ease;
+      transition: width 0.6s ease;
     }
 
     .fill-completed {
-      background: #16a34a !important;
+      background: var(--status-completed);
     }
 
     .btn-live-meet {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 8px 12px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
-      font-size: 0.8rem;
+      gap: 8px;
+      padding: 10px 16px;
+      margin-bottom: 10px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      font-size: 0.85rem;
       font-weight: 600;
-      border-radius: var(--radius-sm);
-      margin-bottom: 12px;
-      transition: all 0.15s ease;
+      border-radius: var(--radius-md);
+      transition: all 0.2s;
       text-decoration: none;
     }
 
     .btn-live-meet:hover {
-      background: #fee2e2;
-      border-color: #f87171;
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.35);
     }
 
     .live-dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #dc2626;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: livePulse 1.2s infinite;
+    }
+
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.75); }
     }
 
     .card-buttons-group {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       margin-top: 4px;
     }
 
     .btn-open-ppt {
-      background: #0f172a !important;
-      border: 1px solid #0f172a !important;
-      color: #ffffff !important;
-      font-weight: 600;
-      font-size: 0.88rem;
-      padding: 10px 14px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+      border: none !important;
+      color: #fff !important;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 12px 18px;
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn-open-ppt:hover {
-      background: #1e293b !important;
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+      transform: translateY(-1px);
     }
 
     .btn-view-syllabus {
-      font-size: 0.82rem;
-      padding: 8px 14px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #334155;
+      font-size: 0.85rem;
+      padding: 10px 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
     }
 
-    .btn-view-syllabus:hover {
-      background: #f8fafc;
-      color: #0f172a;
-    }
-
     .btn-emoji {
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
 
     .w-full {
@@ -543,13 +543,13 @@ import { CourseSummary } from '../../core/models';
     }
 
     .spinner-large {
-      width: 36px;
-      height: 36px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #0f172a;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(99, 102, 241, 0.2);
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 14px;
+      margin: 0 auto 16px;
     }
 
     @keyframes spin {
@@ -609,6 +609,7 @@ export class DashboardComponent implements OnInit {
       next: (course) => {
         this.isLoading.set(false);
         if (course && course.lessons && course.lessons.length > 0) {
+          // Find first available or first completed or fallback to first
           const targetLesson =
             course.lessons.find((l) => l.status === 'AVAILABLE') ||
             course.lessons.find((l) => l.status === 'COMPLETED') ||

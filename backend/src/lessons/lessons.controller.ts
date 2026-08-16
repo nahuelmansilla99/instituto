@@ -11,6 +11,6 @@ export class LessonsController {
 
   @Get(':id')
   findOne(@Param('id') id: string, @GetUser() user: User) {
-    return this.lessonsService.findOne(id, user.id);
+    return this.lessonsService.findOne(id, user);
   }
 }

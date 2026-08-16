@@ -5,10 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Lesson } from '../entities/lesson.entity';
-import { Course } from '../entities/course.entity';
-import { QuizQuestion } from '../entities/quiz-question.entity';
-import { UserProgress, ProgressStatus } from '../entities/user-progress.entity';
+import { Lesson, Course, QuizQuestion, UserProgress, ProgressStatus, User, UserRole, CourseEnrollment, EnrollmentStatus } from '../entities';
 
 @Injectable()
 export class LessonsService {
@@ -21,9 +18,11 @@ export class LessonsService {
     private readonly quizQuestionRepository: Repository<QuizQuestion>,
     @InjectRepository(UserProgress)
     private readonly userProgressRepository: Repository<UserProgress>,
+    @InjectRepository(CourseEnrollment)
+    private readonly enrollmentRepository: Repository<CourseEnrollment>,
   ) {}
 
-  async findOne(lessonId: string, userId: string) {
+  async findOne(lessonId: string, user: User) {
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
       relations: ['course'],
@@ -31,6 +30,21 @@ export class LessonsService {
 
     if (!lesson) {
       throw new NotFoundException('Lección no encontrada');
+    }
+
+    // Verify enrollment for students
+    if (user.role === UserRole.STUDENT) {
+      const enrollment = await this.enrollmentRepository.findOne({
+        where: {
+          userId: user.id,
+          courseId: lesson.courseId,
+          status: EnrollmentStatus.ACTIVE,
+        },
+      });
+
+      if (!enrollment) {
+        throw new ForbiddenException('No estás matriculado en este curso. Solicita acceso a tu profesor.');
+      }
     }
 
     // Fetch all lessons of this course to determine syllabus & order
@@ -41,7 +55,7 @@ export class LessonsService {
 
     // Fetch user progress for all lessons in this course
     const userProgressList = await this.userProgressRepository.find({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     const progressMap = new Map<string, UserProgress>();
@@ -54,7 +68,7 @@ export class LessonsService {
     if (!targetProgress && isFirstLesson) {
       // Automatically initialize first lesson as AVAILABLE
       targetProgress = this.userProgressRepository.create({
-        userId,
+        userId: user.id,
         lessonId: lesson.id,
         status: ProgressStatus.AVAILABLE,
       });

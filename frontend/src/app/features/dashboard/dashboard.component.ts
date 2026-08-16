@@ -61,11 +61,18 @@ import { CourseSummary } from '../../core/models';
         <!-- Loading State -->
         <div *ngIf="isLoading()" class="loading-state">
           <div class="spinner-large"></div>
-          <p>Cargando cursos...</p>
+          <p>Cargando tus cursos...</p>
+        </div>
+
+        <!-- Empty State if no enrolled courses -->
+        <div *ngIf="!isLoading() && courses().length === 0" class="empty-state glass-card animate-fade-in">
+          <div class="empty-icon">📚</div>
+          <h3>Aún no tienes cursos asignados</h3>
+          <p>El profesor debe matricularte en los cursos correspondientes para que puedas acceder al contenido y rendir los exámenes.</p>
         </div>
 
         <!-- Courses Grid -->
-        <div class="courses-grid" *ngIf="!isLoading()">
+        <div class="courses-grid" *ngIf="!isLoading() && courses().length > 0">
           <article
             *ngFor="let course of courses()"
             class="course-card glass-card animate-fade-in"

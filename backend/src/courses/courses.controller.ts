@@ -11,11 +11,11 @@ export class CoursesController {
 
   @Get()
   findAll(@GetUser() user: User) {
-    return this.coursesService.findAll(user.id);
+    return this.coursesService.findAll(user);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @GetUser() user: User) {
-    return this.coursesService.findOne(id, user.id);
+    return this.coursesService.findOne(id, user);
   }
 }

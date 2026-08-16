@@ -1,9 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Course } from '../entities/course.entity';
-import { Lesson } from '../entities/lesson.entity';
-import { UserProgress, ProgressStatus } from '../entities/user-progress.entity';
+import { Course, Lesson, User, UserRole, UserProgress, ProgressStatus, CourseEnrollment, EnrollmentStatus } from '../entities';
 
 @Injectable()
 export class CoursesService {
@@ -14,32 +12,32 @@ export class CoursesService {
     private readonly lessonRepository: Repository<Lesson>,
     @InjectRepository(UserProgress)
     private readonly userProgressRepository: Repository<UserProgress>,
+    @InjectRepository(CourseEnrollment)
+    private readonly enrollmentRepository: Repository<CourseEnrollment>,
   ) {}
 
-  async findAll(userId?: string) {
-    const courses = await this.courseRepository.find({
+  async findAll(user?: User) {
+    let courses = await this.courseRepository.find({
       order: { createdAt: 'ASC' },
     });
 
     const allLessons = await this.lessonRepository.find();
 
-    if (!userId) {
-      return courses.map((course) => {
-        const courseLessons = allLessons.filter((l) => l.courseId === course.id);
-        return {
-          id: course.id,
-          title: course.title,
-          description: course.description,
-          thumbnailUrl: course.thumbnailUrl,
-          totalLessons: courseLessons.length,
-          completedLessons: 0,
-          progressPercentage: 0,
-        };
+    if (!user) {
+      return [];
+    }
+
+    // If student, filter ONLY enrolled courses
+    if (user.role === UserRole.STUDENT) {
+      const enrollments = await this.enrollmentRepository.find({
+        where: { userId: user.id, status: EnrollmentStatus.ACTIVE },
       });
+      const enrolledCourseIds = enrollments.map((e) => e.courseId);
+      courses = courses.filter((c) => enrolledCourseIds.includes(c.id));
     }
 
     const userProgressList = await this.userProgressRepository.find({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     const progressMap = new Map<string, ProgressStatus>();
@@ -68,13 +66,23 @@ export class CoursesService {
     });
   }
 
-  async findOne(courseId: string, userId: string) {
+  async findOne(courseId: string, user: User) {
     const course = await this.courseRepository.findOne({
       where: { id: courseId },
     });
 
     if (!course) {
       throw new NotFoundException('Curso no encontrado');
+    }
+
+    // If student, verify enrollment
+    if (user.role === UserRole.STUDENT) {
+      const enrollment = await this.enrollmentRepository.findOne({
+        where: { userId: user.id, courseId, status: EnrollmentStatus.ACTIVE },
+      });
+      if (!enrollment) {
+        throw new ForbiddenException('No estás matriculado en este curso. Solicita acceso a tu profesor.');
+      }
     }
 
     // Fetch lessons directly from repository
@@ -85,7 +93,7 @@ export class CoursesService {
 
     // Fetch user progress for all lessons
     const userProgressList = await this.userProgressRepository.find({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     const progressMap = new Map<string, UserProgress>();

@@ -17,7 +17,7 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
         <!-- Breadcrumb Navigation -->
         <nav class="breadcrumb-nav animate-fade-in">
           <a routerLink="/dashboard" class="breadcrumb-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
             <span>Mis Cursos</span>
@@ -41,9 +41,9 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
 
             <div class="hero-details">
               <div class="hero-badge-row">
-                <span class="badge-tag">🎓 Curso Virtual</span>
+                <span class="badge-tag">Curso Virtual</span>
                 <span class="badge-status-completion" [class.badge-completed]="c.progressPercentage === 100">
-                  {{ c.progressPercentage === 100 ? '✅ Completado' : (c.progressPercentage > 0 ? '⏳ En Progreso' : '✨ Por Iniciar') }}
+                  {{ c.progressPercentage === 100 ? '✅ Completado' : (c.progressPercentage > 0 ? 'En Progreso' : 'Por Iniciar') }}
                 </span>
               </div>
 
@@ -57,8 +57,8 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
                   <strong>🔴 Clase en Vivo Disponible</strong>
                   <span>Accede a la sala de Google Meet del curso</span>
                 </div>
-                <a [href]="c.meetUrl" target="_blank" class="btn btn-primary btn-sm btn-meet">
-                  Unirse a Google Meet
+                <a [href]="c.meetUrl" target="_blank" class="btn btn-sm btn-meet">
+                  Unirse a Meet
                 </a>
               </div>
 
@@ -124,20 +124,20 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
                       }"
                     >
                       <ng-container *ngIf="lesson.status === 'COMPLETED'">✓ Aprobada ({{ lesson.score }}%)</ng-container>
-                      <ng-container *ngIf="lesson.status === 'AVAILABLE'">🔓 Disponible</ng-container>
-                      <ng-container *ngIf="lesson.status === 'LOCKED'">🔒 Bloqueada</ng-container>
+                      <ng-container *ngIf="lesson.status === 'AVAILABLE'">Disponible</ng-container>
+                      <ng-container *ngIf="lesson.status === 'LOCKED'">Bloqueada</ng-container>
                     </span>
                   </div>
 
                   <div class="lesson-card-meta">
                     <span *ngIf="lesson.presentationUrl" class="meta-badge meta-ppt">
-                      📊 PowerPoint Disponible
+                      📊 PowerPoint Adjunto
                     </span>
                     <span *ngIf="lesson.meetUrl" class="meta-badge meta-meet">
                       🔴 Sesión Meet
                     </span>
                     <span class="meta-badge meta-quiz">
-                      📝 Examen Multiple Choice (80% req.)
+                      📝 Examen (80% req.)
                     </span>
                   </div>
                 </div>
@@ -151,18 +151,18 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
                   class="btn w-full"
                   [ngClass]="lesson.status === 'COMPLETED' ? 'btn-secondary' : 'btn-primary'"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                   </svg>
                   <span>{{ lesson.status === 'COMPLETED' ? 'Ver / Repasar Clase' : 'Iniciar Clase ➔' }}</span>
                 </button>
 
                 <div *ngIf="lesson.status === 'LOCKED'" class="locked-indicator">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                   </svg>
-                  <span>Completa la clase anterior para desbloquear</span>
+                  <span>Completa la clase anterior</span>
                 </div>
               </div>
             </article>
@@ -173,53 +173,54 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
   `,
   styles: [`
     .course-detail-page {
-      padding: 32px 0 80px;
+      padding: 28px 0 64px;
+      background-color: var(--bg-main);
     }
 
     .breadcrumb-nav {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 24px;
-      font-size: 0.9rem;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
     }
 
     .breadcrumb-link {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       color: var(--text-secondary);
       font-weight: 500;
-      transition: color 0.2s;
+      transition: color 0.15s;
     }
 
     .breadcrumb-link:hover {
-      color: #fff;
+      color: #0f172a;
     }
 
     .breadcrumb-separator {
-      color: var(--text-muted);
+      color: #cbd5e1;
     }
 
     .breadcrumb-current {
-      color: #c084fc;
+      color: #0f172a;
       font-weight: 600;
     }
 
     .loading-container {
       text-align: center;
-      padding: 80px 0;
+      padding: 60px 0;
       color: var(--text-secondary);
     }
 
     .spinner-large {
-      width: 48px;
-      height: 48px;
-      border: 3px solid rgba(139, 92, 246, 0.2);
-      border-top-color: #a855f7;
+      width: 36px;
+      height: 36px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #0f172a;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
+      margin: 0 auto 14px;
     }
 
     @keyframes spin {
@@ -228,30 +229,29 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
 
     /* Hero Card */
     .course-hero-card {
-      padding: 36px;
-      margin-bottom: 40px;
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.95) 100%);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      padding: 28px 32px;
+      margin-bottom: 32px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
     }
 
     .hero-layout {
       display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 32px;
+      grid-template-columns: 240px 1fr;
+      gap: 28px;
       align-items: center;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 800px) {
       .hero-layout {
         grid-template-columns: 1fr;
       }
     }
 
     .hero-media {
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      border: 1px solid #e2e8f0;
       aspect-ratio: 16 / 10;
     }
 
@@ -265,51 +265,54 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
     .hero-details {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .hero-badge-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .badge-tag {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #c084fc;
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      padding: 3px 10px;
-      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #475569;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .badge-status-completion {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      color: #818cf8;
-      background: rgba(99, 102, 241, 0.15);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      padding: 3px 10px;
-      border-radius: var(--radius-full);
+      color: #0f172a;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
     }
 
     .badge-completed {
-      color: #34d399 !important;
-      background: rgba(16, 185, 129, 0.15) !important;
-      border-color: rgba(16, 185, 129, 0.35) !important;
+      color: #16a34a !important;
+      background: #f0fdf4 !important;
+      border-color: #bbf7d0 !important;
     }
 
     .course-title {
-      font-size: 1.85rem;
+      font-size: 1.6rem;
       line-height: 1.25;
       margin: 0;
+      color: #0f172a;
     }
 
     .course-description {
       color: var(--text-secondary);
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1.5;
       margin: 0;
     }
@@ -319,280 +322,277 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 12px 18px;
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.7) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.35);
+      gap: 14px;
+      padding: 10px 14px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
       border-radius: var(--radius-sm);
-      margin-top: 4px;
+      margin-top: 2px;
       flex-wrap: wrap;
     }
 
     .live-pulse-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #ef4444;
-      box-shadow: 0 0 10px #ef4444;
-      animation: pulse 1.5s infinite;
+      background: #dc2626;
       flex-shrink: 0;
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.3); opacity: 0.7; }
     }
 
     .meet-callout-text {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
       flex: 1;
     }
 
     .meet-callout-text strong {
-      color: #fca5a5;
-      font-size: 0.88rem;
+      color: #b91c1c;
+      font-size: 0.84rem;
     }
 
     .meet-callout-text span {
-      color: var(--text-secondary);
-      font-size: 0.78rem;
+      color: #475569;
+      font-size: 0.76rem;
     }
 
     .btn-meet {
-      background: #ef4444 !important;
+      background: #dc2626 !important;
       border: none !important;
-      font-size: 0.82rem;
-      padding: 6px 14px;
-      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      color: #fff !important;
+      font-weight: 600;
+    }
+
+    .btn-meet:hover {
+      background: #b91c1c !important;
     }
 
     /* Overall Progress */
     .course-overall-progress {
-      margin-top: 8px;
+      margin-top: 4px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .progress-info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.84rem;
+      font-size: 0.8rem;
     }
 
     .progress-label {
-      color: var(--text-muted);
-      font-weight: 600;
+      color: var(--text-secondary);
+      font-weight: 500;
     }
 
     .progress-percent {
-      color: #c084fc;
+      color: #0f172a;
       font-weight: 700;
     }
 
     .progress-track {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      height: 6px;
+      background: #f1f5f9;
       border-radius: var(--radius-full);
       overflow: hidden;
     }
 
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+      background: #0f172a;
       border-radius: var(--radius-full);
-      transition: width 0.6s ease;
+      transition: width 0.4s ease;
     }
 
     .fill-completed {
-      background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
+      background: #16a34a !important;
     }
 
     /* Syllabus Section */
     .syllabus-section {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
     .syllabus-header h2 {
-      font-size: 1.5rem;
-      margin-bottom: 4px;
+      font-size: 1.35rem;
+      margin-bottom: 2px;
+      color: #0f172a;
     }
 
     .syllabus-subtitle {
       color: var(--text-secondary);
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       margin: 0;
     }
 
     .empty-syllabus {
-      padding: 48px;
+      padding: 40px;
       text-align: center;
       color: var(--text-secondary);
+      background: #ffffff;
     }
 
     .empty-icon {
-      font-size: 3rem;
-      margin-bottom: 12px;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
     }
 
     /* Lessons List */
     .lessons-syllabus-list {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
 
     .lesson-syllabus-card {
-      padding: 22px 28px;
+      padding: 18px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      transition: all 0.25s ease;
+      gap: 20px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.2s ease;
       flex-wrap: wrap;
     }
 
-    .card-available {
-      border: 1px solid rgba(139, 92, 246, 0.45);
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.12);
-    }
-
-    .card-available:hover {
-      border-color: #a855f7;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+    .lesson-syllabus-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-sm);
     }
 
     .card-completed {
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border-left: 3px solid #16a34a;
+    }
+
+    .card-available {
+      border-left: 3px solid #0f172a;
     }
 
     .card-locked {
-      opacity: 0.6;
-      border: 1px solid var(--border-subtle);
-      background: rgba(15, 23, 42, 0.5);
+      opacity: 0.65;
+      background: #f8fafc;
     }
 
     .lesson-card-main {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
       flex: 1;
-      min-width: 280px;
+      min-width: 260px;
     }
 
     .order-indicator {
-      width: 44px;
-      height: 44px;
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      color: #c084fc;
+      width: 38px;
+      height: 38px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 1rem;
+      font-weight: 700;
+      font-size: 0.9rem;
       flex-shrink: 0;
     }
 
     .card-completed .order-indicator {
-      background: rgba(16, 185, 129, 0.15);
-      border-color: rgba(16, 185, 129, 0.4);
-      color: #34d399;
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #16a34a;
     }
 
     .card-locked .order-indicator {
-      background: rgba(255, 255, 255, 0.03);
-      border-color: var(--border-subtle);
+      background: #f8fafc;
+      border-color: #e2e8f0;
       color: var(--text-muted);
     }
 
     .lesson-card-info {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
 
     .lesson-header-line {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
     .lesson-card-title {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       margin: 0;
-      color: #fff;
+      color: #0f172a;
     }
 
     .badge-lesson-status {
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
     }
 
     .status-badge-completed {
-      color: #34d399;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #16a34a;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
     }
 
     .status-badge-available {
-      color: #c084fc;
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.35);
+      color: #0f172a;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
     }
 
     .status-badge-locked {
       color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-subtle);
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
     }
 
     .lesson-card-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .meta-badge {
-      font-size: 0.72rem;
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
-      font-weight: 600;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
     }
 
     .meta-ppt {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.35);
-      color: #fbbf24;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #b45309;
     }
 
     .meta-meet {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
     }
 
     .meta-quiz {
-      background: rgba(99, 102, 241, 0.12);
-      border: 1px solid rgba(99, 102, 241, 0.3);
-      color: #a5b4fc;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #475569;
     }
 
     .lesson-card-action {
-      min-width: 200px;
+      min-width: 180px;
     }
 
     @media (max-width: 600px) {
@@ -604,17 +604,13 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
     .locked-indicator {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.78rem;
+      gap: 6px;
+      font-size: 0.76rem;
       color: var(--text-muted);
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border-subtle);
+      padding: 6px 10px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: var(--radius-sm);
-    }
-
-    .locked-indicator svg {
-      flex-shrink: 0;
     }
 
     .w-full { width: 100%; }
@@ -644,7 +640,7 @@ export class CourseDetailComponent implements OnInit {
         this.course.set(data);
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.isLoading.set(false);
         alert('No tienes acceso a este curso o no existe.');
         this.router.navigate(['/dashboard']);

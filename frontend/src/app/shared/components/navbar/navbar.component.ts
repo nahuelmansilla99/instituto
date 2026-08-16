@@ -13,13 +13,13 @@ import { AuthService } from '../../../core/services/auth.service';
         <!-- Logo -->
         <a routerLink="/dashboard" class="brand-logo">
           <div class="logo-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
               <path d="M6 12v5c3 3 9 3 12 0v-5"/>
             </svg>
           </div>
           <div class="brand-text">
-            <span class="brand-title">Instituto<span class="gradient-text">Virtual</span></span>
+            <span class="brand-title">Instituto Virtual</span>
             <span class="brand-subtitle">Plataforma de E-Learning</span>
           </div>
         </a>
@@ -27,7 +27,7 @@ import { AuthService } from '../../../core/services/auth.service';
         <!-- Right Side Nav -->
         <div class="nav-actions" *ngIf="authService.currentUser() as user">
           <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="3" width="7" height="7"></rect>
               <rect x="14" y="3" width="7" height="7"></rect>
               <rect x="14" y="14" width="7" height="7"></rect>
@@ -43,7 +43,7 @@ import { AuthService } from '../../../core/services/auth.service';
             routerLinkActive="active-link-admin"
             class="nav-link nav-link-admin"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20h9"></path>
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
             </svg>
@@ -62,7 +62,7 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           <button (click)="logout()" class="btn-logout" title="Cerrar Sesión">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -78,15 +78,14 @@ import { AuthService } from '../../../core/services/auth.service';
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(11, 15, 25, 0.85);
-      backdrop-filter: blur(16px);
+      background: #ffffff;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .navbar-container {
-      max-width: 1280px;
+      max-width: 1240px;
       margin: 0 auto;
-      padding: 12px 24px;
+      padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -95,20 +94,19 @@ import { AuthService } from '../../../core/services/auth.service';
     .brand-logo {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       text-decoration: none;
     }
 
     .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--accent-gradient);
+      width: 36px;
+      height: 36px;
+      background: #0f172a;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+      color: #ffffff;
     }
 
     .brand-text {
@@ -118,82 +116,72 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .brand-title {
       font-family: var(--font-heading);
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1.1;
-    }
-
-    .gradient-text {
-      background: var(--accent-gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-left: 3px;
+      color: #0f172a;
+      line-height: 1.15;
     }
 
     .brand-subtitle {
       font-size: 0.72rem;
       color: var(--text-muted);
-      letter-spacing: 0.02em;
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
     }
 
     .nav-link {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 0.9rem;
+      gap: 7px;
+      font-size: 0.88rem;
       font-weight: 500;
       color: var(--text-secondary);
-      padding: 8px 14px;
+      padding: 7px 12px;
       border-radius: var(--radius-sm);
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
     .nav-link:hover, .active-link {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.05);
+      color: #0f172a;
+      background: #f1f5f9;
     }
 
     .nav-link-admin {
-      background: rgba(139, 92, 246, 0.12);
-      color: #c084fc !important;
-      border: 1px solid rgba(139, 92, 246, 0.3);
+      background: #f8fafc;
+      color: #0f172a !important;
+      border: 1px solid var(--border-active);
+      font-weight: 600;
     }
 
     .nav-link-admin:hover, .active-link-admin {
-      background: rgba(139, 92, 246, 0.25) !important;
-      border-color: #a855f7 !important;
-      color: #fff !important;
-      box-shadow: 0 0 14px rgba(139, 92, 246, 0.3);
+      background: #f1f5f9 !important;
+      border-color: #94a3b8 !important;
     }
 
     .user-chip {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 4px 12px 4px 6px;
-      background: rgba(255, 255, 255, 0.03);
+      gap: 9px;
+      padding: 3px 10px 3px 4px;
+      background: #f8fafc;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-full);
     }
 
     .avatar-circle {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: var(--primary-light);
-      border: 1px solid var(--primary);
-      color: var(--primary);
+      background: #e2e8f0;
+      color: #0f172a;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
     }
 
@@ -203,38 +191,37 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .user-name {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #0f172a;
       line-height: 1.1;
     }
 
     .user-role {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
 
     .btn-logout {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: transparent;
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: #f87171;
-      padding: 7px 14px;
+      border: 1px solid #fee2e2;
+      color: #dc2626;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 500;
+      font-size: 0.82rem;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
     .btn-logout:hover {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: #ef4444;
-      transform: translateY(-1px);
+      background: #fef2f2;
+      border-color: #fca5a5;
     }
 
     @media (max-width: 640px) {
@@ -242,7 +229,7 @@ import { AuthService } from '../../../core/services/auth.service';
         display: none;
       }
       .nav-actions {
-        gap: 10px;
+        gap: 8px;
       }
     }
   `],

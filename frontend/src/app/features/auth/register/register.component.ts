@@ -14,7 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
         <!-- Header -->
         <div class="auth-header">
           <div class="auth-logo-badge">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
               <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
@@ -104,13 +104,14 @@ import { AuthService } from '../../../core/services/auth.service';
       align-items: center;
       justify-content: center;
       padding: 24px;
+      background-color: var(--bg-main);
     }
 
     .auth-card {
       width: 100%;
-      max-width: 440px;
+      max-width: 420px;
       padding: 36px 32px;
-      background: rgba(18, 24, 38, 0.85);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
     }
 
@@ -120,65 +121,65 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .auth-logo-badge {
-      width: 56px;
-      height: 56px;
-      margin: 0 auto 16px;
-      background: var(--accent-gradient);
-      border-radius: var(--radius-md);
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 14px;
+      background: #0f172a;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      box-shadow: var(--shadow-glow);
+      color: #ffffff;
     }
 
     .auth-header h2 {
-      font-size: 1.6rem;
-      margin-bottom: 6px;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+      color: #0f172a;
     }
 
     .auth-header p {
       color: var(--text-secondary);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
     .alert-error {
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: var(--status-danger-bg);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      color: #fca5a5;
-      padding: 12px 14px;
+      gap: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      padding: 10px 12px;
       border-radius: var(--radius-sm);
-      font-size: 0.88rem;
-      margin-bottom: 20px;
+      font-size: 0.85rem;
+      margin-bottom: 18px;
     }
 
     .w-full {
       width: 100%;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .auth-footer {
       text-align: center;
       margin-top: 24px;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: var(--text-secondary);
     }
 
     .auth-link {
       font-weight: 600;
-      margin-left: 6px;
-      color: #818cf8;
+      margin-left: 4px;
+      color: #0f172a;
     }
 
     .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
       border-radius: 50%;
-      border-top-color: #fff;
+      border-top-color: #ffffff;
       animation: spin 0.6s linear infinite;
     }
 

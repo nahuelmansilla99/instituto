@@ -50,12 +50,12 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
               <p>Únete a la clase interactiva con el profesor vía Google Meet</p>
             </div>
           </div>
-          <a [href]="currentLesson.meetUrl || currentLesson.courseMeetUrl" target="_blank" class="btn btn-primary btn-meet-join">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <a [href]="currentLesson.meetUrl || currentLesson.courseMeetUrl" target="_blank" class="btn btn-sm btn-meet-join">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="23 7 16 12 23 17 23 7"></polygon>
               <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
             </svg>
-            <span>Unirse a la Clase en Vivo</span>
+            <span>Unirse a Meet</span>
           </a>
         </div>
 
@@ -66,7 +66,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
             class="mode-tab-btn"
             [class.mode-tab-active]="activeLessonView() === 'content'"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
@@ -78,7 +78,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
             class="mode-tab-btn"
             [class.mode-tab-active]="activeLessonView() === 'presentation'"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
               <line x1="8" y1="21" x2="16" y2="21"></line>
               <line x1="12" y1="17" x2="12" y2="21"></line>
@@ -109,7 +109,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 (click)="activeLessonView.set('presentation')"
                 class="btn btn-secondary btn-view-ppt"
               >
-                <span>👁️ Ver en Pantalla de Diapositivas</span>
+                <span>👁️ Ver Diapositivas</span>
               </button>
               <a
                 [href]="currentLesson.presentationUrl"
@@ -117,7 +117,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 [download]="currentLesson.presentationFilename || 'presentacion'"
                 class="btn btn-primary btn-download-ppt"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -143,13 +143,13 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 <div class="ppt-icon-badge">📊</div>
                 <div>
                   <h3>{{ currentLesson.presentationFilename || 'Presentación de la Clase' }}</h3>
-                  <span class="ppt-meta-label">Diapositivas oficiales del curso</span>
+                  <span class="ppt-meta-label">Diapositivas oficiales de la lección</span>
                 </div>
               </div>
 
               <div class="ppt-header-actions">
                 <button (click)="toggleFullscreenPresentation()" class="btn btn-secondary btn-sm" title="Modo Pantalla Completa">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="15 3 21 3 21 9"></polyline>
                     <polyline points="9 21 3 21 3 15"></polyline>
                     <line x1="21" y1="3" x2="14" y2="10"></line>
@@ -164,7 +164,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                   [download]="currentLesson.presentationFilename || 'presentacion'"
                   class="btn btn-primary btn-sm btn-download-ppt"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -197,7 +197,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                       target="_blank"
                       class="btn btn-secondary"
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                         <polyline points="15 3 21 3 21 9"></polyline>
                         <line x1="10" y1="14" x2="21" y2="3"></line>
@@ -211,7 +211,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                       [download]="currentLesson.presentationFilename || 'presentacion'"
                       class="btn btn-primary btn-download-ppt"
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -228,7 +228,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
           <div *ngIf="!currentLesson.presentationUrl" class="empty-presentation-box glass-card animate-fade-in">
             <div class="empty-icon">📊</div>
             <h3>Esta clase aún no cuenta con PowerPoint adjunto</h3>
-            <p>Puedes consultar la explicación teórica completa en la pestaña <strong>"Guía y Contenido de la Clase"</strong>.</p>
+            <p>Puedes consultar la explicación teórica en la pestaña <strong>"Guía y Contenido de la Clase"</strong>.</p>
             <button (click)="activeLessonView.set('content')" class="btn btn-primary" style="margin-top: 12px;">
               Ir a la Guía de la Clase ➔
             </button>
@@ -240,19 +240,19 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
           *ngIf="!isQuizStarted() && !quizResult() && currentLesson.status !== 'COMPLETED' && currentLesson.quizQuestions.length > 0"
           class="lesson-end-action-box glass-card animate-fade-in"
         >
-          <div class="end-action-badge">🎯 Fin del Contenido de la Clase</div>
+          <div class="end-action-badge">Fin de la Clase</div>
           <h2>¿Has terminado de revisar la clase?</h2>
           <p>
             Rinde el examen de opción múltiple para evaluar lo aprendido y desbloquear automáticamente la siguiente lección del curso.
           </p>
 
           <div class="end-action-buttons">
-            <button (click)="startQuizSection()" class="btn btn-primary btn-lg btn-start-quiz-cta">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button (click)="startQuizSection()" class="btn btn-primary btn-start-quiz-cta">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 11l3 3L22 4"></path>
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
               </svg>
-              <span>📝 Iniciar Examen de la Clase ➔</span>
+              <span>Realizar Examen de la Clase ➔</span>
             </button>
 
             <a [routerLink]="['/courses', currentLesson.courseId]" class="btn btn-secondary">
@@ -269,7 +269,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
         >
           <div class="quiz-header">
             <div class="quiz-badge-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M9 11l3 3L22 4"></path>
                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
               </svg>
@@ -300,7 +300,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 class="btn btn-success"
               >
                 <span>Siguiente Lección</span>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </button>
@@ -311,34 +311,34 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 routerLink="/dashboard"
                 class="btn btn-primary"
               >
-                <span>¡Curso Completado! Volver al Panel</span>
+                <span>🎓 Volver a Mis Cursos</span>
               </a>
 
-              <!-- If Failed: Retry Button -->
+              <!-- If Failed: Try Again Button -->
               <button
                 *ngIf="!result.passed"
                 (click)="resetQuiz()"
                 class="btn btn-secondary"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M23 4v6h-6M1 20v-6h6"/>
-                  <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M23 4v6h-6"></path>
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                 </svg>
-                <span>Reintentar Cuestionario</span>
+                <span>Reintentar Examen</span>
               </button>
             </div>
           </div>
 
-          <!-- QUIZ QUESTIONS LIST -->
-          <div class="questions-list" *ngIf="!quizResult() || !quizResult()?.passed">
+          <!-- Quiz Questions Form -->
+          <div *ngIf="!quizResult()" class="questions-list">
             <div
               *ngFor="let question of currentLesson.quizQuestions; let qIndex = index"
-              class="question-card"
+              class="question-block"
             >
-              <h4 class="question-title">
-                <span class="q-number">{{ qIndex + 1 }}.</span>
-                {{ question.questionText }}
-              </h4>
+              <div class="question-title-row">
+                <span class="question-number">Pregunta {{ qIndex + 1 }}</span>
+                <h4 class="question-text">{{ question.questionText }}</h4>
+              </div>
 
               <div class="options-group">
                 <label
@@ -371,7 +371,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 <span>{{ isSubmitting() ? 'Evaluando respuestas...' : 'Enviar Respuestas y Calificar' }}</span>
               </button>
               <span *ngIf="!isAllAnswered()" class="unanswered-warning">
-                * Por favor responde todas las preguntas antes de enviar.
+                * Responde todas las preguntas antes de enviar.
               </span>
             </div>
           </div>
@@ -403,15 +403,15 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
             <!-- Status Icon -->
             <div class="item-status-icon">
               <!-- Completed -->
-              <svg *ngIf="item.status === 'COMPLETED'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-completed">
+              <svg *ngIf="item.status === 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-completed">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
               <!-- Available / Active -->
-              <svg *ngIf="item.status === 'AVAILABLE'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-available">
+              <svg *ngIf="item.status === 'AVAILABLE'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-available">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
               </svg>
               <!-- Locked -->
-              <svg *ngIf="item.status === 'LOCKED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-locked">
+              <svg *ngIf="item.status === 'LOCKED'" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-locked">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
@@ -437,7 +437,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
         <span class="error-emoji">⚠️</span>
         <h3>No se pudo cargar la clase</h3>
         <p>{{ errorMessage() }}</p>
-        <a routerLink="/dashboard" class="btn btn-primary" style="margin-top: 16px;">
+        <a routerLink="/dashboard" class="btn btn-primary" style="margin-top: 14px;">
           Volver a Mis Cursos
         </a>
       </div>
@@ -451,179 +451,181 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
   `,
   styles: [`
     .lesson-layout {
-      max-width: 1440px;
+      max-width: 1240px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 32px;
-      padding: 32px 24px 64px;
+      grid-template-columns: 1fr 340px;
+      gap: 28px;
+      padding: 28px 24px 64px;
       align-items: start;
+      background-color: var(--bg-main);
     }
 
     .content-area {
-      min-width: 0; /* Prevents overflow issues */
+      min-width: 0;
     }
 
     .lesson-breadcrumb {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 0.88rem;
-      margin-bottom: 20px;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
     }
 
     .breadcrumb-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
       color: var(--text-secondary);
       font-weight: 500;
+      transition: color 0.15s;
     }
 
     .breadcrumb-link:hover {
-      color: var(--text-primary);
+      color: #0f172a;
     }
 
     .breadcrumb-separator {
-      color: var(--text-muted);
+      color: #cbd5e1;
     }
 
     .breadcrumb-current {
-      color: var(--text-muted);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: #0f172a;
+      font-weight: 600;
     }
 
     .lesson-header {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .header-badges {
       display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .lesson-header h1 {
-      font-size: 2rem;
+      font-size: 1.65rem;
       line-height: 1.25;
+      color: #0f172a;
     }
 
     .live-meet-lesson-banner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 16px 24px;
-      margin-bottom: 24px;
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%);
-      border: 1px solid rgba(239, 68, 68, 0.4);
+      gap: 14px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
       flex-wrap: wrap;
     }
 
     .meet-banner-content {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .meet-banner-content strong {
-      color: #fca5a5;
-      font-size: 0.95rem;
+      color: #b91c1c;
+      font-size: 0.88rem;
       display: block;
     }
 
     .meet-banner-content p {
-      color: var(--text-secondary);
-      font-size: 0.82rem;
+      color: #475569;
+      font-size: 0.78rem;
       margin: 0;
     }
 
     .live-pulse-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #ef4444;
-      box-shadow: 0 0 10px #ef4444;
-      animation: pulse 1.5s infinite;
+      background: #dc2626;
+    }
+
+    .btn-meet-join {
+      background: #dc2626 !important;
+      border: none !important;
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 0.82rem;
+      padding: 6px 12px;
     }
 
     /* Lesson Mode Tabs */
     .lesson-mode-tabs {
       display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
+      gap: 10px;
+      margin-bottom: 20px;
       border-bottom: 1px solid var(--border-subtle);
-      padding-bottom: 12px;
+      padding-bottom: 10px;
       flex-wrap: wrap;
     }
 
     .mode-tab-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-      font-size: 0.95rem;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
       font-weight: 600;
       color: var(--text-secondary);
-      background: rgba(255, 255, 255, 0.03);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
     .mode-tab-btn:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
+      color: #0f172a;
+      background: #f8fafc;
     }
 
     .mode-tab-active {
-      background: rgba(139, 92, 246, 0.2) !important;
-      border-color: #a855f7 !important;
-      color: #fff !important;
-      box-shadow: 0 0 16px rgba(139, 92, 246, 0.3);
+      background: #0f172a !important;
+      border-color: #0f172a !important;
+      color: #ffffff !important;
     }
 
     .tab-badge-ppt {
-      font-size: 0.7rem;
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
+      font-size: 0.68rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #b45309;
       padding: 1px 6px;
-      border-radius: var(--radius-full);
-      font-weight: 700;
-    }
-
-    .btn-view-ppt {
-      background: rgba(245, 158, 11, 0.15) !important;
-      border-color: rgba(245, 158, 11, 0.4) !important;
-      color: #fbbf24 !important;
+      border-radius: var(--radius-sm);
       font-weight: 600;
     }
 
-    .btn-view-ppt:hover {
-      background: rgba(245, 158, 11, 0.3) !important;
-      color: #fff !important;
+    .mode-tab-active .tab-badge-ppt {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #ffffff;
+    }
+
+    .btn-view-ppt {
+      font-size: 0.82rem;
+      padding: 8px 14px;
     }
 
     /* Dedicated Presentation Screen */
     .presentation-screen-container {
-      padding: 28px 32px;
-      margin-bottom: 36px;
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      padding: 24px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
     }
 
     .presentation-screen-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
       border-bottom: 1px solid var(--border-subtle);
       flex-wrap: wrap;
     }
@@ -631,99 +633,100 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
     .ppt-title-group {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
 
     .ppt-icon-badge {
-      width: 44px;
-      height: 44px;
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
+      width: 38px;
+      height: 38px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #b45309;
       border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.2rem;
     }
 
     .ppt-title-group h3 {
-      font-size: 1.2rem;
-      margin: 0 0 2px;
-      color: #fff;
+      font-size: 1.05rem;
+      margin: 0 0 1px;
+      color: #0f172a;
     }
 
     .ppt-meta-label {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
     .ppt-header-actions {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .presentation-frame-wrapper {
       position: relative;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-sm);
       overflow: hidden;
-      background: #0b0f19;
+      background: #f8fafc;
       border: 1px solid var(--border-subtle);
     }
 
     .presentation-iframe {
       width: 100%;
-      height: 620px;
+      height: 560px;
       border: none;
       display: block;
     }
 
     .presentation-player-fallback {
-      padding: 40px 24px;
+      padding: 40px 20px;
       text-align: center;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(11, 15, 25, 0.98) 100%);
+      background: #f8fafc;
     }
 
     .fallback-hero-content {
-      max-width: 600px;
+      max-width: 500px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .slide-deck-icon {
-      font-size: 3.5rem;
-      margin-bottom: 8px;
+      font-size: 3rem;
+      margin-bottom: 4px;
     }
 
     .fallback-hero-content h3 {
-      font-size: 1.4rem;
+      font-size: 1.2rem;
       margin: 0;
-      color: #fff;
+      color: #0f172a;
     }
 
     .fallback-hero-content p {
       color: var(--text-secondary);
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       margin: 0;
     }
 
     .fallback-cta-row {
       display: flex;
-      gap: 14px;
-      margin-top: 16px;
+      gap: 10px;
+      margin-top: 12px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
     .empty-presentation-box {
-      padding: 56px 32px;
+      padding: 48px 24px;
       text-align: center;
       color: var(--text-secondary);
+      background: #ffffff;
     }
 
     /* Presentation Box */
@@ -731,333 +734,337 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 20px;
-      padding: 20px 28px;
-      margin-bottom: 28px;
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(30, 41, 59, 0.8) 100%);
-      border: 1px solid rgba(245, 158, 11, 0.35);
+      gap: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
       flex-wrap: wrap;
     }
 
     .presentation-main-row {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
 
     .presentation-icon-box {
-      width: 48px;
-      height: 48px;
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      border-radius: var(--radius-md);
+      width: 40px;
+      height: 40px;
+      background: #ffffff;
+      border: 1px solid #fde68a;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.2rem;
       flex-shrink: 0;
     }
 
     .presentation-info h4 {
-      font-size: 1.05rem;
-      margin-bottom: 3px;
-      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 2px;
+      color: #0f172a;
     }
 
     .presentation-info p {
-      color: var(--text-secondary);
-      font-size: 0.84rem;
-      margin-bottom: 6px;
+      color: #475569;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
     }
 
     .presentation-filename-badge {
       display: inline-block;
-      font-size: 0.76rem;
-      color: #fbbf24;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      padding: 2px 8px;
-      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      color: #b45309;
+      background: #ffffff;
+      border: 1px solid #fde68a;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
       font-weight: 600;
     }
 
     .btn-download-ppt {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-      border: none !important;
-      color: #fff !important;
-      font-weight: 700;
-      white-space: nowrap;
+      font-size: 0.82rem;
+      padding: 8px 14px;
     }
 
-    .btn-download-ppt:hover {
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.45);
+    .presentation-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .btn-meet-join {
-      background: #ef4444;
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
-    }
-
-    .btn-meet-join:hover {
-      background: #dc2626;
-      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
-    }
-
-    /* Lesson Content Viewer */
+    /* Lesson Player Content */
     .lesson-player {
-      padding: 36px;
-      margin-bottom: 40px;
-      line-height: 1.8;
-      font-size: 1.05rem;
+      padding: 32px;
+      margin-bottom: 28px;
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
     }
 
+    .lesson-html-content {
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: #334155;
+    }
+
     .lesson-html-content h2 {
-      font-size: 1.5rem;
-      margin: 20px 0 12px;
-      color: #fff;
+      font-size: 1.35rem;
+      margin: 20px 0 10px;
+      color: #0f172a;
     }
 
     .lesson-html-content h3 {
-      font-size: 1.2rem;
-      margin: 18px 0 10px;
-      color: #cbd5e1;
+      font-size: 1.15rem;
+      margin: 16px 0 8px;
+      color: #0f172a;
     }
 
     .lesson-html-content p {
-      margin-bottom: 16px;
-      color: #cbd5e1;
+      margin-bottom: 14px;
+      color: #334155;
     }
 
     .lesson-html-content ul {
-      margin: 16px 0 20px 24px;
-      color: #cbd5e1;
+      margin: 12px 0 16px 20px;
+      color: #334155;
     }
 
     .lesson-html-content li {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .lesson-html-content code {
-      background: rgba(99, 102, 241, 0.15);
-      color: #a5b4fc;
-      padding: 2px 6px;
-      border-radius: 4px;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 5px;
+      border-radius: 3px;
       font-family: monospace;
+      font-size: 0.88em;
     }
 
-    /* Lesson Finished & Quiz Trigger Box */
+    /* Lesson Finished Box */
     .lesson-end-action-box {
-      padding: 36px 40px;
-      margin-bottom: 36px;
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-      border: 1px solid rgba(139, 92, 246, 0.4);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      padding: 28px 32px;
+      margin-bottom: 28px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
     }
 
     .end-action-badge {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #c084fc;
-      background: rgba(139, 92, 246, 0.15);
-      border: 1px solid rgba(139, 92, 246, 0.35);
-      padding: 4px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #475569;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 2px 8px;
       border-radius: var(--radius-full);
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
     .lesson-end-action-box h2 {
-      font-size: 1.6rem;
+      font-size: 1.35rem;
       margin: 0;
+      color: #0f172a;
     }
 
     .lesson-end-action-box p {
       color: var(--text-secondary);
-      font-size: 0.95rem;
-      max-width: 600px;
+      font-size: 0.88rem;
+      max-width: 520px;
       margin: 0 auto;
     }
 
     .end-action-buttons {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-top: 12px;
+      gap: 10px;
+      margin-top: 10px;
       flex-wrap: wrap;
       justify-content: center;
     }
 
     .btn-start-quiz-cta {
-      padding: 14px 28px;
-      font-size: 1.05rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+      padding: 10px 20px;
+      font-size: 0.92rem;
+      font-weight: 600;
     }
 
     .btn-return-syllabus-link {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
-      color: #c084fc;
-      background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      transition: all 0.2s;
+      color: #475569;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      transition: all 0.15s;
     }
 
     .btn-return-syllabus-link:hover {
-      background: rgba(139, 92, 246, 0.25);
-      color: #fff;
+      background: #e2e8f0;
+      color: #0f172a;
     }
 
     /* Quiz Section */
     .quiz-section {
-      padding: 36px;
-      border: 1px solid var(--border-active);
-      background: rgba(18, 24, 38, 0.95);
+      padding: 28px 32px;
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
     }
 
     .quiz-header {
       display: flex;
       align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 32px;
-      padding-bottom: 24px;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .quiz-badge-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--accent-gradient);
-      border-radius: var(--radius-md);
+      width: 40px;
+      height: 40px;
+      background: #0f172a;
+      border-radius: var(--radius-sm);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      box-shadow: var(--shadow-glow);
+      color: #ffffff;
       flex-shrink: 0;
     }
 
     .quiz-header h2 {
-      font-size: 1.4rem;
-      margin-bottom: 4px;
+      font-size: 1.35rem;
+      margin-bottom: 2px;
+      color: #0f172a;
     }
 
     .quiz-subtitle {
       color: var(--text-secondary);
-      font-size: 0.92rem;
+      font-size: 0.85rem;
+      margin: 0;
     }
 
-    /* Result Banner */
     .result-banner {
       display: flex;
       align-items: center;
-      gap: 20px;
-      padding: 24px;
-      border-radius: var(--radius-md);
-      margin-bottom: 32px;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
     }
 
     .result-passed {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      box-shadow: var(--shadow-glow-success);
-    }
-
-    .result-failed {
-      background: rgba(239, 68, 68, 0.12);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-    }
-
-    .result-icon {
-      font-size: 2.2rem;
-    }
-
-    .result-text {
-      flex-grow: 1;
-    }
-
-    .result-text h3 {
-      font-size: 1.25rem;
-      margin-bottom: 4px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
     }
 
     .result-passed .result-text h3 {
-      color: #34d399;
+      color: #15803d;
+    }
+
+    .result-failed {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
     }
 
     .result-failed .result-text h3 {
-      color: #f87171;
+      color: #b91c1c;
+    }
+
+    .result-icon {
+      font-size: 1.8rem;
+    }
+
+    .result-text {
+      flex: 1;
+    }
+
+    .result-text h3 {
+      font-size: 1.1rem;
+      margin-bottom: 2px;
     }
 
     .result-text p {
-      color: var(--text-secondary);
-      font-size: 0.92rem;
+      color: #475569;
+      font-size: 0.85rem;
+      margin: 0;
     }
 
-    /* Questions */
-    .questions-list {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
-
-    .question-card {
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 24px;
-    }
-
-    .question-title {
-      font-size: 1.05rem;
-      margin-bottom: 18px;
-      color: var(--text-primary);
+    .result-actions {
       display: flex;
       gap: 8px;
     }
 
-    .q-number {
-      color: var(--primary);
+    .questions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .question-block {
+      padding: 18px;
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    .question-title-row {
+      margin-bottom: 12px;
+    }
+
+    .question-number {
+      display: inline-block;
+      font-size: 0.72rem;
       font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 2px;
+    }
+
+    .question-text {
+      font-size: 0.98rem;
+      color: #0f172a;
+      line-height: 1.4;
     }
 
     .options-group {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .option-item {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      background: rgba(255, 255, 255, 0.02);
+      gap: 12px;
+      padding: 10px 14px;
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
     }
 
     .option-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(99, 102, 241, 0.3);
+      background: #f1f5f9;
+      border-color: #cbd5e1;
     }
 
     .option-selected {
-      background: rgba(99, 102, 241, 0.12) !important;
-      border-color: var(--primary) !important;
-      box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+      background: #f1f5f9 !important;
+      border-color: #0f172a !important;
     }
 
     .option-radio {
@@ -1065,117 +1072,114 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
     }
 
     .option-indicator {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--border-subtle);
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      color: var(--text-secondary);
+      color: #475569;
       flex-shrink: 0;
-      transition: all 0.2s;
+      transition: all 0.15s ease;
     }
 
     .option-selected .option-indicator {
-      background: var(--primary);
+      background: #0f172a;
+      border-color: #0f172a;
       color: #ffffff;
-      border-color: var(--primary);
     }
 
     .option-text {
-      font-size: 0.95rem;
-      color: var(--text-primary);
+      font-size: 0.9rem;
+      color: #334155;
     }
 
     .quiz-footer {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-      margin-top: 12px;
+      align-items: center;
+      gap: 14px;
+      margin-top: 10px;
+      flex-wrap: wrap;
     }
 
     .btn-submit {
-      padding: 14px 32px;
-      font-size: 1rem;
+      padding: 10px 20px;
+      font-size: 0.9rem;
     }
 
     .unanswered-warning {
       font-size: 0.82rem;
-      color: var(--status-warning);
+      color: #b91c1c;
     }
 
-    /* Sidebar */
+    /* Sidebar Syllabus */
     .syllabus-sidebar {
-      position: sticky;
-      top: 88px;
-      background: var(--bg-card);
-      backdrop-filter: var(--backdrop-blur);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 24px;
+      padding: 18px;
+      position: sticky;
+      top: 80px;
     }
 
     .sidebar-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 14px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--border-subtle);
     }
 
     .sidebar-header h3 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
+      margin: 0;
+      color: #0f172a;
     }
 
     .syllabus-count {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
-      padding: 3px 8px;
-      border-radius: var(--radius-full);
     }
 
     .syllabus-nav {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }
 
     .syllabus-item {
       display: flex;
       align-items: flex-start;
-      gap: 14px;
-      padding: 14px;
-      background: rgba(15, 23, 42, 0.5);
+      gap: 10px;
+      padding: 10px 12px;
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-sm);
       text-align: left;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       width: 100%;
     }
 
     .syllabus-item:hover:not(:disabled) {
-      background: rgba(99, 102, 241, 0.08);
-      border-color: rgba(99, 102, 241, 0.3);
+      background: #f8fafc;
+      border-color: #cbd5e1;
     }
 
     .active-lesson {
-      background: rgba(99, 102, 241, 0.15) !important;
-      border-color: var(--primary) !important;
-      box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+      background: #f1f5f9 !important;
+      border-color: #0f172a !important;
     }
 
     .locked-lesson {
-      opacity: 0.45;
+      opacity: 0.55;
       cursor: not-allowed !important;
-      background: rgba(15, 23, 42, 0.2);
+      background: #f8fafc;
     }
 
     .item-status-icon {
@@ -1184,11 +1188,11 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
     }
 
     .icon-completed {
-      color: #34d399;
+      color: #16a34a;
     }
 
     .icon-available {
-      color: #818cf8;
+      color: #0f172a;
     }
 
     .icon-locked {
@@ -1202,24 +1206,24 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
     }
 
     .item-title {
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       font-weight: 600;
-      color: var(--text-primary);
+      color: #0f172a;
       line-height: 1.3;
     }
 
     .item-meta {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+      font-size: 0.7rem;
     }
 
     .text-completed {
-      color: #34d399;
+      color: #16a34a;
+      font-weight: 600;
     }
 
     .text-available {
-      color: #818cf8;
+      color: #0f172a;
+      font-weight: 600;
     }
 
     .text-locked {
@@ -1227,30 +1231,30 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
     }
 
     .lesson-loading {
-      min-height: 70vh;
+      min-height: 60vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
       color: var(--text-secondary);
     }
 
     .spinner-large {
-      width: 44px;
-      height: 44px;
-      border: 3px solid rgba(99, 102, 241, 0.2);
-      border-top-color: var(--primary);
+      width: 36px;
+      height: 36px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #0f172a;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
 
     .spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
       border-radius: 50%;
-      border-top-color: #fff;
+      border-top-color: #ffffff;
       animation: spin 0.6s linear infinite;
     }
 
@@ -1259,33 +1263,32 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
     }
 
     .alert-error-box {
-      max-width: 480px;
-      padding: 32px 24px;
+      max-width: 440px;
+      padding: 28px 24px;
       text-align: center;
       margin: 0 auto;
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      background: rgba(18, 24, 38, 0.95);
+      border: 1px solid #fecaca;
+      background: #fef2f2;
     }
 
     .error-emoji {
-      font-size: 2.5rem;
+      font-size: 2rem;
       display: block;
-      margin-bottom: 12px;
-    }
-
-    .alert-error-box h3 {
-      font-size: 1.3rem;
-      color: #f87171;
       margin-bottom: 8px;
     }
 
-    .alert-error-box p {
-      color: var(--text-secondary);
-      font-size: 0.92rem;
-      line-height: 1.5;
+    .alert-error-box h3 {
+      font-size: 1.15rem;
+      color: #b91c1c;
+      margin-bottom: 4px;
     }
 
-    @media (max-width: 1024px) {
+    .alert-error-box p {
+      color: #475569;
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 960px) {
       .lesson-layout {
         grid-template-columns: 1fr;
       }
@@ -1333,7 +1336,6 @@ export class LessonComponent implements OnInit {
     this.errorMessage.set(null);
     this.quizResult.set(null);
     this.isQuizStarted.set(false);
-    this.activeLessonView.set('content');
     this.selectedAnswers.set({});
 
     this.coursesService.getLessonById(lessonId).subscribe({
@@ -1399,7 +1401,6 @@ export class LessonComponent implements OnInit {
         this.isSubmitting.set(false);
         this.quizResult.set(res);
 
-        // If passed, refresh lesson syllabus to show updated status immediately
         if (res.passed) {
           this.coursesService.getLessonById(currentLesson.id).subscribe((updated) => {
             this.lesson.set(updated);

@@ -121,13 +121,12 @@ import { CourseSummary } from '../../core/models';
               <!-- Action Button -->
               <button
                 (click)="openCourse(course.id)"
-                class="btn w-full"
-                [ngClass]="course.progressPercentage > 0 ? 'btn-primary' : 'btn-secondary'"
+                class="btn btn-primary w-full"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polygon points="5 3 19 12 5 21 5 3"></polygon>
                 </svg>
-                <span>{{ course.progressPercentage === 100 ? 'Revisar Curso' : (course.progressPercentage > 0 ? 'Continuar Clase' : 'Iniciar Curso') }}</span>
+                <span>Ver Clases del Curso ({{ course.totalLessons }}) ➔</span>
               </button>
             </div>
           </article>
@@ -495,26 +494,6 @@ export class DashboardComponent implements OnInit {
   }
 
   openCourse(courseId: string): void {
-    this.coursesService.getCourseById(courseId).subscribe({
-      next: (course) => {
-        if (course && course.lessons && course.lessons.length > 0) {
-          // Find first available lesson or first completed, or fallback to first
-          const targetLesson =
-            course.lessons.find((l) => l.status === 'AVAILABLE') ||
-            course.lessons.find((l) => l.status === 'COMPLETED') ||
-            course.lessons[0];
-
-          if (targetLesson) {
-            this.router.navigate(['/lessons', targetLesson.id]);
-            return;
-          }
-        }
-        alert('Este curso aún no tiene clases configuradas.');
-      },
-      error: (err) => {
-        console.error('Error al abrir el curso:', err);
-        alert('No se pudo acceder al curso. Por favor intenta de nuevo.');
-      },
-    });
+    this.router.navigate(['/courses', courseId]);
   }
 }

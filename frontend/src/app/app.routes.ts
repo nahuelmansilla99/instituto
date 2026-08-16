@@ -25,6 +25,14 @@ export const routes: Routes = [
       import('./features/dashboard/dashboard.component').then((m) => m.DashboardComponent),
   },
   {
+    path: 'courses/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/course-detail/course-detail.component').then(
+        (m) => m.CourseDetailComponent,
+      ),
+  },
+  {
     path: 'lessons/:id',
     canActivate: [authGuard],
     loadComponent: () =>

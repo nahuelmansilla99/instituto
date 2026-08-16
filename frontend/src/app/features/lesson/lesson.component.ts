@@ -19,13 +19,14 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
         <!-- Breadcrumb & Top bar -->
         <nav class="lesson-breadcrumb">
           <a routerLink="/dashboard" class="breadcrumb-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
-            </svg>
-            Volver a Cursos
+            <span>Mis Cursos</span>
           </a>
           <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-current">{{ currentLesson.courseTitle }}</span>
+          <a [routerLink]="['/courses', currentLesson.courseId]" class="breadcrumb-link">
+            <span>{{ currentLesson.courseTitle }}</span>
+          </a>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-current">Clase #{{ currentLesson.orderNumber }}</span>
         </nav>
 
         <!-- Lesson Header -->
@@ -33,7 +34,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
           <div class="header-badges">
             <span class="badge badge-available">Clase {{ currentLesson.orderNumber }}</span>
             <span *ngIf="currentLesson.status === 'COMPLETED'" class="badge badge-completed">
-              ✓ Completada ({{ currentLesson.score }}%)
+              ✓ Aprobada ({{ currentLesson.score }}%)
             </span>
           </div>
           <h1>{{ currentLesson.title }}</h1>
@@ -93,8 +94,38 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
           <div class="lesson-html-content" [innerHTML]="currentLesson.content"></div>
         </section>
 
+        <!-- LESSON FINISHED & QUIZ TRIGGER PROMPT -->
+        <section
+          *ngIf="!isQuizStarted() && !quizResult() && currentLesson.status !== 'COMPLETED' && currentLesson.quizQuestions.length > 0"
+          class="lesson-end-action-box glass-card animate-fade-in"
+        >
+          <div class="end-action-badge">🎯 Fin del Contenido de la Clase</div>
+          <h2>¿Has terminado de revisar la clase?</h2>
+          <p>
+            Rinde el examen de opción múltiple para evaluar lo aprendido y desbloquear automáticamente la siguiente lección del curso.
+          </p>
+
+          <div class="end-action-buttons">
+            <button (click)="startQuizSection()" class="btn btn-primary btn-lg btn-start-quiz-cta">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 11l3 3L22 4"></path>
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+              </svg>
+              <span>📝 Iniciar Examen de la Clase ➔</span>
+            </button>
+
+            <a [routerLink]="['/courses', currentLesson.courseId]" class="btn btn-secondary">
+              Volver al Temario
+            </a>
+          </div>
+        </section>
+
         <!-- QUIZ & PROGRESSION EVALUATION SECTION -->
-        <section class="quiz-section glass-card animate-fade-in" id="quiz-section">
+        <section
+          *ngIf="(isQuizStarted() || quizResult() || currentLesson.status === 'COMPLETED') && currentLesson.quizQuestions.length > 0"
+          class="quiz-section glass-card animate-fade-in"
+          id="quiz-section"
+        >
           <div class="quiz-header">
             <div class="quiz-badge-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -209,8 +240,13 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
       <!-- SYLLABUS / TEMARIO SIDEBAR -->
       <aside class="syllabus-sidebar">
         <div class="sidebar-header">
-          <h3>Temario del Curso</h3>
-          <span class="syllabus-count">{{ currentLesson.syllabus.length }} Clases</span>
+          <div>
+            <h3>Temario del Curso</h3>
+            <span class="syllabus-count">{{ currentLesson.syllabus.length }} Clases</span>
+          </div>
+          <a [routerLink]="['/courses', currentLesson.courseId]" class="btn-return-syllabus-link" title="Ver temario completo">
+            <span>← Ver Temario</span>
+          </a>
         </div>
 
         <nav class="syllabus-nav">
@@ -491,6 +527,77 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
       padding: 2px 6px;
       border-radius: 4px;
       font-family: monospace;
+    }
+
+    /* Lesson Finished & Quiz Trigger Box */
+    .lesson-end-action-box {
+      padding: 36px 40px;
+      margin-bottom: 36px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .end-action-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #c084fc;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .lesson-end-action-box h2 {
+      font-size: 1.6rem;
+      margin: 0;
+    }
+
+    .lesson-end-action-box p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .end-action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-start-quiz-cta {
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-return-syllabus-link {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #c084fc;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      transition: all 0.2s;
+    }
+
+    .btn-return-syllabus-link:hover {
+      background: rgba(139, 92, 246, 0.25);
+      color: #fff;
     }
 
     /* Quiz Section */
@@ -888,6 +995,7 @@ export class LessonComponent implements OnInit {
   readonly selectedAnswers = signal<Record<string, number>>({});
   readonly quizResult = signal<QuizEvaluationResponse | null>(null);
   readonly errorMessage = signal<string | null>(null);
+  readonly isQuizStarted = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -902,6 +1010,7 @@ export class LessonComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.quizResult.set(null);
+    this.isQuizStarted.set(false);
     this.selectedAnswers.set({});
 
     this.coursesService.getLessonById(lessonId).subscribe({
@@ -929,6 +1038,13 @@ export class LessonComponent implements OnInit {
 
   getOptionLetter(index: number): string {
     return String.fromCharCode(65 + index); // A, B, C, D...
+  }
+
+  startQuizSection(): void {
+    this.isQuizStarted.set(true);
+    setTimeout(() => {
+      document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 60);
   }
 
   isAllAnswered(): boolean {

@@ -19,6 +19,10 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
   app.use('/api/uploads', express.static(join(process.cwd(), 'uploads')));
 
+  // Payload body limit for large presentation files
+  app.use(express.json({ limit: '200mb' }));
+  app.use(express.urlencoded({ limit: '200mb', extended: true }));
+
   // Enable CORS for Angular frontend
   app.enableCors({
     origin: true,

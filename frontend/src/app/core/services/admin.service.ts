@@ -127,25 +127,7 @@ export class AdminService {
     );
   }
 
-  // Excel
-  downloadExcelTemplate(): void {
-    this.http
-      .get(`${this.apiUrl}/admin/template-excel`, { responseType: 'blob' })
-      .subscribe((blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'plantilla_clases_y_preguntas.xlsx';
-        a.click();
-        window.URL.revokeObjectURL(url);
-      });
-  }
 
-  uploadExcel(courseId: string, file: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post(`${this.apiUrl}/admin/courses/${courseId}/upload-excel`, formData);
-  }
 
   // ----------------------------------------------------
   // GESTIÓN DE ALUMNOS (MATRÍCULAS Y SEGUIMIENTO)

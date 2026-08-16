@@ -21,7 +21,7 @@ import { CourseSummary } from '../../core/models';
           <div class="hero-content">
             <span class="hero-badge">⚙️ Área de Administración</span>
             <h1>Panel del <span class="gradient-text">Profesor</span></h1>
-            <p>Gestiona los cursos, sube clases y exámenes mediante Excel, comparte enlaces a Google Meet y administra los cuestionarios de opción múltiple.</p>
+            <p>Gestiona los cursos, organiza clases, adjunta presentaciones PowerPoint, comparte enlaces a Google Meet y administra los cuestionarios de opción múltiple.</p>
           </div>
           <div class="hero-actions">
             <button (click)="openCreateModal()" class="btn btn-primary">
@@ -30,14 +30,6 @@ import { CourseSummary } from '../../core/models';
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               <span>Crear Nuevo Curso</span>
-            </button>
-            <button (click)="downloadExcelTemplate()" class="btn btn-secondary" title="Descargar archivo Excel de ejemplo para subir clases masivamente">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Plantilla Excel</span>
             </button>
           </div>
         </section>
@@ -121,7 +113,7 @@ import { CourseSummary } from '../../core/models';
                     <path d="M12 20h9"></path>
                     <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                   </svg>
-                  <span>📝 Clases, Exámenes y Excel</span>
+                  <span>📝 Clases y Exámenes</span>
                 </a>
 
                 <div class="sub-actions">
@@ -572,9 +564,7 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  downloadExcelTemplate(): void {
-    this.adminService.downloadExcelTemplate();
-  }
+
 
   openCreateModal(): void {
     this.isEditing.set(false);

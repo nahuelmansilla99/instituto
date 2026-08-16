@@ -20,7 +20,7 @@ import { CourseSummary } from '../../core/models';
           <div class="teacher-banner-text">
             <span class="badge-role-tag">👨‍🏫 Perfil de Profesor Activo</span>
             <h3>Panel de Gestión de Cursos, Clases y Alumnos</h3>
-            <p>Puedes matricular estudiantes, ver el rendimiento clase por clase, subir exámenes por Excel y configurar salas de Google Meet.</p>
+            <p>Puedes matricular estudiantes, ver el rendimiento clase por clase, adjuntar presentaciones PowerPoint y configurar salas de Google Meet.</p>
           </div>
           <a routerLink="/admin" class="btn btn-primary btn-teacher-portal">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

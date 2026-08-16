@@ -89,82 +89,34 @@ import {
         </div>
 
         <!-- ==================================================== -->
-        <!-- TAB 1: CLASES, EXCEL Y EXÁMENES                      -->
+        <!-- TAB 1: CLASES Y EXÁMENES                             -->
         <!-- ==================================================== -->
         <div *ngIf="activeTab() === 'content'" class="tab-content-pane animate-fade-in">
-          <!-- EXCEL IMPORT & EXPORT SUITE -->
-          <section class="excel-import-section glass-card">
-            <div class="excel-content">
-              <div class="excel-info">
-                <div class="excel-badge-icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                    <polyline points="10 9 9 9 8 9"></polyline>
-                  </svg>
-                </div>
-                <div>
-                  <h3>Subida Masiva con Archivos Excel (.xlsx / .csv)</h3>
-                  <p>Importa múltiples clases, contenidos y preguntas de examen con sus respuestas correctas en un solo clic.</p>
-                </div>
-              </div>
-
-              <div class="excel-actions">
-                <button (click)="downloadTemplate()" class="btn btn-secondary">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  <span>Descargar Plantilla Excel</span>
-                </button>
-
-                <label class="btn btn-primary btn-upload-label">
-                  <input
-                    type="file"
-                    accept=".xlsx, .xls, .csv"
-                    (change)="onExcelFileSelected($event)"
-                    class="file-input-hidden"
-                    [disabled]="isUploadingExcel()"
-                  />
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                  </svg>
-                  <span>{{ isUploadingExcel() ? 'Procesando Excel...' : 'Subir Archivo Excel' }}</span>
-                </label>
-              </div>
-            </div>
-
-            <div *ngIf="uploadSuccessMessage()" class="alert-success-box animate-fade-in">
-              <span>✅ {{ uploadSuccessMessage() }}</span>
-            </div>
-          </section>
-
           <!-- LESSONS & QUIZ QUESTIONS MANAGEMENT -->
           <section class="lessons-management-section">
             <div class="section-title-row">
               <div>
                 <h2>Clases del Curso ({{ c.lessons.length }})</h2>
-                <p class="section-desc">Administra el temario, redacta el contenido y configura los exámenes de opción múltiple</p>
+                <p class="section-desc">Administra el temario, redacta el contenido, adjunta presentaciones PowerPoint y configura los exámenes de opción múltiple</p>
               </div>
               <button (click)="openCreateLessonModal()" class="btn btn-primary">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
-                <span>Agregar Clase Manualmente</span>
+                <span>Agregar Nueva Clase</span>
               </button>
+            </div>
+
+            <div *ngIf="presentationSuccessMessage()" class="alert-success-box animate-fade-in" style="margin-bottom: 20px;">
+              <span>✅ {{ presentationSuccessMessage() }}</span>
             </div>
 
             <!-- Empty Lessons State -->
             <div *ngIf="c.lessons.length === 0" class="empty-state glass-card">
               <div class="empty-icon">📂</div>
               <h3>No hay clases creadas en este curso</h3>
-              <p>Puedes agregar clases manualmente o importar un archivo Excel usando los botones de arriba.</p>
+              <p>Haz clic en 'Agregar Nueva Clase' para crear la primera lección del curso.</p>
             </div>
 
             <!-- Lessons List -->
@@ -1299,85 +1251,6 @@ import {
       color: var(--text-muted);
     }
 
-    /* Excel Section */
-    .excel-import-section {
-      padding: 28px 32px;
-      margin-bottom: 40px;
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.85) 100%);
-      border: 1px solid var(--border-active);
-    }
-
-    .excel-content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-
-    .excel-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      max-width: 600px;
-    }
-
-    .excel-badge-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      color: #34d399;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .excel-info h3 {
-      font-size: 1.15rem;
-      margin-bottom: 4px;
-    }
-
-    .excel-info p {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-    }
-
-    .excel-actions {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .btn-upload-label {
-      position: relative;
-      cursor: pointer;
-      overflow: hidden;
-      margin: 0;
-    }
-
-    .file-input-hidden {
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-    }
-
-    .alert-success-box {
-      margin-top: 18px;
-      padding: 12px 16px;
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: #34d399;
-      border-radius: var(--radius-sm);
-      font-size: 0.9rem;
-    }
-
     /* Lessons Section */
     .lessons-management-section {
       margin-top: 24px;
@@ -1838,8 +1711,7 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly course = signal<AdminCourseDetail | null>(null);
   readonly isLoading = signal(true);
   readonly isSaving = signal(false);
-  readonly isUploadingExcel = signal(false);
-  readonly uploadSuccessMessage = signal<string | null>(null);
+  readonly presentationSuccessMessage = signal<string | null>(null);
 
   // Tab: 'content' | 'students'
   readonly activeTab = signal<'content' | 'students'>('content');
@@ -2071,35 +1943,7 @@ export class AdminCourseEditorComponent implements OnInit {
     });
   }
 
-  // ----------------------------------------------------
-  // EXCEL IMPORT & EXPORT
-  // ----------------------------------------------------
-  downloadTemplate(): void {
-    this.adminService.downloadExcelTemplate();
-  }
 
-  onExcelFileSelected(event: any): void {
-    const file = event.target.files?.[0];
-    const c = this.course();
-    if (!file || !c) return;
-
-    this.isUploadingExcel.set(true);
-    this.uploadSuccessMessage.set(null);
-
-    this.adminService.uploadExcel(c.id, file).subscribe({
-      next: (res) => {
-        this.isUploadingExcel.set(false);
-        this.uploadSuccessMessage.set(
-          `Archivo procesado con éxito: ${res.lessonsCreated} clases y ${res.questionsCreated} preguntas importadas/actualizadas.`,
-        );
-        this.loadCourse(c.id);
-      },
-      error: (err) => {
-        this.isUploadingExcel.set(false);
-        alert('Error al procesar el archivo Excel: ' + (err.error?.message || 'Verifica el formato'));
-      },
-    });
-  }
 
   // ----------------------------------------------------
   // LESSON MANAGEMENT
@@ -2320,8 +2164,8 @@ export class AdminCourseEditorComponent implements OnInit {
 
     this.adminService.uploadLessonPresentation(lesson.id, file).subscribe({
       next: () => {
-        this.uploadSuccessMessage.set(`Presentación subida correctamente a "${lesson.title}"`);
-        setTimeout(() => this.uploadSuccessMessage.set(null), 4000);
+        this.presentationSuccessMessage.set(`Presentación subida correctamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {

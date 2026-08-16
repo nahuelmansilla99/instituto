@@ -159,34 +159,7 @@ export class AdminController {
     return this.adminService.deleteQuestion(id);
   }
 
-  // ----------------------------------------------------
-  // PLANTILLA Y SUBIDA MASIVA POR EXCEL (.xlsx / .csv)
-  // ----------------------------------------------------
-  @Get('template-excel')
-  downloadTemplate(@Res() res: Response) {
-    const buffer = this.adminService.generateExcelTemplate();
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    );
-    res.setHeader(
-      'Content-Disposition',
-      'attachment; filename=plantilla_clases_y_preguntas.xlsx',
-    );
-    res.send(buffer);
-  }
 
-  @Post('courses/:courseId/upload-excel')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadExcel(
-    @Param('courseId') courseId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) {
-      throw new BadRequestException('Debes adjuntar un archivo Excel (.xlsx o .csv)');
-    }
-    return this.adminService.processExcelUpload(courseId, file.buffer);
-  }
 
   // ----------------------------------------------------
   // GESTIÓN DE ALUMNOS POR CURSO

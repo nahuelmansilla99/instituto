@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { CoursesService } from '../../core/services/courses.service';
 import { QuizService } from '../../core/services/quiz.service';
@@ -58,41 +59,181 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
           </a>
         </div>
 
-        <!-- Presentation Material (PowerPoint / PDF) if available -->
-        <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in">
-          <div class="presentation-main-row">
-            <div class="presentation-icon-box">
-              <span>📊</span>
-            </div>
-            <div class="presentation-info">
-              <h4>Presentación y Diapositivas de la Clase</h4>
-              <p>Material complementario de apoyo subido por el profesor.</p>
-              <span class="presentation-filename-badge">
-                📎 {{ currentLesson.presentationFilename || 'Presentación.pptx' }}
-              </span>
-            </div>
-          </div>
-          <div class="presentation-actions">
-            <a
-              [href]="currentLesson.presentationUrl"
-              target="_blank"
-              [download]="currentLesson.presentationFilename || 'presentacion'"
-              class="btn btn-primary btn-download-ppt"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Descargar Presentación (.pptx)</span>
-            </a>
-          </div>
+        <!-- LESSON VIEW MODE TABS -->
+        <div class="lesson-mode-tabs animate-fade-in">
+          <button
+            (click)="activeLessonView.set('content')"
+            class="mode-tab-btn"
+            [class.mode-tab-active]="activeLessonView() === 'content'"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
+            <span>📖 Guía y Contenido de la Clase</span>
+          </button>
+
+          <button
+            (click)="activeLessonView.set('presentation')"
+            class="mode-tab-btn"
+            [class.mode-tab-active]="activeLessonView() === 'presentation'"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>📊 Pantalla de Presentación PowerPoint</span>
+            <span *ngIf="currentLesson.presentationUrl" class="tab-badge-ppt">PPT Disponible</span>
+          </button>
         </div>
 
-        <!-- Lesson Content Viewer (HTML / Slides / Video) -->
-        <section class="lesson-player glass-card animate-fade-in">
-          <div class="lesson-html-content" [innerHTML]="currentLesson.content"></div>
-        </section>
+        <!-- TAB 1: HTML / CONTENT VIEW -->
+        <div *ngIf="activeLessonView() === 'content'" class="tab-content-pane animate-fade-in">
+          <!-- Presentation Material (PowerPoint / PDF) Quick Box -->
+          <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in">
+            <div class="presentation-main-row">
+              <div class="presentation-icon-box">
+                <span>📊</span>
+              </div>
+              <div class="presentation-info">
+                <h4>Presentación y Diapositivas de la Clase</h4>
+                <p>Material de diapositivas preparado por el profesor.</p>
+                <span class="presentation-filename-badge">
+                  📎 {{ currentLesson.presentationFilename || 'Presentación.pptx' }}
+                </span>
+              </div>
+            </div>
+            <div class="presentation-actions">
+              <button
+                (click)="activeLessonView.set('presentation')"
+                class="btn btn-secondary btn-view-ppt"
+              >
+                <span>👁️ Ver en Pantalla de Diapositivas</span>
+              </button>
+              <a
+                [href]="currentLesson.presentationUrl"
+                target="_blank"
+                [download]="currentLesson.presentationFilename || 'presentacion'"
+                class="btn btn-primary btn-download-ppt"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Descargar (.pptx)</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Lesson Content Viewer (HTML / Slides / Video) -->
+          <section class="lesson-player glass-card animate-fade-in">
+            <div class="lesson-html-content" [innerHTML]="currentLesson.content"></div>
+          </section>
+        </div>
+
+        <!-- TAB 2: POWERPOINT PRESENTATION SCREEN -->
+        <div *ngIf="activeLessonView() === 'presentation'" class="tab-content-pane animate-fade-in">
+          <!-- If Presentation Exists -->
+          <section *ngIf="currentLesson.presentationUrl" class="presentation-screen-container glass-card animate-fade-in" id="presentation-fullscreen-box">
+            <!-- Screen Header Controls -->
+            <div class="presentation-screen-header">
+              <div class="ppt-title-group">
+                <div class="ppt-icon-badge">📊</div>
+                <div>
+                  <h3>{{ currentLesson.presentationFilename || 'Presentación de la Clase' }}</h3>
+                  <span class="ppt-meta-label">Diapositivas oficiales del curso</span>
+                </div>
+              </div>
+
+              <div class="ppt-header-actions">
+                <button (click)="toggleFullscreenPresentation()" class="btn btn-secondary btn-sm" title="Modo Pantalla Completa">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <polyline points="9 21 3 21 3 15"></polyline>
+                    <line x1="21" y1="3" x2="14" y2="10"></line>
+                    <line x1="3" y1="21" x2="10" y2="14"></line>
+                  </svg>
+                  <span>Pantalla Completa</span>
+                </button>
+
+                <a
+                  [href]="currentLesson.presentationUrl"
+                  target="_blank"
+                  [download]="currentLesson.presentationFilename || 'presentacion'"
+                  class="btn btn-primary btn-sm btn-download-ppt"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                  </svg>
+                  <span>Descargar .pptx</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- Embedded Slide Viewer Frame -->
+            <div class="presentation-frame-wrapper">
+              <iframe
+                *ngIf="getSafePresentationUrl(currentLesson.presentationUrl) as safeUrl"
+                [src]="safeUrl"
+                class="presentation-iframe"
+                frameborder="0"
+                allowfullscreen="true"
+              ></iframe>
+
+              <!-- Fallback / In-App Presentation Player Card -->
+              <div class="presentation-player-fallback">
+                <div class="fallback-hero-content">
+                  <div class="slide-deck-icon">📊</div>
+                  <h3>{{ currentLesson.presentationFilename || 'Diapositivas de la Clase' }}</h3>
+                  <p>Presentación lista para ver, proyectar o estudiar.</p>
+
+                  <div class="fallback-cta-row">
+                    <a
+                      [href]="currentLesson.presentationUrl"
+                      target="_blank"
+                      class="btn btn-secondary"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                      <span>Abrir Presentación en Nueva Pestaña</span>
+                    </a>
+
+                    <a
+                      [href]="currentLesson.presentationUrl"
+                      target="_blank"
+                      [download]="currentLesson.presentationFilename || 'presentacion'"
+                      class="btn btn-primary btn-download-ppt"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                      </svg>
+                      <span>Descargar Archivo (.pptx)</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- If No Presentation in Lesson -->
+          <div *ngIf="!currentLesson.presentationUrl" class="empty-presentation-box glass-card animate-fade-in">
+            <div class="empty-icon">📊</div>
+            <h3>Esta clase aún no cuenta con PowerPoint adjunto</h3>
+            <p>Puedes consultar la explicación teórica completa en la pestaña <strong>"Guía y Contenido de la Clase"</strong>.</p>
+            <button (click)="activeLessonView.set('content')" class="btn btn-primary" style="margin-top: 12px;">
+              Ir a la Guía de la Clase ➔
+            </button>
+          </div>
+        </div>
 
         <!-- LESSON FINISHED & QUIZ TRIGGER PROMPT -->
         <section
@@ -406,6 +547,183 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
       background: #ef4444;
       box-shadow: 0 0 10px #ef4444;
       animation: pulse 1.5s infinite;
+    }
+
+    /* Lesson Mode Tabs */
+    .lesson-mode-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .mode-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .mode-tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mode-tab-active {
+      background: rgba(139, 92, 246, 0.2) !important;
+      border-color: #a855f7 !important;
+      color: #fff !important;
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.3);
+    }
+
+    .tab-badge-ppt {
+      font-size: 0.7rem;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      padding: 1px 6px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+    }
+
+    .btn-view-ppt {
+      background: rgba(245, 158, 11, 0.15) !important;
+      border-color: rgba(245, 158, 11, 0.4) !important;
+      color: #fbbf24 !important;
+      font-weight: 600;
+    }
+
+    .btn-view-ppt:hover {
+      background: rgba(245, 158, 11, 0.3) !important;
+      color: #fff !important;
+    }
+
+    /* Dedicated Presentation Screen */
+    .presentation-screen-container {
+      padding: 28px 32px;
+      margin-bottom: 36px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .presentation-screen-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .ppt-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .ppt-icon-badge {
+      width: 44px;
+      height: 44px;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .ppt-title-group h3 {
+      font-size: 1.2rem;
+      margin: 0 0 2px;
+      color: #fff;
+    }
+
+    .ppt-meta-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .ppt-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .presentation-frame-wrapper {
+      position: relative;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #0b0f19;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .presentation-iframe {
+      width: 100%;
+      height: 620px;
+      border: none;
+      display: block;
+    }
+
+    .presentation-player-fallback {
+      padding: 40px 24px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(11, 15, 25, 0.98) 100%);
+    }
+
+    .fallback-hero-content {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .slide-deck-icon {
+      font-size: 3.5rem;
+      margin-bottom: 8px;
+    }
+
+    .fallback-hero-content h3 {
+      font-size: 1.4rem;
+      margin: 0;
+      color: #fff;
+    }
+
+    .fallback-hero-content p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      margin: 0;
+    }
+
+    .fallback-cta-row {
+      display: flex;
+      gap: 14px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .empty-presentation-box {
+      padding: 56px 32px;
+      text-align: center;
+      color: var(--text-secondary);
     }
 
     /* Presentation Box */
@@ -986,10 +1304,14 @@ export class LessonComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly coursesService = inject(CoursesService);
   private readonly quizService = inject(QuizService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly lesson = signal<LessonDetail | null>(null);
   readonly isLoading = signal(true);
   readonly isSubmitting = signal(false);
+
+  // View Mode: 'content' | 'presentation'
+  readonly activeLessonView = signal<'content' | 'presentation'>('content');
 
   // Selected answers: { [questionId: string]: optionIndex }
   readonly selectedAnswers = signal<Record<string, number>>({});
@@ -1011,6 +1333,7 @@ export class LessonComponent implements OnInit {
     this.errorMessage.set(null);
     this.quizResult.set(null);
     this.isQuizStarted.set(false);
+    this.activeLessonView.set('content');
     this.selectedAnswers.set({});
 
     this.coursesService.getLessonById(lessonId).subscribe({
@@ -1095,5 +1418,25 @@ export class LessonComponent implements OnInit {
   selectLesson(item: { id: string; status: string }): void {
     if (item.status === 'LOCKED') return;
     this.router.navigate(['/lessons', item.id]);
+  }
+
+  getSafePresentationUrl(presentationUrl: string): SafeResourceUrl | null {
+    if (!presentationUrl) return null;
+    const fullUrl = presentationUrl.startsWith('http')
+      ? presentationUrl
+      : `${window.location.origin}${presentationUrl}`;
+    const officeViewer = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fullUrl)}`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(officeViewer);
+  }
+
+  toggleFullscreenPresentation(): void {
+    const el = document.getElementById('presentation-fullscreen-box');
+    if (el) {
+      if (!document.fullscreenElement) {
+        el.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
   }
 }

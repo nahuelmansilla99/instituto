@@ -17,4 +17,12 @@ export class CreateLessonDto {
   @IsOptional()
   @IsString()
   meetUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  presentationUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  presentationFilename?: string;
 }

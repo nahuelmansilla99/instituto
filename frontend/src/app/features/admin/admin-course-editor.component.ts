@@ -183,6 +183,9 @@ import {
                       <span *ngIf="lesson.meetUrl" class="badge-meet-pill">
                         🔴 Meet: {{ lesson.meetUrl }}
                       </span>
+                      <span *ngIf="lesson.presentationUrl" class="badge-ppt-pill">
+                        📊 PPT: {{ lesson.presentationFilename || 'Presentación adjunta' }}
+                      </span>
                       <span class="badge-questions-count">
                         📝 {{ lesson.questions?.length || 0 }} Preguntas de Examen
                       </span>
@@ -190,12 +193,41 @@ import {
                   </div>
 
                   <div class="lesson-actions-group">
+                    <!-- Upload or Manage PowerPoint -->
+                    <label *ngIf="!lesson.presentationUrl" class="btn btn-secondary btn-sm btn-ppt-upload-btn" title="Subir archivo de PowerPoint (.pptx, .ppt, .pdf)">
+                      <input
+                        type="file"
+                        accept=".pptx, .ppt, .pdf, .odp"
+                        (change)="onPresentationFileSelected($event, lesson)"
+                        class="file-input-hidden"
+                      />
+                      <span>📊 Subir PowerPoint</span>
+                    </label>
+
+                    <div *ngIf="lesson.presentationUrl" class="ppt-attached-group">
+                      <a [href]="lesson.presentationUrl" target="_blank" class="btn btn-secondary btn-sm" title="Descargar / Ver presentación">
+                        📥 PPT
+                      </a>
+                      <label class="btn btn-secondary btn-sm btn-ppt-change" title="Reemplazar archivo de PowerPoint">
+                        <input
+                          type="file"
+                          accept=".pptx, .ppt, .pdf, .odp"
+                          (change)="onPresentationFileSelected($event, lesson)"
+                          class="file-input-hidden"
+                        />
+                        <span>🔄 Cambiar</span>
+                      </label>
+                      <button (click)="removePresentation(lesson)" class="btn-icon btn-icon-delete" title="Quitar archivo de PowerPoint">
+                        ❌
+                      </button>
+                    </div>
+
                     <button
                       (click)="openLessonStudentsModal(lesson)"
                       class="btn btn-secondary btn-sm btn-lesson-students"
                       title="Ver y gestionar qué alumnos completaron esta clase"
                     >
-                      <span>👥 Alumnos de esta Clase</span>
+                      <span>👥 Alumnos</span>
                     </button>
                     <button
                       (click)="openQuestionsModal(lesson)"
@@ -1435,6 +1467,16 @@ import {
       border-radius: var(--radius-full);
     }
 
+    .badge-ppt-pill {
+      font-size: 0.72rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+    }
+
     .badge-questions-count {
       font-size: 0.72rem;
       background: rgba(139, 92, 246, 0.12);
@@ -1448,6 +1490,34 @@ import {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-ppt-upload-btn {
+      background: rgba(245, 158, 11, 0.15) !important;
+      border-color: rgba(245, 158, 11, 0.4) !important;
+      color: #fbbf24 !important;
+      cursor: pointer;
+    }
+
+    .btn-ppt-upload-btn:hover {
+      background: rgba(245, 158, 11, 0.3) !important;
+      color: #fff !important;
+    }
+
+    .ppt-attached-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn-ppt-change {
+      cursor: pointer;
+      padding: 6px 10px;
     }
 
     .btn-quiz-manage {
@@ -2236,5 +2306,48 @@ export class AdminCourseEditorComponent implements OnInit {
           alert('Error al actualizar estado del alumno: ' + (err.error?.message || 'Error'));
         },
       });
+  }
+
+  // ----------------------------------------------------
+  // GESTIÓN DE PRESENTACIONES POWERPOINT
+  // ----------------------------------------------------
+  onPresentationFileSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.uploadLessonPresentation(lesson.id, file).subscribe({
+      next: () => {
+        this.uploadSuccessMessage.set(`Presentación subida correctamente a "${lesson.title}"`);
+        setTimeout(() => this.uploadSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al subir presentación: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+
+    // Reset input
+    event.target.value = '';
+  }
+
+  removePresentation(lesson: any): void {
+    if (!confirm(`¿Estás seguro de quitar el archivo de presentación de la clase "${lesson.title}"?`)) {
+      return;
+    }
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.deleteLessonPresentation(lesson.id).subscribe({
+      next: () => {
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al quitar presentación: ' + (err.error?.message || 'Error'));
+      },
+    });
   }
 }

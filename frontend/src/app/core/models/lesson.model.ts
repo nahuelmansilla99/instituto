@@ -7,6 +7,8 @@ export interface LessonDetail {
   courseTitle: string;
   courseMeetUrl?: string | null;
   meetUrl?: string | null;
+  presentationUrl?: string | null;
+  presentationFilename?: string | null;
   title: string;
   content: string;
   orderNumber: number;

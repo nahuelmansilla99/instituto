@@ -18,6 +18,8 @@ export interface CourseLessonItem {
   title: string;
   orderNumber: number;
   meetUrl?: string | null;
+  presentationUrl?: string | null;
+  presentationFilename?: string | null;
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;
 }

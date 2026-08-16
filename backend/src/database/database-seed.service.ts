@@ -24,9 +24,11 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     try {
       this.logger.log('Verificando inicialización y esquema de base de datos...');
-      // Garantizar que las columnas de Google Meet existan en la tabla aunque el volumen ya estuviera creado
+      // Garantizar que las columnas de Google Meet y PowerPoint existan en la tabla aunque el volumen ya estuviera creado
       await this.courseRepo.query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url VARCHAR(500);`);
       await this.lessonRepo.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS meet_url VARCHAR(500);`);
+      await this.lessonRepo.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_url VARCHAR(500);`);
+      await this.lessonRepo.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_filename VARCHAR(255);`);
 
       // Crear tabla de matriculaciones si no existe
       await this.courseRepo.query(`

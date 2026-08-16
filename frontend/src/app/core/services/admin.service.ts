@@ -77,6 +77,17 @@ export class AdminService {
     return this.http.delete<{ success: boolean }>(`${this.apiUrl}/admin/lessons/${lessonId}`);
   }
 
+  // Presentaciones PowerPoint (.pptx, .ppt, .pdf)
+  uploadLessonPresentation(lessonId: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.apiUrl}/admin/lessons/${lessonId}/presentation`, formData);
+  }
+
+  deleteLessonPresentation(lessonId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/admin/lessons/${lessonId}/presentation`);
+  }
+
   // Preguntas de Cuestionario
   getQuestions(lessonId: string): Observable<AdminQuizQuestion[]> {
     return this.http.get<AdminQuizQuestion[]>(`${this.apiUrl}/admin/lessons/${lessonId}/questions`);

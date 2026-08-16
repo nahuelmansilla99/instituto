@@ -57,6 +57,37 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
           </a>
         </div>
 
+        <!-- Presentation Material (PowerPoint / PDF) if available -->
+        <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in">
+          <div class="presentation-main-row">
+            <div class="presentation-icon-box">
+              <span>📊</span>
+            </div>
+            <div class="presentation-info">
+              <h4>Presentación y Diapositivas de la Clase</h4>
+              <p>Material complementario de apoyo subido por el profesor.</p>
+              <span class="presentation-filename-badge">
+                📎 {{ currentLesson.presentationFilename || 'Presentación.pptx' }}
+              </span>
+            </div>
+          </div>
+          <div class="presentation-actions">
+            <a
+              [href]="currentLesson.presentationUrl"
+              target="_blank"
+              [download]="currentLesson.presentationFilename || 'presentacion'"
+              class="btn btn-primary btn-download-ppt"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Descargar Presentación (.pptx)</span>
+            </a>
+          </div>
+        </div>
+
         <!-- Lesson Content Viewer (HTML / Slides / Video) -->
         <section class="lesson-player glass-card animate-fade-in">
           <div class="lesson-html-content" [innerHTML]="currentLesson.content"></div>
@@ -338,8 +369,74 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
       border-radius: 50%;
       background: #ef4444;
       box-shadow: 0 0 10px #ef4444;
-      animation: livePulse 1.2s infinite;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Presentation Box */
+    .lesson-presentation-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px 28px;
+      margin-bottom: 28px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(30, 41, 59, 0.8) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      flex-wrap: wrap;
+    }
+
+    .presentation-main-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .presentation-icon-box {
+      width: 48px;
+      height: 48px;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
       flex-shrink: 0;
+    }
+
+    .presentation-info h4 {
+      font-size: 1.05rem;
+      margin-bottom: 3px;
+      color: #fff;
+    }
+
+    .presentation-info p {
+      color: var(--text-secondary);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+    }
+
+    .presentation-filename-badge {
+      display: inline-block;
+      font-size: 0.76rem;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+    }
+
+    .btn-download-ppt {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+      border: none !important;
+      color: #fff !important;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .btn-download-ppt:hover {
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.45);
     }
 
     .btn-meet-join {

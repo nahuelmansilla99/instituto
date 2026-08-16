@@ -14,6 +14,9 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -74,6 +77,57 @@ export class AdminController {
   @Delete('lessons/:id')
   deleteLesson(@Param('id') id: string) {
     return this.adminService.deleteLesson(id);
+  }
+
+  // ----------------------------------------------------
+  // PRESENTACIONES POWERPOINT (.pptx, .ppt, .pdf)
+  // ----------------------------------------------------
+  @Post('lessons/:lessonId/presentation')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = path.join(process.cwd(), 'uploads', 'presentations');
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = path.extname(file.originalname);
+          cb(null, `${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowed = ['.ppt', '.pptx', '.pdf', '.odp'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (!allowed.includes(ext)) {
+          return cb(
+            new BadRequestException(
+              'Formato no permitido. Solo se admiten archivos de PowerPoint (.pptx, .ppt) o documentos PDF (.pdf)',
+            ),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+    }),
+  )
+  uploadPresentation(
+    @Param('lessonId') lessonId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Debes seleccionar un archivo de presentación');
+    }
+    return this.adminService.setLessonPresentation(lessonId, file);
+  }
+
+  @Delete('lessons/:lessonId/presentation')
+  deletePresentation(@Param('lessonId') lessonId: string) {
+    return this.adminService.deleteLessonPresentation(lessonId);
   }
 
   // ----------------------------------------------------

@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
+import * as fs from 'fs';
+import * as path from 'path';
 import { Course, Lesson, QuizQuestion, User, UserRole, UserProgress, CourseEnrollment, EnrollmentStatus, ProgressStatus } from '../entities';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateLessonDto } from './dto/create-lesson.dto';
@@ -31,6 +33,31 @@ export class AdminService {
   // ----------------------------------------------------
   // GESTIÓN DE CURSOS
   // ----------------------------------------------------
+  async getAllCoursesAdmin(): Promise<Course[]> {
+    return this.courseRepo.find({
+      order: { createdAt: 'DESC' },
+      relations: ['lessons'],
+    });
+  }
+
+  async getCourseAdmin(id: string): Promise<Course> {
+    const course = await this.courseRepo.findOne({
+      where: { id },
+      relations: ['lessons', 'lessons.quizQuestions'],
+      order: {
+        lessons: {
+          orderNumber: 'ASC',
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException('Curso no encontrado');
+    }
+
+    return course;
+  }
+
   async createCourse(dto: CreateCourseDto): Promise<Course> {
     const course = this.courseRepo.create({
       title: dto.title.trim(),
@@ -38,6 +65,7 @@ export class AdminService {
       thumbnailUrl: dto.thumbnailUrl?.trim() || null,
       meetUrl: dto.meetUrl?.trim() || null,
     });
+
     return this.courseRepo.save(course);
   }
 
@@ -62,36 +90,6 @@ export class AdminService {
     }
     await this.courseRepo.remove(course);
     return { success: true };
-  }
-
-  async getCourseAdmin(id: string) {
-    const course = await this.courseRepo.findOne({ where: { id } });
-    if (!course) {
-      throw new NotFoundException('Curso no encontrado');
-    }
-
-    const lessons = await this.lessonRepo.find({
-      where: { courseId: id },
-      order: { orderNumber: 'ASC' },
-    });
-
-    const lessonsWithQuestions = await Promise.all(
-      lessons.map(async (l) => {
-        const questions = await this.quizRepo.find({
-          where: { lessonId: l.id },
-          order: { createdAt: 'ASC' },
-        });
-        return {
-          ...l,
-          questions,
-        };
-      }),
-    );
-
-    return {
-      ...course,
-      lessons: lessonsWithQuestions,
-    };
   }
 
   // ----------------------------------------------------
@@ -119,6 +117,8 @@ export class AdminService {
       content: dto.content.trim(),
       orderNumber,
       meetUrl: dto.meetUrl?.trim() || null,
+      presentationUrl: dto.presentationUrl?.trim() || null,
+      presentationFilename: dto.presentationFilename?.trim() || null,
     });
 
     return this.lessonRepo.save(lesson);
@@ -134,6 +134,52 @@ export class AdminService {
     if (dto.content !== undefined) lesson.content = dto.content.trim();
     if (dto.orderNumber !== undefined) lesson.orderNumber = dto.orderNumber;
     if (dto.meetUrl !== undefined) lesson.meetUrl = dto.meetUrl?.trim() || null;
+    if (dto.presentationUrl !== undefined) lesson.presentationUrl = dto.presentationUrl?.trim() || null;
+    if (dto.presentationFilename !== undefined) lesson.presentationFilename = dto.presentationFilename?.trim() || null;
+
+    return this.lessonRepo.save(lesson);
+  }
+
+  async setLessonPresentation(lessonId: string, file: Express.Multer.File): Promise<Lesson> {
+    const lesson = await this.lessonRepo.findOne({ where: { id: lessonId } });
+    if (!lesson) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+
+    if (lesson.presentationUrl && lesson.presentationUrl.startsWith('/api/uploads/presentations/')) {
+      const oldFilename = lesson.presentationUrl.replace('/api/uploads/presentations/', '');
+      const oldPath = path.join(process.cwd(), 'uploads', 'presentations', oldFilename);
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.unlinkSync(oldPath);
+        } catch (_) {}
+      }
+    }
+
+    lesson.presentationUrl = `/api/uploads/presentations/${file.filename}`;
+    lesson.presentationFilename = file.originalname;
+
+    return this.lessonRepo.save(lesson);
+  }
+
+  async deleteLessonPresentation(lessonId: string): Promise<Lesson> {
+    const lesson = await this.lessonRepo.findOne({ where: { id: lessonId } });
+    if (!lesson) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+
+    if (lesson.presentationUrl && lesson.presentationUrl.startsWith('/api/uploads/presentations/')) {
+      const oldFilename = lesson.presentationUrl.replace('/api/uploads/presentations/', '');
+      const oldPath = path.join(process.cwd(), 'uploads', 'presentations', oldFilename);
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.unlinkSync(oldPath);
+        } catch (_) {}
+      }
+    }
+
+    lesson.presentationUrl = null;
+    lesson.presentationFilename = null;
 
     return this.lessonRepo.save(lesson);
   }
@@ -143,6 +189,17 @@ export class AdminService {
     if (!lesson) {
       throw new NotFoundException('Lección no encontrada');
     }
+
+    if (lesson.presentationUrl && lesson.presentationUrl.startsWith('/api/uploads/presentations/')) {
+      const oldFilename = lesson.presentationUrl.replace('/api/uploads/presentations/', '');
+      const oldPath = path.join(process.cwd(), 'uploads', 'presentations', oldFilename);
+      if (fs.existsSync(oldPath)) {
+        try {
+          fs.unlinkSync(oldPath);
+        } catch (_) {}
+      }
+    }
+
     await this.lessonRepo.remove(lesson);
     return { success: true };
   }

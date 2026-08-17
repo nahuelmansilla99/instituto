@@ -145,31 +145,46 @@ import {
                   </div>
 
                   <div class="lesson-actions-group">
-                    <!-- Upload or Manage PowerPoint -->
-                    <label *ngIf="!lesson.presentationUrl" class="btn btn-secondary btn-sm btn-ppt-upload-btn" title="Subir archivo de PowerPoint (.pptx, .ppt, .pdf)">
-                      <input
-                        type="file"
-                        accept=".pptx, .ppt, .pdf, .odp"
-                        (change)="onPresentationFileSelected($event, lesson)"
-                        class="file-input-hidden"
-                      />
-                      <span>📊 Subir PowerPoint</span>
-                    </label>
-
-                    <div *ngIf="lesson.presentationUrl" class="ppt-attached-group">
-                      <a [href]="lesson.presentationUrl" target="_blank" class="btn btn-secondary btn-sm" title="Descargar / Ver presentación">
-                        📥 PPT
-                      </a>
-                      <label class="btn btn-secondary btn-sm btn-ppt-change" title="Reemplazar archivo de PowerPoint">
+                    <!-- Upload or Manage PowerPoint / Prezi -->
+                    <div *ngIf="!lesson.presentationUrl" class="ppt-unattached-group">
+                      <label class="btn btn-secondary btn-sm btn-ppt-upload-btn" title="Subir archivo de PowerPoint (.pptx, .ppt, .pdf)">
                         <input
                           type="file"
                           accept=".pptx, .ppt, .pdf, .odp"
                           (change)="onPresentationFileSelected($event, lesson)"
                           class="file-input-hidden"
                         />
-                        <span>🔄 Cambiar</span>
+                        <span>📁 Subir PPT</span>
                       </label>
-                      <button (click)="removePresentation(lesson)" class="btn-icon btn-icon-delete" title="Quitar archivo de PowerPoint">
+                      <button
+                        (click)="openPreziModal(lesson)"
+                        class="btn btn-secondary btn-sm btn-prezi-btn"
+                        title="Vincular presentación de Prezi o Diapositivas Online"
+                      >
+                        <span>🌀 Prezi / Enlace</span>
+                      </button>
+                    </div>
+
+                    <div *ngIf="lesson.presentationUrl" class="ppt-attached-group">
+                      <a *ngIf="!isPreziUrl(lesson.presentationUrl)" [href]="lesson.presentationUrl" target="_blank" class="btn btn-secondary btn-sm" title="Descargar / Ver presentación">
+                        📥 PPT
+                      </a>
+                      <a *ngIf="isPreziUrl(lesson.presentationUrl)" [href]="lesson.presentationUrl" target="_blank" class="btn btn-secondary btn-sm" title="Abrir presentación en Prezi">
+                        🌀 Prezi
+                      </a>
+                      <button (click)="openPreziModal(lesson)" class="btn btn-secondary btn-sm" title="Editar enlace de Prezi o presentación">
+                        🔗
+                      </button>
+                      <label class="btn btn-secondary btn-sm btn-ppt-change" title="Reemplazar por archivo local (.pptx, .pdf)">
+                        <input
+                          type="file"
+                          accept=".pptx, .ppt, .pdf, .odp"
+                          (change)="onPresentationFileSelected($event, lesson)"
+                          class="file-input-hidden"
+                        />
+                        <span>🔄 Archivo</span>
+                      </label>
+                      <button (click)="removePresentation(lesson)" class="btn-icon btn-icon-delete" title="Quitar presentación de esta clase">
                         ❌
                       </button>
                     </div>
@@ -543,6 +558,20 @@ import {
             ></textarea>
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="lPresentationUrl">
+              <span>🌀 Enlace a Presentación (Prezi, Google Slides, Canva o Web - Opcional)</span>
+            </label>
+            <input
+              id="lPresentationUrl"
+              type="url"
+              class="form-control"
+              placeholder="https://prezi.com/p/xxxxxx/ o https://docs.google.com/presentation/d/.../edit"
+              formControlName="presentationUrl"
+            />
+            <span class="form-hint">Si pegas un enlace de Prezi o Google Slides, se incrustará de forma interactiva en la clase para los alumnos.</span>
+          </div>
+
           <div class="modal-footer">
             <button type="button" (click)="closeLessonModal()" class="btn btn-secondary">Cancelar</button>
             <button type="submit" class="btn btn-primary" [disabled]="lessonForm.invalid || isSaving()">
@@ -550,6 +579,58 @@ import {
             </button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- MODAL: DEDICATED PREZI / ONLINE PRESENTATION LINK -->
+    <div class="modal-backdrop animate-fade-in" *ngIf="showPreziModal()">
+      <div class="modal-content glass-card animate-fade-in">
+        <div class="modal-header">
+          <div>
+            <h3>🌀 Vincular Presentación de Prezi o Enlace Online</h3>
+            <p class="modal-subtitle" *ngIf="selectedPreziLesson() as l">Clase: {{ l.title }}</p>
+          </div>
+          <button (click)="closePreziModal()" class="btn-close">&times;</button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="preziUrlInput">URL o Enlace de la Presentación Prezi *</label>
+          <input
+            id="preziUrlInput"
+            type="url"
+            class="form-control"
+            placeholder="https://prezi.com/p/xxxxxx/ o https://prezi.com/view/xxxxxx/"
+            [value]="preziInputUrl()"
+            (input)="onPreziUrlChange($event)"
+          />
+          <span class="form-hint">Pega cualquier enlace público de Prezi (ej: <code>https://prezi.com/p/...</code> o <code>https://prezi.com/view/...</code>) o de Google Slides.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="preziTitleInput">Nombre descriptivo de la presentación (Opcional)</label>
+          <input
+            id="preziTitleInput"
+            type="text"
+            class="form-control"
+            placeholder="Ej: Presentación Interactiva Prezi"
+            [value]="preziInputTitle()"
+            (input)="onPreziTitleChange($event)"
+          />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" (click)="closePreziModal()" class="btn btn-secondary">
+            Cancelar
+          </button>
+          <button
+            type="button"
+            (click)="savePreziLink()"
+            class="btn btn-primary"
+            [disabled]="!preziInputUrl().trim() || isSavingPrezi()"
+          >
+            <span>{{ isSavingPrezi() ? 'Guardando...' : 'Vincular Presentación Prezi' }}</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1744,7 +1825,15 @@ export class AdminCourseEditorComponent implements OnInit {
     content: ['', [Validators.required]],
     orderNumber: [null],
     meetUrl: [''],
+    presentationUrl: [''],
   });
+
+  // Dedicated Prezi / Presentation Link Modal
+  readonly showPreziModal = signal(false);
+  readonly selectedPreziLesson = signal<any | null>(null);
+  readonly preziInputUrl = signal('');
+  readonly preziInputTitle = signal('');
+  readonly isSavingPrezi = signal(false);
 
   // Questions Modal
   readonly showQuestionsModal = signal(false);
@@ -1943,11 +2032,13 @@ export class AdminCourseEditorComponent implements OnInit {
     });
   }
 
-
-
   // ----------------------------------------------------
   // LESSON MANAGEMENT
   // ----------------------------------------------------
+  isPreziUrl(url?: string | null): boolean {
+    return !!url && url.toLowerCase().includes('prezi.com');
+  }
+
   openCreateLessonModal(): void {
     this.isEditingLesson.set(false);
     this.currentEditingLessonId.set(null);
@@ -1967,6 +2058,7 @@ export class AdminCourseEditorComponent implements OnInit {
       content: lesson.content,
       orderNumber: lesson.orderNumber,
       meetUrl: lesson.meetUrl || '',
+      presentationUrl: lesson.presentationUrl || '',
     });
     this.showLessonModal.set(true);
   }
@@ -1987,6 +2079,10 @@ export class AdminCourseEditorComponent implements OnInit {
       content: formVal.content!,
       orderNumber: formVal.orderNumber ? Number(formVal.orderNumber) : undefined,
       meetUrl: formVal.meetUrl || undefined,
+      presentationUrl: formVal.presentationUrl?.trim() || undefined,
+      presentationFilename: formVal.presentationUrl?.trim()
+        ? (formVal.presentationUrl.includes('prezi.com') ? 'Presentación Prezi' : 'Presentación Online')
+        : undefined,
     };
 
     if (this.isEditingLesson() && this.currentEditingLessonId()) {
@@ -2029,6 +2125,60 @@ export class AdminCourseEditorComponent implements OnInit {
       },
       error: (err) => {
         alert('Error al eliminar clase: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // PREZI / ONLINE PRESENTATION MODAL
+  // ----------------------------------------------------
+  openPreziModal(lesson: any): void {
+    this.selectedPreziLesson.set(lesson);
+    this.preziInputUrl.set(lesson.presentationUrl || '');
+    this.preziInputTitle.set(lesson.presentationFilename || (this.isPreziUrl(lesson.presentationUrl) ? 'Presentación Prezi' : 'Diapositivas Online'));
+    this.showPreziModal.set(true);
+  }
+
+  closePreziModal(): void {
+    this.showPreziModal.set(false);
+    this.selectedPreziLesson.set(null);
+    this.preziInputUrl.set('');
+    this.preziInputTitle.set('');
+  }
+
+  onPreziUrlChange(event: any): void {
+    this.preziInputUrl.set(event.target.value || '');
+  }
+
+  onPreziTitleChange(event: any): void {
+    this.preziInputTitle.set(event.target.value || '');
+  }
+
+  savePreziLink(): void {
+    const lesson = this.selectedPreziLesson();
+    const c = this.course();
+    if (!lesson || !c) return;
+
+    const url = this.preziInputUrl().trim();
+    if (!url) return;
+
+    this.isSavingPrezi.set(true);
+    const title = this.preziInputTitle().trim() || (url.includes('prezi.com') ? 'Presentación Prezi' : 'Diapositivas Online');
+
+    this.adminService.updateLesson(lesson.id, {
+      presentationUrl: url,
+      presentationFilename: title,
+    }).subscribe({
+      next: () => {
+        this.isSavingPrezi.set(false);
+        this.closePreziModal();
+        this.presentationSuccessMessage.set(`Presentación vinculada exitosamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        this.isSavingPrezi.set(false);
+        alert('Error al vincular presentación: ' + (err.error?.message || 'Error'));
       },
     });
   }
@@ -2153,7 +2303,7 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   // ----------------------------------------------------
-  // GESTIÓN DE PRESENTACIONES POWERPOINT
+  // GESTIÓN DE PRESENTACIONES POWERPOINT / PREZI
   // ----------------------------------------------------
   onPresentationFileSelected(event: any, lesson: any): void {
     const file = event.target.files?.[0];

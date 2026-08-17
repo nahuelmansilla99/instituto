@@ -30,6 +30,20 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       await this.lessonRepo.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_url VARCHAR(500);`);
       await this.lessonRepo.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_filename VARCHAR(255);`);
 
+      // Asegurar que las clases de prueba tengan la presentación configurada si estaba nula
+      await this.lessonRepo.query(`
+        UPDATE lessons 
+        SET presentation_url = '/api/uploads/presentations/clase1-nestjs-angular.pptx',
+            presentation_filename = 'Clase 1 - Introducción a NestJS.pptx'
+        WHERE id = 'l1000000-0000-0000-0000-000000000001' AND presentation_url IS NULL;
+      `);
+      await this.lessonRepo.query(`
+        UPDATE lessons 
+        SET presentation_url = '/api/uploads/presentations/clase1-nestjs-angular.pptx',
+            presentation_filename = 'Clase 2 - TypeORM y PostgreSQL.pptx'
+        WHERE id = 'l2000000-0000-0000-0000-000000000002' AND presentation_url IS NULL;
+      `);
+
       // Crear tabla de matriculaciones si no existe
       await this.courseRepo.query(`
         CREATE TABLE IF NOT EXISTS course_enrollments (
@@ -152,6 +166,8 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         courseId: course1.id,
         title: '1. Introducción a la Arquitectura Modular de NestJS',
         orderNumber: 1,
+        presentationUrl: '/api/uploads/presentations/clase1-nestjs-angular.pptx',
+        presentationFilename: 'Clase 1 - Introducción a NestJS.pptx',
         content: `<h2>Bienvenido al curso</h2><p>En esta lección inaugural exploraremos los conceptos esenciales de <strong>NestJS</strong>, el framework de Node.js progresivo construido sobre Express/Fastify y potenciado por TypeScript.</p><h3>Puntos clave:</h3><ul><li><strong>Módulos:</strong> Organización estructural mediante el decorador <code>@Module()</code>.</li><li><strong>Controladores:</strong> Encargados de recibir peticiones HTTP con <code>@Controller()</code>.</li><li><strong>Proveedores / Servicios:</strong> Lógica de negocio inyectable con <code>@Injectable()</code>.</li><li><strong>Inyección de Dependencias:</strong> El contenedor IoC gestiona el ciclo de vida.</li></ul><div class="video-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;margin:24px 0;"><iframe src="https://www.youtube.com/embed/0M8AYU_hPas" title="NestJS Introduction" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div>`,
       });
       await this.lessonRepo.save(lesson1);

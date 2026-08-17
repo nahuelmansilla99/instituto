@@ -4,6 +4,7 @@ export interface CourseSummary {
   description: string;
   thumbnailUrl: string;
   meetUrl?: string | null;
+  hasPresentation?: boolean;
   totalLessons: number;
   completedLessons: number;
   progressPercentage: number;

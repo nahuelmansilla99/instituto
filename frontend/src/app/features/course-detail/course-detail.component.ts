@@ -130,8 +130,15 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
                   </div>
 
                   <div class="lesson-card-meta">
-                    <span *ngIf="lesson.presentationUrl" class="meta-badge meta-ppt">
-                      📊 PowerPoint Disponible
+                    <span
+                      *ngIf="lesson.presentationUrl"
+                      class="meta-badge meta-ppt"
+                      [class.meta-ppt-clickable]="lesson.status !== 'LOCKED'"
+                      (click)="lesson.status !== 'LOCKED' ? openLessonPresentation(lesson.id) : null"
+                      [title]="'Haz clic para abrir la presentación interactiva'"
+                    >
+                      <ng-container *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi Disponible</ng-container>
+                      <ng-container *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 PowerPoint / Diapositivas</ng-container>
                     </span>
                     <span *ngIf="lesson.meetUrl" class="meta-badge meta-meet">
                       🔴 Sesión Meet
@@ -145,17 +152,28 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
 
               <!-- Action Button for this Lesson -->
               <div class="lesson-card-action">
-                <button
-                  *ngIf="lesson.status !== 'LOCKED'"
-                  (click)="startLesson(lesson.id)"
-                  class="btn w-full"
-                  [ngClass]="lesson.status === 'COMPLETED' ? 'btn-secondary' : 'btn-primary'"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
-                  <span>{{ lesson.status === 'COMPLETED' ? 'Ver / Repasar Clase' : 'Iniciar Clase ➔' }}</span>
-                </button>
+                <div *ngIf="lesson.status !== 'LOCKED'" class="lesson-card-action-group">
+                  <button
+                    (click)="startLesson(lesson.id)"
+                    class="btn btn-action-main"
+                    [ngClass]="lesson.status === 'COMPLETED' ? 'btn-secondary' : 'btn-primary'"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span>{{ lesson.status === 'COMPLETED' ? 'Ver / Repasar Clase' : 'Abrir Clase ➔' }}</span>
+                  </button>
+
+                  <button
+                    *ngIf="lesson.presentationUrl"
+                    (click)="openLessonPresentation(lesson.id)"
+                    class="btn btn-ppt-quick"
+                    [title]="isPreziUrl(lesson.presentationUrl) ? 'Abrir presentación Prezi interactiva' : 'Abrir diapositivas e interactuar con el PowerPoint'"
+                  >
+                    <span *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi</span>
+                    <span *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 Diapositivas</span>
+                  </button>
+                </div>
 
                 <div *ngIf="lesson.status === 'LOCKED'" class="locked-indicator">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -579,6 +597,17 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
       color: #fbbf24;
     }
 
+    .meta-ppt-clickable {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .meta-ppt-clickable:hover {
+      background: rgba(245, 158, 11, 0.3);
+      border-color: #f59e0b;
+      transform: scale(1.04);
+    }
+
     .meta-meet {
       background: rgba(239, 68, 68, 0.12);
       border: 1px solid rgba(239, 68, 68, 0.3);
@@ -592,7 +621,34 @@ import { CourseDetail, CourseLessonItem } from '../../core/models';
     }
 
     .lesson-card-action {
-      min-width: 200px;
+      min-width: 220px;
+    }
+
+    .lesson-card-action-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-action-main {
+      width: 100%;
+    }
+
+    .btn-ppt-quick {
+      width: 100%;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+      font-size: 0.85rem;
+      padding: 6px 12px;
+      font-weight: 600;
+    }
+
+    .btn-ppt-quick:hover {
+      background: rgba(245, 158, 11, 0.25);
+      border-color: #f59e0b;
+      color: #fef3c7;
     }
 
     @media (max-width: 600px) {
@@ -653,6 +709,14 @@ export class CourseDetailComponent implements OnInit {
   }
 
   startLesson(lessonId: string): void {
+    this.router.navigate(['/lessons', lessonId]);
+  }
+
+  isPreziUrl(url?: string | null): boolean {
+    return !!url && url.toLowerCase().includes('prezi.com');
+  }
+
+  openLessonPresentation(lessonId: string): void {
     this.router.navigate(['/lessons', lessonId], {
       queryParams: { view: 'presentation' },
     });

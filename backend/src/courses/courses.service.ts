@@ -53,12 +53,15 @@ export class CoursesService {
       const progressPercentage =
         totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
+      const hasPresentation = courseLessons.some((l) => !!l.presentationUrl);
+
       return {
         id: course.id,
         title: course.title,
         description: course.description,
         thumbnailUrl: course.thumbnailUrl,
         meetUrl: course.meetUrl,
+        hasPresentation,
         totalLessons,
         completedLessons,
         progressPercentage,
@@ -115,7 +118,9 @@ export class CoursesService {
         id: lesson.id,
         title: lesson.title,
         orderNumber: lesson.orderNumber,
-        meetUrl: lesson.meetUrl,
+        meetUrl: lesson.meetUrl || null,
+        presentationUrl: lesson.presentationUrl || null,
+        presentationFilename: lesson.presentationFilename || null,
         status,
         score: progress?.score ?? null,
       };

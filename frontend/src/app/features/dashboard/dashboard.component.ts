@@ -609,10 +609,13 @@ export class DashboardComponent implements OnInit {
       next: (course) => {
         this.isLoading.set(false);
         if (course && course.lessons && course.lessons.length > 0) {
-          // Find first available or first completed or fallback to first
+          // Prioritize finding the active available lesson or one with a presentation
           const targetLesson =
+            course.lessons.find((l) => l.status === 'AVAILABLE' && l.presentationUrl) ||
             course.lessons.find((l) => l.status === 'AVAILABLE') ||
+            course.lessons.find((l) => l.status === 'COMPLETED' && l.presentationUrl) ||
             course.lessons.find((l) => l.status === 'COMPLETED') ||
+            course.lessons.find((l) => !!l.presentationUrl) ||
             course.lessons[0];
 
           if (targetLesson) {

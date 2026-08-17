@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { PresentationViewerComponent } from '../../shared/components/presentation-viewer/presentation-viewer.component';
 import { CoursesService } from '../../core/services/courses.service';
 import { QuizService } from '../../core/services/quiz.service';
 import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
@@ -10,7 +11,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent],
   template: `
     <app-navbar></app-navbar>
 
@@ -83,24 +84,26 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
               <line x1="8" y1="21" x2="16" y2="21"></line>
               <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
-            <span>📊 Pantalla de Presentación PowerPoint</span>
-            <span *ngIf="currentLesson.presentationUrl" class="tab-badge-ppt">PPT Disponible</span>
+            <span *ngIf="isPreziUrl(currentLesson.presentationUrl)">🌀 Pantalla de Presentación Prezi</span>
+            <span *ngIf="!isPreziUrl(currentLesson.presentationUrl)">📊 Pantalla de Presentación / Diapositivas</span>
+            <span *ngIf="currentLesson.presentationUrl" class="tab-badge-ppt">Disponible</span>
           </button>
         </div>
 
         <!-- TAB 1: HTML / CONTENT VIEW -->
         <div *ngIf="activeLessonView() === 'content'" class="tab-content-pane animate-fade-in">
-          <!-- Presentation Material (PowerPoint / PDF) Quick Box -->
+          <!-- Presentation Material (PowerPoint / Prezi / PDF) Quick Box -->
           <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in">
             <div class="presentation-main-row">
               <div class="presentation-icon-box">
-                <span>📊</span>
+                <span *ngIf="isPreziUrl(currentLesson.presentationUrl)">🌀</span>
+                <span *ngIf="!isPreziUrl(currentLesson.presentationUrl)">📊</span>
               </div>
               <div class="presentation-info">
-                <h4>Presentación y Diapositivas de la Clase</h4>
-                <p>Material de diapositivas preparado por el profesor.</p>
+                <h4>{{ isPreziUrl(currentLesson.presentationUrl) ? 'Presentación Interactiva Prezi' : 'Presentación y Diapositivas de la Clase' }}</h4>
+                <p>{{ isPreziUrl(currentLesson.presentationUrl) ? 'Explora la presentación de Prezi con zoom y animaciones interactivas.' : 'Material de diapositivas preparado por el profesor.' }}</p>
                 <span class="presentation-filename-badge">
-                  📎 {{ currentLesson.presentationFilename || 'Presentación.pptx' }}
+                  📎 {{ currentLesson.presentationFilename || (isPreziUrl(currentLesson.presentationUrl) ? 'Presentación Prezi' : 'Presentación.pptx') }}
                 </span>
               </div>
             </div>
@@ -112,6 +115,7 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                 <span>👁️ Ver en Pantalla de Diapositivas</span>
               </button>
               <a
+                *ngIf="!isPreziUrl(currentLesson.presentationUrl)"
                 [href]="currentLesson.presentationUrl"
                 target="_blank"
                 [download]="currentLesson.presentationFilename || 'presentacion'"
@@ -122,7 +126,16 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                <span>Descargar (.pptx)</span>
+                <span>Descargar Archivo</span>
+              </a>
+              <a
+                *ngIf="isPreziUrl(currentLesson.presentationUrl)"
+                [href]="currentLesson.presentationUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn btn-primary btn-download-ppt"
+              >
+                <span>↗️ Abrir en Prezi</span>
               </a>
             </div>
           </div>
@@ -135,94 +148,14 @@ import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
 
         <!-- TAB 2: POWERPOINT PRESENTATION SCREEN -->
         <div *ngIf="activeLessonView() === 'presentation'" class="tab-content-pane animate-fade-in">
-          <!-- If Presentation Exists -->
-          <section *ngIf="currentLesson.presentationUrl" class="presentation-screen-container glass-card animate-fade-in" id="presentation-fullscreen-box">
-            <!-- Screen Header Controls -->
-            <div class="presentation-screen-header">
-              <div class="ppt-title-group">
-                <div class="ppt-icon-badge">📊</div>
-                <div>
-                  <h3>{{ currentLesson.presentationFilename || 'Presentación de la Clase' }}</h3>
-                  <span class="ppt-meta-label">Diapositivas oficiales del curso</span>
-                </div>
-              </div>
-
-              <div class="ppt-header-actions">
-                <button (click)="toggleFullscreenPresentation()" class="btn btn-secondary btn-sm" title="Modo Pantalla Completa">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <polyline points="9 21 3 21 3 15"></polyline>
-                    <line x1="21" y1="3" x2="14" y2="10"></line>
-                    <line x1="3" y1="21" x2="10" y2="14"></line>
-                  </svg>
-                  <span>Pantalla Completa</span>
-                </button>
-
-                <a
-                  [href]="currentLesson.presentationUrl"
-                  target="_blank"
-                  [download]="currentLesson.presentationFilename || 'presentacion'"
-                  class="btn btn-primary btn-sm btn-download-ppt"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  <span>Descargar .pptx</span>
-                </a>
-              </div>
-            </div>
-
-            <!-- Embedded Slide Viewer Frame -->
-            <div class="presentation-frame-wrapper">
-              <iframe
-                *ngIf="getSafePresentationUrl(currentLesson.presentationUrl) as safeUrl"
-                [src]="safeUrl"
-                class="presentation-iframe"
-                frameborder="0"
-                allowfullscreen="true"
-              ></iframe>
-
-              <!-- Fallback / In-App Presentation Player Card -->
-              <div class="presentation-player-fallback">
-                <div class="fallback-hero-content">
-                  <div class="slide-deck-icon">📊</div>
-                  <h3>{{ currentLesson.presentationFilename || 'Diapositivas de la Clase' }}</h3>
-                  <p>Presentación lista para ver, proyectar o estudiar.</p>
-
-                  <div class="fallback-cta-row">
-                    <a
-                      [href]="currentLesson.presentationUrl"
-                      target="_blank"
-                      class="btn btn-secondary"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                      </svg>
-                      <span>Abrir Presentación en Nueva Pestaña</span>
-                    </a>
-
-                    <a
-                      [href]="currentLesson.presentationUrl"
-                      target="_blank"
-                      [download]="currentLesson.presentationFilename || 'presentacion'"
-                      class="btn btn-primary btn-download-ppt"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                      </svg>
-                      <span>Descargar Archivo (.pptx)</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+          <!-- If Presentation Exists: Native Interactive Viewer -->
+          <div *ngIf="currentLesson.presentationUrl" class="presentation-active-wrapper animate-fade-in">
+            <app-presentation-viewer
+              [presentationUrl]="currentLesson.presentationUrl"
+              [presentationFilename]="currentLesson.presentationFilename || 'Presentación.pptx'"
+              [title]="currentLesson.title"
+            ></app-presentation-viewer>
+          </div>
 
           <!-- If No Presentation in Lesson -->
           <div *ngIf="!currentLesson.presentationUrl" class="empty-presentation-box glass-card animate-fade-in">
@@ -1326,6 +1259,15 @@ export class LessonComponent implements OnInit {
         this.loadLesson(lessonId);
       }
     });
+
+    this.route.queryParamMap.subscribe((queryParams) => {
+      const view = queryParams.get('view');
+      if (view === 'presentation') {
+        this.activeLessonView.set('presentation');
+      } else if (view === 'content') {
+        this.activeLessonView.set('content');
+      }
+    });
   }
 
   loadLesson(lessonId: string): void {
@@ -1433,6 +1375,10 @@ export class LessonComponent implements OnInit {
       : `${window.location.origin}${presentationUrl}`;
     const officeViewer = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fullUrl)}`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(officeViewer);
+  }
+
+  isPreziUrl(url?: string | null): boolean {
+    return !!url && url.toLowerCase().includes('prezi.com');
   }
 
   toggleFullscreenPresentation(): void {

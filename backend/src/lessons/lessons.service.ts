@@ -76,9 +76,12 @@ export class LessonsService {
       progressMap.set(lesson.id, targetProgress);
     }
 
-    const currentStatus = targetProgress ? targetProgress.status : ProgressStatus.LOCKED;
+    const isTeacher = user.role === UserRole.ADMIN;
+    const currentStatus = isTeacher
+      ? (targetProgress?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE)
+      : (targetProgress ? targetProgress.status : ProgressStatus.LOCKED);
 
-    if (currentStatus === ProgressStatus.LOCKED) {
+    if (!isTeacher && currentStatus === ProgressStatus.LOCKED) {
       throw new ForbiddenException(
         'Esta clase está bloqueada. Debes completar y aprobar los cuestionarios de las clases anteriores para desbloquearla.',
       );
@@ -88,7 +91,9 @@ export class LessonsService {
     const syllabus = allLessons.map((l, index) => {
       const p = progressMap.get(l.id);
       let s = ProgressStatus.LOCKED;
-      if (p) {
+      if (isTeacher) {
+        s = p?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
+      } else if (p) {
         s = p.status;
       } else if (index === 0) {
         s = ProgressStatus.AVAILABLE;

@@ -1,0 +1,667 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { AdminService, AdminCourseDetail } from '../../../core/services/admin.service';
+import {
+  AdminQuizQuestion,
+  EnrolledStudentReport,
+  StudentSummary,
+  StudentCourseProgressReport,
+} from '../../../core/models';
+
+@Component({
+  selector: 'app-admin-course-editor',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, RouterLink],
+  templateUrl: './admin-course-editor.component.html',
+  styleUrl: './admin-course-editor.component.css',
+})
+export class AdminCourseEditorComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly adminService = inject(AdminService);
+  private readonly fb = inject(FormBuilder);
+
+  readonly course = signal<AdminCourseDetail | null>(null);
+  readonly isLoading = signal(true);
+  readonly isSaving = signal(false);
+  readonly presentationSuccessMessage = signal<string | null>(null);
+
+  // Tab: 'content' | 'students'
+  readonly activeTab = signal<'content' | 'students'>('content');
+
+  // Students Tab State
+  readonly enrolledStudents = signal<EnrolledStudentReport[]>([]);
+  readonly allPlatformStudents = signal<StudentSummary[]>([]);
+  readonly isLoadingStudents = signal(false);
+  readonly showEnrollModal = signal(false);
+  readonly isEnrolling = signal(false);
+  readonly showStudentProgressModal = signal(false);
+  readonly selectedStudentReport = signal<StudentCourseProgressReport | null>(null);
+
+  readonly enrollForm = this.fb.group({
+    emailOrUserId: ['', [Validators.required]],
+  });
+
+  // Course Edit Modal
+  readonly showEditCourseModal = signal(false);
+  readonly isSavingCourse = signal(false);
+  readonly courseEditForm = this.fb.group({
+    title: ['', [Validators.required]],
+    description: ['', [Validators.required]],
+    thumbnailUrl: [''],
+    meetUrl: [''],
+  });
+
+  // Meet Modal
+  readonly showMeetModal = signal(false);
+  readonly meetForm = this.fb.group({
+    meetUrl: [''],
+  });
+
+  // Lesson Modal
+  readonly showLessonModal = signal(false);
+  readonly isEditingLesson = signal(false);
+  readonly currentEditingLessonId = signal<string | null>(null);
+  readonly lessonForm = this.fb.group({
+    title: ['', [Validators.required]],
+    content: ['', [Validators.required]],
+    orderNumber: [null],
+    meetUrl: [''],
+    presentationUrl: [''],
+  });
+
+  // Dedicated Prezi / Presentation Link Modal
+  readonly showPreziModal = signal(false);
+  readonly selectedPreziLesson = signal<any | null>(null);
+  readonly preziInputUrl = signal('');
+  readonly preziInputTitle = signal('');
+  readonly isSavingPrezi = signal(false);
+
+  // Questions Modal
+  readonly showQuestionsModal = signal(false);
+  readonly activeLesson = signal<any | null>(null);
+  readonly activeQuestions = signal<AdminQuizQuestion[]>([]);
+  readonly isSavingQuestion = signal(false);
+
+  readonly questionForm = this.fb.group({
+    questionText: ['', [Validators.required]],
+    optionA: ['', [Validators.required]],
+    optionB: ['', [Validators.required]],
+    optionC: [''],
+    optionD: [''],
+    correctOptionIndex: [0, [Validators.required]],
+  });
+
+  // Lesson Students Modal
+  readonly showLessonStudentsModal = signal(false);
+  readonly activeLessonForStudents = signal<any | null>(null);
+  readonly lessonStudentsList = signal<any[]>([]);
+  readonly isLoadingLessonStudents = signal(false);
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe((params) => {
+      const courseId = params.get('id');
+      if (courseId) {
+        this.loadCourse(courseId);
+        this.loadEnrolledStudents(courseId);
+      }
+    });
+
+    this.route.queryParamMap.subscribe((queryParams) => {
+      const tab = queryParams.get('tab');
+      if (tab === 'students') {
+        this.activeTab.set('students');
+      } else if (tab === 'content') {
+        this.activeTab.set('content');
+      }
+    });
+  }
+
+  loadCourse(courseId: string): void {
+    this.isLoading.set(true);
+    this.adminService.getCourseAdmin(courseId).subscribe({
+      next: (data) => {
+        this.course.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // STUDENTS MANAGEMENT
+  // ----------------------------------------------------
+  switchTabToStudents(): void {
+    this.activeTab.set('students');
+    const c = this.course();
+    if (c) {
+      this.loadEnrolledStudents(c.id);
+    }
+  }
+
+  loadEnrolledStudents(courseId: string): void {
+    this.isLoadingStudents.set(true);
+    this.adminService.getCourseStudents(courseId).subscribe({
+      next: (data) => {
+        this.enrolledStudents.set(data);
+        this.isLoadingStudents.set(false);
+      },
+      error: () => {
+        this.isLoadingStudents.set(false);
+      },
+    });
+  }
+
+  getInitials(name: string): string {
+    if (!name) return 'A';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }
+
+  getAverageCourseProgress(): number {
+    const list = this.enrolledStudents();
+    if (list.length === 0) return 0;
+    const sum = list.reduce((acc, s) => acc + (s.progressPercentage || 0), 0);
+    return Math.round(sum / list.length);
+  }
+
+  getOverallAverageScore(): number {
+    const list = this.enrolledStudents().filter((s) => s.averageScore !== null);
+    if (list.length === 0) return 0;
+    const sum = list.reduce((acc, s) => acc + (s.averageScore || 0), 0);
+    return Math.round(sum / list.length);
+  }
+
+  openEnrollModal(): void {
+    this.enrollForm.reset();
+    this.showEnrollModal.set(true);
+    this.adminService.getAllStudents().subscribe({
+      next: (students) => {
+        this.allPlatformStudents.set(students);
+      },
+    });
+  }
+
+  onSelectStudentDropdown(event: any): void {
+    const selectedEmail = event.target.value;
+    if (selectedEmail) {
+      this.enrollForm.patchValue({ emailOrUserId: selectedEmail });
+    }
+  }
+
+  submitEnrollStudent(): void {
+    const c = this.course();
+    if (!c || this.enrollForm.invalid) return;
+
+    this.isEnrolling.set(true);
+    const emailOrUserId = this.enrollForm.value.emailOrUserId!;
+
+    this.adminService.enrollStudent(c.id, emailOrUserId).subscribe({
+      next: () => {
+        this.isEnrolling.set(false);
+        this.showEnrollModal.set(false);
+        this.loadEnrolledStudents(c.id);
+      },
+      error: (err) => {
+        this.isEnrolling.set(false);
+        alert('Error al matricular alumno: ' + (err.error?.message || 'Verifica el correo'));
+      },
+    });
+  }
+
+  unenrollStudent(student: EnrolledStudentReport): void {
+    if (!confirm(`¿Estás seguro de desmatricular a "${student.name}" de este curso?`)) {
+      return;
+    }
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.unenrollStudent(c.id, student.studentId).subscribe({
+      next: () => {
+        this.loadEnrolledStudents(c.id);
+      },
+      error: (err) => {
+        alert('Error al desmatricular alumno: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  viewStudentProgress(student: EnrolledStudentReport): void {
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.getStudentCourseProgress(c.id, student.studentId).subscribe({
+      next: (report) => {
+        this.selectedStudentReport.set(report);
+        this.showStudentProgressModal.set(true);
+      },
+      error: (err) => {
+        alert('Error al cargar progreso del alumno: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // GOOGLE MEET MODAL
+  // ----------------------------------------------------
+  openMeetModal(): void {
+    const c = this.course();
+    if (!c) return;
+    this.meetForm.patchValue({ meetUrl: c.meetUrl || '' });
+    this.showMeetModal.set(true);
+  }
+
+  saveMeetUrl(): void {
+    const c = this.course();
+    if (!c) return;
+    this.isSaving.set(true);
+    const meetUrl = this.meetForm.value.meetUrl || '';
+
+    this.adminService.updateCourse(c.id, { meetUrl }).subscribe({
+      next: () => {
+        this.isSaving.set(false);
+        this.showMeetModal.set(false);
+        this.loadCourse(c.id);
+      },
+      error: () => {
+        this.isSaving.set(false);
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // LESSON MANAGEMENT
+  // ----------------------------------------------------
+  isPreziUrl(url?: string | null): boolean {
+    return !!url && url.toLowerCase().includes('prezi.com');
+  }
+
+  openCreateLessonModal(): void {
+    this.isEditingLesson.set(false);
+    this.currentEditingLessonId.set(null);
+    this.lessonForm.reset();
+    const c = this.course();
+    if (c) {
+      this.lessonForm.patchValue({ orderNumber: c.lessons.length + 1 as any });
+    }
+    this.showLessonModal.set(true);
+  }
+
+  openEditLessonModal(lesson: any): void {
+    this.isEditingLesson.set(true);
+    this.currentEditingLessonId.set(lesson.id);
+    this.lessonForm.patchValue({
+      title: lesson.title,
+      content: lesson.content,
+      orderNumber: lesson.orderNumber,
+      meetUrl: lesson.meetUrl || '',
+      presentationUrl: lesson.presentationUrl || '',
+    });
+    this.showLessonModal.set(true);
+  }
+
+  closeLessonModal(): void {
+    this.showLessonModal.set(false);
+    this.lessonForm.reset();
+  }
+
+  saveLesson(): void {
+    const c = this.course();
+    if (!c || this.lessonForm.invalid) return;
+
+    this.isSaving.set(true);
+    const formVal = this.lessonForm.value;
+    const payload = {
+      title: formVal.title!,
+      content: formVal.content!,
+      orderNumber: formVal.orderNumber ? Number(formVal.orderNumber) : undefined,
+      meetUrl: formVal.meetUrl || undefined,
+      presentationUrl: formVal.presentationUrl?.trim() || undefined,
+      presentationFilename: formVal.presentationUrl?.trim()
+        ? (formVal.presentationUrl.includes('prezi.com') ? 'Presentación Prezi' : 'Presentación Online')
+        : undefined,
+    };
+
+    if (this.isEditingLesson() && this.currentEditingLessonId()) {
+      this.adminService.updateLesson(this.currentEditingLessonId()!, payload).subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.closeLessonModal();
+          this.loadCourse(c.id);
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          alert('Error al actualizar la clase: ' + (err.error?.message || 'Error desconocido'));
+        },
+      });
+    } else {
+      this.adminService.createLesson(c.id, payload).subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.closeLessonModal();
+          this.loadCourse(c.id);
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          alert('Error al crear la clase: ' + (err.error?.message || 'Error desconocido'));
+        },
+      });
+    }
+  }
+
+  deleteLesson(lesson: any): void {
+    if (!confirm(`¿Estás seguro de eliminar la clase "${lesson.title}" y su cuestionario?`)) {
+      return;
+    }
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.deleteLesson(lesson.id).subscribe({
+      next: () => {
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al eliminar clase: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // PREZI / ONLINE PRESENTATION MODAL
+  // ----------------------------------------------------
+  openPreziModal(lesson: any): void {
+    this.selectedPreziLesson.set(lesson);
+    this.preziInputUrl.set(lesson.presentationUrl || '');
+    this.preziInputTitle.set(lesson.presentationFilename || (this.isPreziUrl(lesson.presentationUrl) ? 'Presentación Prezi' : 'Diapositivas Online'));
+    this.showPreziModal.set(true);
+  }
+
+  closePreziModal(): void {
+    this.showPreziModal.set(false);
+    this.selectedPreziLesson.set(null);
+    this.preziInputUrl.set('');
+    this.preziInputTitle.set('');
+  }
+
+  onPreziUrlChange(event: any): void {
+    this.preziInputUrl.set(event.target.value || '');
+  }
+
+  onPreziTitleChange(event: any): void {
+    this.preziInputTitle.set(event.target.value || '');
+  }
+
+  savePreziLink(): void {
+    const lesson = this.selectedPreziLesson();
+    const c = this.course();
+    if (!lesson || !c) return;
+
+    const url = this.preziInputUrl().trim();
+    if (!url) return;
+
+    this.isSavingPrezi.set(true);
+    const title = this.preziInputTitle().trim() || (url.includes('prezi.com') ? 'Presentación Prezi' : 'Diapositivas Online');
+
+    this.adminService.updateLesson(lesson.id, {
+      presentationUrl: url,
+      presentationFilename: title,
+    }).subscribe({
+      next: () => {
+        this.isSavingPrezi.set(false);
+        this.closePreziModal();
+        this.presentationSuccessMessage.set(`Presentación vinculada exitosamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        this.isSavingPrezi.set(false);
+        alert('Error al vincular presentación: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // QUESTIONS & QUIZ MANAGER (MULTIPLE CHOICE)
+  // ----------------------------------------------------
+  openQuestionsModal(lesson: any): void {
+    this.activeLesson.set(lesson);
+    this.showQuestionsModal.set(true);
+    this.questionForm.reset({ correctOptionIndex: 0 });
+    this.loadQuestions(lesson.id);
+  }
+
+  closeQuestionsModal(): void {
+    this.showQuestionsModal.set(false);
+    this.activeLesson.set(null);
+    const c = this.course();
+    if (c) this.loadCourse(c.id);
+  }
+
+  loadQuestions(lessonId: string): void {
+    this.adminService.getQuestions(lessonId).subscribe({
+      next: (data) => {
+        this.activeQuestions.set(data);
+      },
+    });
+  }
+
+  getOptionLetter(idx: number): string {
+    return String.fromCharCode(65 + idx);
+  }
+
+  addQuestion(): void {
+    const lesson = this.activeLesson();
+    if (!lesson || this.questionForm.invalid) return;
+
+    this.isSavingQuestion.set(true);
+    const formVal = this.questionForm.value;
+
+    const options = [
+      formVal.optionA,
+      formVal.optionB,
+      formVal.optionC,
+      formVal.optionD,
+    ].filter((o) => o && String(o).trim().length > 0) as string[];
+
+    const payload = {
+      questionText: formVal.questionText!,
+      options,
+      correctOptionIndex: Number(formVal.correctOptionIndex || 0),
+    };
+
+    this.adminService.createQuestion(lesson.id, payload).subscribe({
+      next: () => {
+        this.isSavingQuestion.set(false);
+        this.questionForm.reset({ correctOptionIndex: 0 });
+        this.loadQuestions(lesson.id);
+      },
+      error: (err) => {
+        this.isSavingQuestion.set(false);
+        alert('Error al agregar pregunta: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  deleteQuestion(questionId: string): void {
+    if (!confirm('¿Eliminar esta pregunta del cuestionario?')) return;
+    const lesson = this.activeLesson();
+    if (!lesson) return;
+
+    this.adminService.deleteQuestion(questionId).subscribe({
+      next: () => {
+        this.loadQuestions(lesson.id);
+      },
+      error: (err) => {
+        alert('Error al eliminar pregunta: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // GESTIÓN DE ALUMNOS POR CADA CLASE
+  // ----------------------------------------------------
+  openLessonStudentsModal(lesson: any): void {
+    this.activeLessonForStudents.set(lesson);
+    this.showLessonStudentsModal.set(true);
+    this.loadLessonStudents(lesson.id);
+  }
+
+  loadLessonStudents(lessonId: string): void {
+    this.isLoadingLessonStudents.set(true);
+    this.adminService.getLessonStudents(lessonId).subscribe({
+      next: (res) => {
+        this.lessonStudentsList.set(res.students || []);
+        this.isLoadingLessonStudents.set(false);
+      },
+      error: () => {
+        this.isLoadingLessonStudents.set(false);
+      },
+    });
+  }
+
+  setStudentLessonStatus(
+    lessonId: string,
+    studentId: string,
+    status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED',
+    score?: number,
+  ): void {
+    this.adminService
+      .updateLessonStudentProgress(lessonId, studentId, status, score)
+      .subscribe({
+        next: () => {
+          this.loadLessonStudents(lessonId);
+          const c = this.course();
+          if (c) this.loadEnrolledStudents(c.id);
+        },
+        error: (err) => {
+          alert('Error al actualizar estado del alumno: ' + (err.error?.message || 'Error'));
+        },
+      });
+  }
+
+  // ----------------------------------------------------
+  // GESTIÓN DE PRESENTACIONES POWERPOINT / PREZI
+  // ----------------------------------------------------
+  onPresentationFileSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.uploadLessonPresentation(lesson.id, file).subscribe({
+      next: () => {
+        this.presentationSuccessMessage.set(`Presentación subida correctamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al subir presentación: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+
+    // Reset input
+    event.target.value = '';
+  }
+
+  removePresentation(lesson: any): void {
+    if (!confirm(`¿Estás seguro de quitar el archivo de presentación de la clase "${lesson.title}"?`)) {
+      return;
+    }
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.deleteLessonPresentation(lesson.id).subscribe({
+      next: () => {
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al quitar presentación: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // GESTIÓN DEL CURSO (EDITAR / ELIMINAR / PREVIEW)
+  // ----------------------------------------------------
+  openEditCourseModal(): void {
+    const c = this.course();
+    if (!c) return;
+
+    this.courseEditForm.patchValue({
+      title: c.title,
+      description: c.description,
+      thumbnailUrl: c.thumbnailUrl || '',
+      meetUrl: c.meetUrl || '',
+    });
+    this.showEditCourseModal.set(true);
+  }
+
+  closeEditCourseModal(): void {
+    this.showEditCourseModal.set(false);
+  }
+
+  saveCourseEdit(): void {
+    const c = this.course();
+    if (!c || this.courseEditForm.invalid) return;
+
+    this.isSavingCourse.set(true);
+    const formVal = this.courseEditForm.value;
+
+    this.adminService
+      .updateCourse(c.id, {
+        title: formVal.title!,
+        description: formVal.description!,
+        thumbnailUrl: formVal.thumbnailUrl || undefined,
+        meetUrl: formVal.meetUrl || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.isSavingCourse.set(false);
+          this.closeEditCourseModal();
+          this.loadCourse(c.id);
+        },
+        error: (err) => {
+          this.isSavingCourse.set(false);
+          alert('Error al actualizar el curso: ' + (err.error?.message || 'Error'));
+        },
+      });
+  }
+
+  deleteCourse(): void {
+    const c = this.course();
+    if (!c) return;
+
+    const confirmMsg = `¿Estás seguro de que deseas eliminar permanentemente el curso "${c.title}"?\n\nEsta acción borrará todas sus clases, diapositivas, exámenes y matrículas de alumnos.`;
+    if (!confirm(confirmMsg)) return;
+
+    this.adminService.deleteCourse(c.id).subscribe({
+      next: () => {
+        alert('Curso eliminado exitosamente.');
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        alert('Error al eliminar el curso: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  previewLesson(lessonId: string): void {
+    this.router.navigate(['/lessons', lessonId]);
+  }
+
+  previewLessonPresentation(lessonId: string): void {
+    this.router.navigate(['/lessons', lessonId], {
+      queryParams: { view: 'presentation' },
+    });
+  }
+}

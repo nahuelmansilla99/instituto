@@ -107,7 +107,9 @@ export class CoursesService {
       const progress = progressMap.get(lesson.id);
       let status: ProgressStatus = ProgressStatus.LOCKED;
 
-      if (progress) {
+      if (user.role === UserRole.ADMIN) {
+        status = progress?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
+      } else if (progress) {
         status = progress.status;
       } else if (index === 0) {
         // First lesson is always AVAILABLE by default

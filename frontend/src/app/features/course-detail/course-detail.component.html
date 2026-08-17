@@ -1,0 +1,193 @@
+<app-navbar></app-navbar>
+
+<main class="course-detail-page">
+  <div class="container">
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb-nav animate-fade-in">
+      <a routerLink="/dashboard" class="breadcrumb-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        <span>Mis Cursos</span>
+      </a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">{{ course()?.title || 'Cargando curso...' }}</span>
+    </nav>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading()" class="loading-container">
+      <div class="spinner-large"></div>
+      <p>Cargando temario y clases del curso...</p>
+    </div>
+
+    <!-- Teacher Course Management Banner -->
+    <div *ngIf="authService.currentUser()?.role === 'ADMIN' && course() as c" class="teacher-course-alert glass-card animate-fade-in">
+      <div class="teacher-alert-info">
+        <span class="badge-role-tag">👨‍🏫 Modo Profesor Activo</span>
+        <h4>Gestión del Curso y Vista Previa</h4>
+        <p>Tienes acceso libre e ilimitado a todas las clases. Puedes administrar alumnos, editar clases y configurar exámenes en el Panel del Curso.</p>
+      </div>
+      <a [routerLink]="['/admin/courses', c.id]" class="btn btn-primary btn-teacher-action">
+        <span>⚙️ Administrar Curso (Alumnos, Clases y Exámenes) ➔</span>
+      </a>
+    </div>
+
+    <!-- Course Header Card -->
+    <div *ngIf="course() as c" class="course-hero-card glass-card animate-fade-in">
+      <div class="hero-layout">
+        <div class="hero-media" *ngIf="c.thumbnailUrl">
+          <img [src]="c.thumbnailUrl" [alt]="c.title" class="hero-image" />
+        </div>
+
+        <div class="hero-details">
+          <div class="hero-badge-row">
+            <span class="badge-tag">🎓 Curso Virtual</span>
+            <span *ngIf="authService.currentUser()?.role !== 'ADMIN'" class="badge-status-completion" [class.badge-completed]="c.progressPercentage === 100">
+              {{ c.progressPercentage === 100 ? '✅ Completado' : (c.progressPercentage > 0 ? '⏳ En Progreso' : '✨ Por Iniciar') }}
+            </span>
+            <span *ngIf="authService.currentUser()?.role === 'ADMIN'" class="badge-status-completion badge-completed">
+              👨‍🏫 Profesor Asignado
+            </span>
+          </div>
+
+          <h1 class="course-title">{{ c.title }}</h1>
+          <p class="course-description">{{ c.description }}</p>
+
+          <!-- Live Meet Button if active in Course -->
+          <div *ngIf="c.meetUrl" class="live-meet-callout">
+            <span class="live-pulse-dot"></span>
+            <div class="meet-callout-text">
+              <strong>🔴 Clase en Vivo Disponible</strong>
+              <span>Accede a la sala de Google Meet del curso</span>
+            </div>
+            <a [href]="c.meetUrl" target="_blank" class="btn btn-primary btn-sm btn-meet">
+              Unirse a Google Meet
+            </a>
+          </div>
+
+          <!-- Overall Progress Bar -->
+          <div class="course-overall-progress">
+            <div class="progress-info-row">
+              <span class="progress-label">Tu Progreso de Aprendizaje</span>
+              <span class="progress-percent">{{ c.progressPercentage }}% ({{ c.completedLessons }} de {{ c.totalLessons }} clases aprobadas)</span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [style.width.%]="c.progressPercentage"
+                [class.fill-completed]="c.progressPercentage === 100"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lessons Syllabus Section -->
+    <section *ngIf="course() as c" class="syllabus-section animate-fade-in">
+      <div class="syllabus-header">
+        <div>
+          <h2>Clases y Módulos del Curso ({{ c.lessons.length }})</h2>
+          <p class="syllabus-subtitle">Selecciona la clase que deseas cursar. Al terminar cada lección podrás rendir su examen de aprobación.</p>
+        </div>
+      </div>
+
+      <!-- Empty Lessons State -->
+      <div *ngIf="c.lessons.length === 0" class="empty-syllabus glass-card">
+        <div class="empty-icon">📂</div>
+        <h3>Este curso aún no tiene clases disponibles</h3>
+        <p>El profesor está preparando el temario y las diapositivas. Vuelve a consultar pronto.</p>
+      </div>
+
+      <!-- Lessons Grid / List -->
+      <div class="lessons-syllabus-list" *ngIf="c.lessons.length > 0">
+        <article
+          *ngFor="let lesson of c.lessons; let idx = index"
+          class="lesson-syllabus-card glass-card animate-fade-in"
+          [class.card-completed]="lesson.status === 'COMPLETED'"
+          [class.card-available]="lesson.status === 'AVAILABLE'"
+          [class.card-locked]="lesson.status === 'LOCKED'"
+        >
+          <div class="lesson-card-main">
+            <!-- Order Indicator -->
+            <div class="order-indicator">
+              <span class="order-number">#{{ lesson.orderNumber || (idx + 1) }}</span>
+            </div>
+
+            <!-- Lesson Info -->
+            <div class="lesson-card-info">
+              <div class="lesson-header-line">
+                <h3 class="lesson-card-title">{{ lesson.title }}</h3>
+                <span
+                  class="badge-lesson-status"
+                  [ngClass]="{
+                    'status-badge-completed': lesson.status === 'COMPLETED',
+                    'status-badge-available': lesson.status === 'AVAILABLE',
+                    'status-badge-locked': lesson.status === 'LOCKED'
+                  }"
+                >
+                  <ng-container *ngIf="lesson.status === 'COMPLETED'">✓ Aprobada ({{ lesson.score }}%)</ng-container>
+                  <ng-container *ngIf="lesson.status === 'AVAILABLE'">🔓 Disponible</ng-container>
+                  <ng-container *ngIf="lesson.status === 'LOCKED'">🔒 Bloqueada</ng-container>
+                </span>
+              </div>
+
+              <div class="lesson-card-meta">
+                <span
+                  *ngIf="lesson.presentationUrl"
+                  class="meta-badge meta-ppt"
+                  [class.meta-ppt-clickable]="lesson.status !== 'LOCKED'"
+                  (click)="lesson.status !== 'LOCKED' ? openLessonPresentation(lesson.id) : null"
+                  [title]="'Haz clic para abrir la presentación interactiva'"
+                >
+                  <ng-container *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi Disponible</ng-container>
+                  <ng-container *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 PowerPoint / Diapositivas</ng-container>
+                </span>
+                <span *ngIf="lesson.meetUrl" class="meta-badge meta-meet">
+                  🔴 Sesión Meet
+                </span>
+                <span class="meta-badge meta-quiz">
+                  📝 Examen Multiple Choice (80% req.)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Button for this Lesson -->
+          <div class="lesson-card-action">
+            <div *ngIf="lesson.status !== 'LOCKED'" class="lesson-card-action-group">
+              <button
+                (click)="startLesson(lesson.id)"
+                class="btn btn-action-main"
+                [ngClass]="lesson.status === 'COMPLETED' ? 'btn-secondary' : 'btn-primary'"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>{{ lesson.status === 'COMPLETED' ? 'Ver / Repasar Clase' : 'Abrir Clase ➔' }}</span>
+              </button>
+
+              <button
+                *ngIf="lesson.presentationUrl"
+                (click)="openLessonPresentation(lesson.id)"
+                class="btn btn-ppt-quick"
+                [title]="isPreziUrl(lesson.presentationUrl) ? 'Abrir presentación Prezi interactiva' : 'Abrir diapositivas e interactuar con el PowerPoint'"
+              >
+                <span *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi</span>
+                <span *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 Diapositivas</span>
+              </button>
+            </div>
+
+            <div *ngIf="lesson.status === 'LOCKED'" class="locked-indicator">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>Completa la clase anterior para desbloquear</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>

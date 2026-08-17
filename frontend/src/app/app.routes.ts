@@ -42,7 +42,7 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
-      import('./features/admin/admin-dashboard.component').then(
+      import('./features/admin/admin-dashboard/admin-dashboard.component').then(
         (m) => m.AdminDashboardComponent,
       ),
   },
@@ -50,7 +50,7 @@ export const routes: Routes = [
     path: 'admin/courses/:id',
     canActivate: [authGuard, adminGuard],
     loadComponent: () =>
-      import('./features/admin/admin-course-editor.component').then(
+      import('./features/admin/admin-course-editor/admin-course-editor.component').then(
         (m) => m.AdminCourseEditorComponent,
       ),
   },

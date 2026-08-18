@@ -37,6 +37,9 @@ export class Lesson {
   @Column({ name: 'presentation_filename', length: 255, nullable: true })
   presentationFilename: string;
 
+  @Column({ name: 'available_at', type: 'timestamp', nullable: true })
+  availableAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

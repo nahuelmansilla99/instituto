@@ -9,6 +9,7 @@ export interface LessonDetail {
   meetUrl?: string | null;
   presentationUrl?: string | null;
   presentationFilename?: string | null;
+  availableAt?: string | null;
   title: string;
   content: string;
   orderNumber: number;

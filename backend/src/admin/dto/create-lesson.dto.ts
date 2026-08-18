@@ -25,4 +25,8 @@ export class CreateLessonDto {
   @IsOptional()
   @IsString()
   presentationFilename?: string;
+
+  @IsOptional()
+  @IsString()
+  availableAt?: string | null;
 }

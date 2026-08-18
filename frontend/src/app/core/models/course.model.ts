@@ -21,6 +21,7 @@ export interface CourseLessonItem {
   meetUrl?: string | null;
   presentationUrl?: string | null;
   presentationFilename?: string | null;
+  availableAt?: string | null;
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;
 }

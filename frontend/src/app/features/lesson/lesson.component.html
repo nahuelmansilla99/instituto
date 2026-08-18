@@ -165,6 +165,46 @@
       </div>
     </div>
 
+    <!-- NO QUIZ REQUIRED - COMPLETION & NEXT LESSON BANNER -->
+    <section
+      *ngIf="currentLesson.quizQuestions.length === 0"
+      class="lesson-end-action-box glass-card animate-fade-in"
+    >
+      <div class="end-action-badge">✅ Fin de la Lección</div>
+      <h2>¡Has completado el contenido de esta clase!</h2>
+      <p *ngIf="authService.currentUser()?.role !== 'ADMIN'">
+        Esta clase no requiere examen de evaluación. Puedes continuar directamente a la siguiente lección del curso.
+      </p>
+      <p *ngIf="authService.currentUser()?.role === 'ADMIN'">
+        Esta clase no tiene preguntas de evaluación asignadas. Puedes agregar preguntas de opción múltiple desde el editor del curso si lo deseas.
+      </p>
+
+      <div class="end-action-buttons">
+        <button
+          *ngIf="getNextLesson() as nextL"
+          (click)="goToNextSyllabusLesson()"
+          class="btn btn-primary btn-lg btn-start-quiz-cta"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span>Siguiente Clase: {{ nextL.title }} ➔</span>
+        </button>
+
+        <a
+          *ngIf="authService.currentUser()?.role === 'ADMIN'"
+          [routerLink]="['/admin/courses', currentLesson.courseId]"
+          class="btn btn-secondary"
+        >
+          ✏️ Agregar Preguntas en el Editor
+        </a>
+
+        <a [routerLink]="['/courses', currentLesson.courseId]" class="btn btn-secondary">
+          Volver al Temario del Curso
+        </a>
+      </div>
+    </section>
+
     <!-- LESSON FINISHED & QUIZ TRIGGER PROMPT -->
     <section
       *ngIf="!isQuizStarted() && !quizResult() && (currentLesson.status !== 'COMPLETED' || authService.currentUser()?.role === 'ADMIN') && currentLesson.quizQuestions.length > 0"

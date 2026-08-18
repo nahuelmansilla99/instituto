@@ -50,6 +50,7 @@ export class LessonsService {
     // Fetch all lessons of this course to determine syllabus & order
     const allLessons = await this.lessonRepository.find({
       where: { courseId: lesson.courseId },
+      relations: ['quizQuestions'],
       order: { orderNumber: 'ASC' },
     });
 
@@ -61,43 +62,42 @@ export class LessonsService {
     const progressMap = new Map<string, UserProgress>();
     userProgressList.forEach((p) => progressMap.set(p.lessonId, p));
 
-    // Check progress of target lesson
-    let targetProgress = progressMap.get(lesson.id);
-    const isFirstLesson = allLessons.length > 0 && allLessons[0].id === lesson.id;
-
-    if (!targetProgress && isFirstLesson) {
-      // Automatically initialize first lesson as AVAILABLE
-      targetProgress = this.userProgressRepository.create({
-        userId: user.id,
-        lessonId: lesson.id,
-        status: ProgressStatus.AVAILABLE,
-      });
-      await this.userProgressRepository.save(targetProgress);
-      progressMap.set(lesson.id, targetProgress);
-    }
-
     const isTeacher = user.role === UserRole.ADMIN;
-    const currentStatus = isTeacher
-      ? (targetProgress?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE)
-      : (targetProgress ? targetProgress.status : ProgressStatus.LOCKED);
+    const now = new Date();
+    const isScheduledFuture = lesson.availableAt && now < new Date(lesson.availableAt);
 
-    if (!isTeacher && currentStatus === ProgressStatus.LOCKED) {
+    if (!isTeacher && isScheduledFuture) {
       throw new ForbiddenException(
-        'Esta clase está bloqueada. Debes completar y aprobar los cuestionarios de las clases anteriores para desbloquearla.',
+        `Esta clase no está disponible todavía. Estará habilitada a partir del ${new Date(lesson.availableAt).toLocaleString('es-AR')}.`,
       );
     }
 
-    // Build sidebar syllabus for easy navigation
+    // Build sidebar syllabus for easy navigation and compute unlocked status
+    let prevUnlockedNext = false;
     const syllabus = allLessons.map((l, index) => {
       const p = progressMap.get(l.id);
-      let s = ProgressStatus.LOCKED;
+      const isFuture = l.availableAt && now < new Date(l.availableAt);
+      const hasNoQuiz = !l.quizQuestions || l.quizQuestions.length === 0;
+
+      let s: ProgressStatus = ProgressStatus.LOCKED;
       if (isTeacher) {
         s = p?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
-      } else if (p) {
-        s = p.status;
+      } else if (isFuture) {
+        s = ProgressStatus.LOCKED;
+      } else if (p?.status === ProgressStatus.COMPLETED) {
+        s = ProgressStatus.COMPLETED;
       } else if (index === 0) {
+        s = p?.status || ProgressStatus.AVAILABLE;
+      } else if (prevUnlockedNext) {
+        s = p?.status || ProgressStatus.AVAILABLE;
+      } else if (p?.status === ProgressStatus.AVAILABLE) {
         s = ProgressStatus.AVAILABLE;
       }
+
+      prevUnlockedNext =
+        s === ProgressStatus.COMPLETED ||
+        (hasNoQuiz && (s === ProgressStatus.AVAILABLE || !isFuture));
+
       return {
         id: l.id,
         title: l.title,
@@ -105,15 +105,71 @@ export class LessonsService {
         meetUrl: l.meetUrl || null,
         presentationUrl: l.presentationUrl || null,
         presentationFilename: l.presentationFilename || null,
+        availableAt: l.availableAt || null,
+        hasQuiz: !hasNoQuiz,
         status: s,
         score: p?.score ?? null,
       };
     });
 
+    const targetSyllabusItem = syllabus.find((s) => s.id === lesson.id);
+    const calculatedStatus = isTeacher
+      ? ProgressStatus.AVAILABLE
+      : (targetSyllabusItem ? targetSyllabusItem.status : ProgressStatus.LOCKED);
+
+    if (!isTeacher && calculatedStatus === ProgressStatus.LOCKED) {
+      throw new ForbiddenException(
+        'Esta clase está bloqueada. Debes completar las clases anteriores para desbloquearla.',
+      );
+    }
+
     // Fetch quiz questions directly
     const quizQuestions = await this.quizQuestionRepository.find({
       where: { lessonId: lesson.id },
     });
+
+    const hasNoQuiz = quizQuestions.length === 0;
+
+    // Check progress of target lesson
+    let targetProgress = progressMap.get(lesson.id);
+
+    if (!isTeacher) {
+      if (!targetProgress) {
+        targetProgress = this.userProgressRepository.create({
+          userId: user.id,
+          lessonId: lesson.id,
+          status: hasNoQuiz ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE,
+          completedAt: hasNoQuiz ? new Date() : null,
+        });
+        await this.userProgressRepository.save(targetProgress);
+        progressMap.set(lesson.id, targetProgress);
+      } else if (hasNoQuiz && targetProgress.status !== ProgressStatus.COMPLETED) {
+        targetProgress.status = ProgressStatus.COMPLETED;
+        targetProgress.completedAt = new Date();
+        await this.userProgressRepository.save(targetProgress);
+      }
+
+      // If this lesson has no quiz, automatically ensure the next lesson is unlocked
+      if (hasNoQuiz) {
+        const currentIdx = allLessons.findIndex((l) => l.id === lesson.id);
+        if (currentIdx >= 0 && currentIdx < allLessons.length - 1) {
+          const nextL = allLessons[currentIdx + 1];
+          let nextP = progressMap.get(nextL.id);
+          if (!nextP) {
+            nextP = this.userProgressRepository.create({
+              userId: user.id,
+              lessonId: nextL.id,
+              status: ProgressStatus.AVAILABLE,
+            });
+            await this.userProgressRepository.save(nextP);
+            progressMap.set(nextL.id, nextP);
+          } else if (nextP.status === ProgressStatus.LOCKED) {
+            nextP.status = ProgressStatus.AVAILABLE;
+            await this.userProgressRepository.save(nextP);
+          }
+        }
+      }
+    }
 
     // Quiz questions without correctOptionIndex
     const questions = quizQuestions.map((q) => ({
@@ -130,10 +186,12 @@ export class LessonsService {
       meetUrl: lesson.meetUrl || null,
       presentationUrl: lesson.presentationUrl || null,
       presentationFilename: lesson.presentationFilename || null,
+      availableAt: lesson.availableAt || null,
+      hasQuiz: !hasNoQuiz,
       title: lesson.title,
       content: lesson.content,
       orderNumber: lesson.orderNumber,
-      status: currentStatus,
+      status: targetProgress ? targetProgress.status : calculatedStatus,
       score: targetProgress?.score ?? null,
       completedAt: targetProgress?.completedAt ?? null,
       quizQuestions: questions,

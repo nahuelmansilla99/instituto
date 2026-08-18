@@ -58,6 +58,7 @@ export class AdminService {
       meetUrl?: string;
       presentationUrl?: string;
       presentationFilename?: string;
+      availableAt?: string | null;
     },
   ): Observable<any> {
     return this.http.post(`${this.apiUrl}/admin/courses/${courseId}/lessons`, data);
@@ -72,6 +73,7 @@ export class AdminService {
       meetUrl?: string;
       presentationUrl?: string;
       presentationFilename?: string;
+      availableAt?: string | null;
     }>,
   ): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/lessons/${lessonId}`, data);

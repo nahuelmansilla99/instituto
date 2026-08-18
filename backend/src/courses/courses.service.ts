@@ -88,9 +88,10 @@ export class CoursesService {
       }
     }
 
-    // Fetch lessons directly from repository
+    // Fetch lessons directly from repository with quiz questions
     const sortedLessons = await this.lessonRepository.find({
       where: { courseId },
+      relations: ['quizQuestions'],
       order: { orderNumber: 'ASC' },
     });
 
@@ -103,18 +104,40 @@ export class CoursesService {
     userProgressList.forEach((p) => progressMap.set(p.lessonId, p));
 
     // Determine status for each lesson
+    const now = new Date();
+    let previousLessonUnlockedNext = false;
+
     const lessonsWithStatus = sortedLessons.map((lesson, index) => {
       const progress = progressMap.get(lesson.id);
+      const isFutureScheduled = lesson.availableAt && now < new Date(lesson.availableAt);
+      const hasNoQuiz = !lesson.quizQuestions || lesson.quizQuestions.length === 0;
+
       let status: ProgressStatus = ProgressStatus.LOCKED;
 
       if (user.role === UserRole.ADMIN) {
         status = progress?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
-      } else if (progress) {
-        status = progress.status;
+      } else if (isFutureScheduled) {
+        // Future scheduled release
+        status = ProgressStatus.LOCKED;
+      } else if (progress?.status === ProgressStatus.COMPLETED) {
+        status = ProgressStatus.COMPLETED;
       } else if (index === 0) {
-        // First lesson is always AVAILABLE by default
+        // First lesson is always AVAILABLE if not completed and not future scheduled
+        status = progress?.status || ProgressStatus.AVAILABLE;
+      } else if (previousLessonUnlockedNext) {
+        // Previous lesson was passed or did not require a quiz
+        status = progress?.status || ProgressStatus.AVAILABLE;
+      } else if (progress?.status === ProgressStatus.AVAILABLE) {
         status = ProgressStatus.AVAILABLE;
       }
+
+      // Check if this lesson allows the subsequent lesson to unlock
+      // It allows unlock if:
+      // 1. It is completed, OR
+      // 2. It has no quiz questions AND is available (so students aren't blocked by missing exams)
+      previousLessonUnlockedNext =
+        status === ProgressStatus.COMPLETED ||
+        (hasNoQuiz && (status === ProgressStatus.AVAILABLE || !isFutureScheduled));
 
       return {
         id: lesson.id,
@@ -123,6 +146,8 @@ export class CoursesService {
         meetUrl: lesson.meetUrl || null,
         presentationUrl: lesson.presentationUrl || null,
         presentationFilename: lesson.presentationFilename || null,
+        availableAt: lesson.availableAt || null,
+        hasQuiz: !hasNoQuiz,
         status,
         score: progress?.score ?? null,
       };

@@ -125,11 +125,14 @@
               <div class="lesson-info">
                 <h3 class="lesson-title">{{ lesson.title }}</h3>
                 <div class="lesson-meta-badges">
+                  <span *ngIf="lesson.availableAt" class="badge-schedule-pill">
+                    🗓️ Habilita: {{ lesson.availableAt | date:'dd/MM/yyyy HH:mm' }}
+                  </span>
                   <span *ngIf="lesson.meetUrl" class="badge-meet-pill">
                     🔴 Meet: {{ lesson.meetUrl }}
                   </span>
                   <span *ngIf="lesson.presentationUrl" class="badge-ppt-pill">
-                    📊 PPT: {{ lesson.presentationFilename || 'Presentación adjunta' }}
+                    📊 {{ isPreziUrl(lesson.presentationUrl) ? '🌀 Prezi' : '📊 Diapositivas' }}
                   </span>
                   <span class="badge-questions-count">
                     📝 {{ lesson.questions?.length || 0 }} Preguntas de Examen
@@ -510,11 +513,12 @@
 <div class="modal-backdrop animate-fade-in" *ngIf="showLessonModal()">
   <div class="modal-content glass-card animate-fade-in modal-large">
     <div class="modal-header">
-      <h3>{{ isEditingLesson() ? 'Editar Clase' : 'Nueva Clase' }}</h3>
+      <h3>{{ isEditingLesson() ? '✏️ Editar Clase' : '➕ Nueva Clase' }}</h3>
       <button (click)="closeLessonModal()" class="btn-close">&times;</button>
     </div>
 
     <form [formGroup]="lessonForm" (ngSubmit)="saveLesson()">
+      <!-- General Information -->
       <div class="form-group">
         <label class="form-label" for="lTitle">Título de la Clase *</label>
         <input
@@ -550,28 +554,84 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="lContent">Contenido de la Clase (HTML / Texto / Embed Video) *</label>
+        <label class="form-label" for="lContent">Contenido de la Clase (HTML / Texto / Guía Teórica) *</label>
         <textarea
           id="lContent"
-          rows="6"
+          rows="5"
           class="form-control font-mono"
-          placeholder="<h2>Título</h2><p>Explicación...</p><iframe src='https://www.youtube.com/embed/...'></iframe>"
+          placeholder="<h2>Título</h2><p>Explicación teórica de la clase...</p>"
           formControlName="content"
         ></textarea>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="lPresentationUrl">
-          <span>🌀 Enlace a Presentación (Prezi, Google Slides, Canva o Web - Opcional)</span>
-        </label>
-        <input
-          id="lPresentationUrl"
-          type="url"
-          class="form-control"
-          placeholder="https://prezi.com/p/xxxxxx/ o https://docs.google.com/presentation/d/.../edit"
-          formControlName="presentationUrl"
-        />
-        <span class="form-hint">Si pegas un enlace de Prezi o Google Slides, se incrustará de forma interactiva en la clase para los alumnos.</span>
+      <!-- SECTION: PRESENTATION MATERIAL (POWERPOINT & PREZI) -->
+      <div class="form-section-card glass-card">
+        <h4 class="section-card-title">📊 Material de Diapositivas y Presentación (Opcional)</h4>
+        <p class="section-card-desc">Puedes importar un archivo de PowerPoint local o vincular una presentación interactiva de Prezi.</p>
+
+        <!-- Option 1: File Upload (.pptx, .ppt, .pdf) -->
+        <div class="form-group">
+          <label class="form-label">📁 Importar Archivo PowerPoint (.pptx, .ppt, .pdf)</label>
+          <div class="file-picker-row">
+            <label class="btn btn-secondary btn-upload-modal-ppt" for="modalPptInput">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>Seleccionar Archivo PowerPoint / PDF</span>
+            </label>
+            <input
+              id="modalPptInput"
+              type="file"
+              accept=".pptx, .ppt, .pdf, .odp"
+              (change)="onModalPresentationFileSelected($event)"
+              class="file-input-hidden"
+            />
+            
+            <div *ngIf="selectedModalPresentationFile() as file" class="selected-file-badge animate-fade-in">
+              <span class="file-name">📎 {{ file.name }}</span>
+              <button type="button" (click)="removeSelectedModalPresentationFile()" class="btn-remove-selected-file" title="Quitar archivo seleccionado">
+                ✕
+              </button>
+            </div>
+          </div>
+          <span class="form-hint">El visor interactivo integrado permitirá a los alumnos proyectar y navegar las diapositivas.</span>
+        </div>
+
+        <!-- Option 2: Prezi / Online Link -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="lPresentationUrl">
+            <span>🌀 Enlace a Presentación de Prezi o Diapositivas Online (Opcional)</span>
+          </label>
+          <input
+            id="lPresentationUrl"
+            type="url"
+            class="form-control"
+            placeholder="https://prezi.com/p/xxxxxx/ o https://docs.google.com/presentation/d/..."
+            formControlName="presentationUrl"
+          />
+          <span class="form-hint">Si pegas un enlace de Prezi, se integrará con animaciones interactivas directamente en la clase.</span>
+        </div>
+      </div>
+
+      <!-- SECTION: SCHEDULED RELEASE DATE -->
+      <div class="form-section-card glass-card">
+        <h4 class="section-card-title">🗓️ Programación de Fecha de Habilitación para Alumnos</h4>
+        <p class="section-card-desc">Define el momento exacto a partir del cual los estudiantes matriculados podrán acceder a esta clase.</p>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="lAvailableAt">Fecha y Hora de Estreno (Opcional)</label>
+          <input
+            id="lAvailableAt"
+            type="datetime-local"
+            class="form-control"
+            formControlName="availableAt"
+          />
+          <span class="form-hint">
+            Si no seleccionas fecha, estará disponible de inmediato. Si seleccionas una fecha futura, los alumnos verán un aviso de estreno programado. (Como profesor siempre tendrás acceso libre).
+          </span>
+        </div>
       </div>
 
       <div class="modal-footer">

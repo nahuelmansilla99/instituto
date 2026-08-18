@@ -59,4 +59,9 @@ export class CourseDetailComponent implements OnInit {
       queryParams: { view: 'presentation' },
     });
   }
+
+  isFutureDate(dateStr?: string | null): boolean {
+    if (!dateStr) return false;
+    return new Date() < new Date(dateStr);
+  }
 }

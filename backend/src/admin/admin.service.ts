@@ -118,6 +118,7 @@ export class AdminService {
       meetUrl: dto.meetUrl?.trim() || null,
       presentationUrl: dto.presentationUrl?.trim() || null,
       presentationFilename: dto.presentationFilename?.trim() || null,
+      availableAt: dto.availableAt ? new Date(dto.availableAt) : null,
     });
 
     return this.lessonRepo.save(lesson);
@@ -135,6 +136,9 @@ export class AdminService {
     if (dto.meetUrl !== undefined) lesson.meetUrl = dto.meetUrl?.trim() || null;
     if (dto.presentationUrl !== undefined) lesson.presentationUrl = dto.presentationUrl?.trim() || null;
     if (dto.presentationFilename !== undefined) lesson.presentationFilename = dto.presentationFilename?.trim() || null;
+    if (dto.availableAt !== undefined) {
+      lesson.availableAt = dto.availableAt ? new Date(dto.availableAt) : null;
+    }
 
     return this.lessonRepo.save(lesson);
   }

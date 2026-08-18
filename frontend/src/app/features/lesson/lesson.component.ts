@@ -148,6 +148,23 @@ export class LessonComponent implements OnInit {
     this.router.navigate(['/lessons', nextLessonId]);
   }
 
+  getNextLesson(): any {
+    const l = this.lesson();
+    if (!l || !l.syllabus) return null;
+    const currentIndex = l.syllabus.findIndex((item) => item.id === l.id);
+    if (currentIndex >= 0 && currentIndex < l.syllabus.length - 1) {
+      return l.syllabus[currentIndex + 1];
+    }
+    return null;
+  }
+
+  goToNextSyllabusLesson(): void {
+    const next = this.getNextLesson();
+    if (next) {
+      this.router.navigate(['/lessons', next.id]);
+    }
+  }
+
   selectLesson(item: { id: string; status: string }): void {
     if (this.authService.currentUser()?.role !== 'ADMIN' && item.status === 'LOCKED') return;
     this.router.navigate(['/lessons', item.id]);

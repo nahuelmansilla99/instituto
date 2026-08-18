@@ -65,12 +65,14 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly showLessonModal = signal(false);
   readonly isEditingLesson = signal(false);
   readonly currentEditingLessonId = signal<string | null>(null);
+  readonly selectedModalPresentationFile = signal<File | null>(null);
   readonly lessonForm = this.fb.group({
     title: ['', [Validators.required]],
     content: ['', [Validators.required]],
     orderNumber: [null],
     meetUrl: [''],
     presentationUrl: [''],
+    availableAt: [''],
   });
 
   // Dedicated Prezi / Presentation Link Modal
@@ -284,9 +286,21 @@ export class AdminCourseEditorComponent implements OnInit {
     return !!url && url.toLowerCase().includes('prezi.com');
   }
 
+  onModalPresentationFileSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.selectedModalPresentationFile.set(file);
+    }
+  }
+
+  removeSelectedModalPresentationFile(): void {
+    this.selectedModalPresentationFile.set(null);
+  }
+
   openCreateLessonModal(): void {
     this.isEditingLesson.set(false);
     this.currentEditingLessonId.set(null);
+    this.selectedModalPresentationFile.set(null);
     this.lessonForm.reset();
     const c = this.course();
     if (c) {
@@ -298,18 +312,29 @@ export class AdminCourseEditorComponent implements OnInit {
   openEditLessonModal(lesson: any): void {
     this.isEditingLesson.set(true);
     this.currentEditingLessonId.set(lesson.id);
+    this.selectedModalPresentationFile.set(null);
+
+    let formattedDate = '';
+    if (lesson.availableAt) {
+      const d = new Date(lesson.availableAt);
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      formattedDate = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
     this.lessonForm.patchValue({
       title: lesson.title,
       content: lesson.content,
       orderNumber: lesson.orderNumber,
       meetUrl: lesson.meetUrl || '',
       presentationUrl: lesson.presentationUrl || '',
+      availableAt: formattedDate,
     });
     this.showLessonModal.set(true);
   }
 
   closeLessonModal(): void {
     this.showLessonModal.set(false);
+    this.selectedModalPresentationFile.set(null);
     this.lessonForm.reset();
   }
 
@@ -328,14 +353,34 @@ export class AdminCourseEditorComponent implements OnInit {
       presentationFilename: formVal.presentationUrl?.trim()
         ? (formVal.presentationUrl.includes('prezi.com') ? 'Presentación Prezi' : 'Presentación Online')
         : undefined,
+      availableAt: formVal.availableAt ? new Date(formVal.availableAt).toISOString() : null,
     };
 
+    const pptFile = this.selectedModalPresentationFile();
+
     if (this.isEditingLesson() && this.currentEditingLessonId()) {
-      this.adminService.updateLesson(this.currentEditingLessonId()!, payload).subscribe({
+      const lessonId = this.currentEditingLessonId()!;
+      this.adminService.updateLesson(lessonId, payload).subscribe({
         next: () => {
-          this.isSaving.set(false);
-          this.closeLessonModal();
-          this.loadCourse(c.id);
+          if (pptFile) {
+            this.adminService.uploadLessonPresentation(lessonId, pptFile).subscribe({
+              next: () => {
+                this.isSaving.set(false);
+                this.closeLessonModal();
+                this.loadCourse(c.id);
+              },
+              error: (err) => {
+                this.isSaving.set(false);
+                alert('Clase actualizada pero ocurrió un error al subir la presentación: ' + (err.error?.message || 'Error'));
+                this.closeLessonModal();
+                this.loadCourse(c.id);
+              },
+            });
+          } else {
+            this.isSaving.set(false);
+            this.closeLessonModal();
+            this.loadCourse(c.id);
+          }
         },
         error: (err) => {
           this.isSaving.set(false);
@@ -344,10 +389,26 @@ export class AdminCourseEditorComponent implements OnInit {
       });
     } else {
       this.adminService.createLesson(c.id, payload).subscribe({
-        next: () => {
-          this.isSaving.set(false);
-          this.closeLessonModal();
-          this.loadCourse(c.id);
+        next: (createdLesson) => {
+          if (pptFile && createdLesson && createdLesson.id) {
+            this.adminService.uploadLessonPresentation(createdLesson.id, pptFile).subscribe({
+              next: () => {
+                this.isSaving.set(false);
+                this.closeLessonModal();
+                this.loadCourse(c.id);
+              },
+              error: (err) => {
+                this.isSaving.set(false);
+                alert('Clase creada pero ocurrió un error al subir la presentación: ' + (err.error?.message || 'Error'));
+                this.closeLessonModal();
+                this.loadCourse(c.id);
+              },
+            });
+          } else {
+            this.isSaving.set(false);
+            this.closeLessonModal();
+            this.loadCourse(c.id);
+          }
         },
         error: (err) => {
           this.isSaving.set(false);

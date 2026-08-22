@@ -26,25 +26,54 @@
         <span>{{ user.role === 'ADMIN' ? 'Mis Cursos' : 'Mis Cursos' }}</span>
       </a>
 
-      <!-- User Profile & Logout -->
-      <div class="user-chip">
-        <div class="avatar-circle">
-          {{ getInitials(user.name) }}
-        </div>
-        <div class="user-info">
-          <span class="user-name">{{ user.name }}</span>
-          <span class="user-role">{{ user.role === 'ADMIN' ? 'Profesor' : 'Alumno' }}</span>
+      <!-- User Profile & Dropdown -->
+      <div class="user-menu-container">
+        <button class="user-chip" (click)="toggleDropdown()" [class.active]="isDropdownOpen">
+          <div class="avatar-circle">
+            {{ getInitials(user.name) }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-role">{{ user.role === 'ADMIN' ? 'Profesor' : 'Alumno' }}</span>
+          </div>
+          <svg class="chevron-icon" [class.rotated]="isDropdownOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu" *ngIf="isDropdownOpen">
+          <button (click)="confirmLogout()" class="dropdown-item text-danger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Cerrar Sesión</span>
+          </button>
         </div>
       </div>
+    </div>
+  </div>
+</header>
 
-      <button (click)="logout()" class="btn-logout" title="Cerrar Sesión">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<!-- Logout Confirmation Modal -->
+<div class="modal-overlay" *ngIf="showLogoutModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-icon text-danger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
         </svg>
-        <span>Salir</span>
-      </button>
+      </div>
+      <h3 class="modal-title">Cerrar Sesión</h3>
+    </div>
+    <p class="modal-message">¿Estás seguro que deseas cerrar sesión y salir de la plataforma?</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cancelLogout()">Cancelar</button>
+      <button class="btn-confirm" (click)="executeLogout()">Sí, cerrar sesión</button>
     </div>
   </div>
-</header>
+</div>

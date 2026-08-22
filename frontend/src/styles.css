@@ -11,6 +11,10 @@
   --bg-card-hover: rgba(28, 36, 56, 0.85);
   --bg-surface: #111827;
   --bg-surface-elevated: #1e293b;
+  --bg-input: rgba(15, 23, 42, 0.6);
+  --bg-input-focus: rgba(15, 23, 42, 0.9);
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-hover-strong: rgba(255, 255, 255, 0.1);
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-active: rgba(99, 102, 241, 0.4);
 
@@ -30,8 +34,10 @@
   /* Status Colors */
   --status-completed: #10b981;
   --status-completed-bg: rgba(16, 185, 129, 0.12);
+  --badge-completed-text: #34d399;
   --status-available: #6366f1;
   --status-available-bg: rgba(99, 102, 241, 0.15);
+  --badge-available-text: #818cf8;
   --status-locked: #64748b;
   --status-locked-bg: rgba(100, 116, 139, 0.15);
   --status-danger: #ef4444;
@@ -51,6 +57,35 @@
   --radius-full: 9999px;
   
   --backdrop-blur: blur(16px);
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] {
+  --bg-main: #f3f6fa;
+  --bg-card: rgba(255, 255, 255, 0.7);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-input: rgba(255, 255, 255, 0.6);
+  --bg-input-focus: rgba(255, 255, 255, 1);
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  --bg-hover-strong: rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-active: rgba(99, 102, 241, 0.5);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+
+  --badge-completed-text: #059669;
+  --badge-available-text: #4338ca;
+
+  --card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.15);
+  --backdrop-blur: blur(24px);
 }
 
 /* ==========================================================================
@@ -180,8 +215,8 @@ a:hover {
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--bg-hover-strong);
+  border-color: var(--border-active);
   transform: translateY(-2px);
 }
 
@@ -213,7 +248,7 @@ a:hover {
 .form-control {
   width: 100%;
   padding: 13px 16px;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--bg-input);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -226,7 +261,7 @@ a:hover {
 .form-control:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-light);
-  background: rgba(15, 23, 42, 0.9);
+  background: var(--bg-input-focus);
 }
 
 .form-error {
@@ -250,13 +285,13 @@ a:hover {
 
 .badge-completed {
   background: var(--status-completed-bg);
-  color: #34d399;
+  color: var(--badge-completed-text);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .badge-available {
   background: var(--status-available-bg);
-  color: #818cf8;
+  color: var(--badge-available-text);
   border: 1px solid rgba(99, 102, 241, 0.3);
 }
 

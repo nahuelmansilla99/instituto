@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -12,6 +12,21 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class NavbarComponent {
   readonly authService = inject(AuthService);
+  private eRef = inject(ElementRef);
+
+  isDropdownOpen = false;
+  showLogoutModal = false;
+
+  @HostListener('document:click', ['$event'])
+  clickout(event: Event) {
+    if (!this.eRef.nativeElement.contains(event.target)) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+  toggleDropdown() {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
 
   getInitials(name: string): string {
     if (!name) return 'U';
@@ -22,7 +37,17 @@ export class NavbarComponent {
     return name.slice(0, 2).toUpperCase();
   }
 
-  logout(): void {
+  confirmLogout(): void {
+    this.isDropdownOpen = false;
+    this.showLogoutModal = true;
+  }
+
+  cancelLogout(): void {
+    this.showLogoutModal = false;
+  }
+
+  executeLogout(): void {
+    this.showLogoutModal = false;
     this.authService.logout();
   }
 }

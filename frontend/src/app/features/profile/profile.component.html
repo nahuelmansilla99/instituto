@@ -1,0 +1,110 @@
+<app-navbar></app-navbar>
+
+<div class="profile-page">
+  <div class="profile-container animate-fade-in">
+    
+    <!-- Profile Header / Hero -->
+    <div class="profile-header glass-card">
+      <div class="profile-hero-content">
+        <div class="profile-avatar">
+          {{ authService.currentUser()?.name ? getInitials(authService.currentUser()!.name) : 'U' }}
+        </div>
+        <div class="profile-hero-info">
+          <h1>Hola, <span class="gradient-text">{{ authService.currentUser()?.name }}</span></h1>
+          <p class="role-badge" *ngIf="authService.currentUser()?.role === 'ADMIN'">👨‍🏫 Profesor</p>
+          <p class="role-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN'">🎓 Estudiante</p>
+          <p class="profile-email">{{ authService.currentUser()?.email }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="profile-content">
+      
+      <!-- Personal Info Card -->
+      <div class="card profile-card glass-card">
+        <div class="card-header">
+          <h2>Información Personal</h2>
+          <p>Actualiza tu nombre visible en la plataforma.</p>
+        </div>
+        <form [formGroup]="profileForm" (ngSubmit)="onProfileSubmit()" class="profile-form">
+          <div class="form-group">
+            <label for="name">Nombre Completo</label>
+            <input type="text" id="name" formControlName="name" placeholder="Tu nombre"
+                   [class.is-invalid]="profileForm.get('name')?.invalid && profileForm.get('name')?.touched" />
+            <div class="error-message" *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+              El nombre es obligatorio.
+            </div>
+          </div>
+
+          <div class="alert alert-success animate-fade-in" *ngIf="profileMessage">
+            <span class="alert-icon">✓</span> {{ profileMessage }}
+          </div>
+          <div class="alert alert-danger animate-fade-in" *ngIf="profileError">
+            <span class="alert-icon">⚠</span> {{ profileError }}
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid">
+              Guardar Cambios
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Security Card -->
+      <div class="card security-card glass-card">
+        <div class="card-header">
+          <h2>Seguridad</h2>
+          <p>Cambia tu contraseña para mantener tu cuenta segura.</p>
+        </div>
+        <form [formGroup]="passwordForm" (ngSubmit)="onPasswordSubmit()" class="profile-form">
+          
+          <div class="form-group">
+            <label for="currentPassword">Contraseña Actual</label>
+            <input type="password" id="currentPassword" formControlName="currentPassword" placeholder="Ingresa tu contraseña actual"
+                   [class.is-invalid]="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched" />
+            <div class="error-message" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+              La contraseña actual es obligatoria.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">Nueva Contraseña</label>
+            <input type="password" id="newPassword" formControlName="newPassword" placeholder="Mínimo 6 caracteres"
+                   [class.is-invalid]="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched" />
+            <div class="error-message" *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+              La nueva contraseña debe tener al menos 6 caracteres.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar Nueva Contraseña</label>
+            <input type="password" id="confirmPassword" formControlName="confirmPassword" placeholder="Vuelve a ingresar la contraseña"
+                   [class.is-invalid]="(passwordForm.get('confirmPassword')?.invalid || passwordForm.hasError('passwordMismatch')) && passwordForm.get('confirmPassword')?.touched" />
+            <div class="error-message" *ngIf="passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched">
+              Confirmar la contraseña es obligatorio.
+            </div>
+            <div class="error-message" *ngIf="passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched">
+              Las contraseñas no coinciden.
+            </div>
+          </div>
+
+          <div class="alert alert-success animate-fade-in" *ngIf="passwordMessage">
+            <span class="alert-icon">✓</span> {{ passwordMessage }}
+          </div>
+          <div class="alert alert-danger animate-fade-in" *ngIf="passwordError">
+            <span class="alert-icon">⚠</span> {{ passwordError }}
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
+              Actualizar Contraseña
+            </button>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>

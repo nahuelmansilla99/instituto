@@ -90,7 +90,7 @@
     <!-- TAB 1: HTML / CONTENT VIEW -->
     <div *ngIf="activeLessonView() === 'content'" class="tab-content-pane animate-fade-in">
       <!-- Presentation Material (PowerPoint / Prezi / PDF) Quick Box -->
-      <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in">
+      <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in mb-3">
         <div class="presentation-main-row">
           <div class="presentation-icon-box">
             <span *ngIf="isPreziUrl(currentLesson.presentationUrl)">🌀</span>
@@ -263,6 +263,7 @@
           <h2>Evaluación de la Clase</h2>
           <p class="quiz-subtitle" *ngIf="authService.currentUser()?.role !== 'ADMIN'">
             Responde las siguientes preguntas. Necesitas al menos un <strong>80%</strong> para aprobar y desbloquear la siguiente lección.
+            <span *ngIf="currentLesson.attemptsCount > 0" style="color: #64748b; font-weight: 500;">(Intentos realizados: {{ currentLesson.attemptsCount }})</span>
           </p>
           <p class="quiz-subtitle" *ngIf="authService.currentUser()?.role === 'ADMIN'">
             👨‍🏫 <strong>Vista de Docente:</strong> Puedes probar las respuestas interactivamente. Las siguientes clases ya están habilitadas para ti.
@@ -326,6 +327,8 @@
           <h4 class="question-title">
             <span class="q-number">{{ qIndex + 1 }}.</span>
             {{ question.questionText }}
+            <span *ngIf="isQuestionCorrect(question.id) === true" style="color: #10b981; margin-left: 8px; font-size: 0.9em;">✅ Correcta</span>
+            <span *ngIf="isQuestionCorrect(question.id) === false" style="color: #ef4444; margin-left: 8px; font-size: 0.9em;">❌ Incorrecta</span>
           </h4>
 
           <div class="options-group">
@@ -341,6 +344,7 @@
                 [checked]="selectedAnswers()[question.id] === optIndex"
                 (change)="onSelectOption(question.id, optIndex)"
                 class="option-radio"
+                [disabled]="(currentLesson.status === 'COMPLETED' && authService.currentUser()?.role !== 'ADMIN') || quizResult() !== null"
               />
               <span class="option-indicator">{{ getOptionLetter(optIndex) }}</span>
               <span class="option-text">{{ option }}</span>
@@ -349,18 +353,39 @@
         </div>
 
         <!-- Quiz Submit CTA -->
-        <div class="quiz-footer">
-          <button
-            (click)="submitQuiz()"
-            class="btn btn-primary btn-submit"
-            [disabled]="!isAllAnswered() || isSubmitting()"
-          >
-            <span *ngIf="isSubmitting()" class="spinner"></span>
-            <span>{{ isSubmitting() ? 'Evaluando respuestas...' : 'Enviar Respuestas y Calificar' }}</span>
-          </button>
-          <span *ngIf="!isAllAnswered()" class="unanswered-warning">
+        <div class="quiz-footer" *ngIf="(currentLesson.status !== 'COMPLETED' || authService.currentUser()?.role === 'ADMIN') && !quizResult()">
+          <div class="quiz-footer-buttons" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <button
+              (click)="saveQuizProgress()"
+              class="btn btn-secondary"
+              [disabled]="isSavingProgress() || isSubmitting()"
+            >
+              <span *ngIf="isSavingProgress()" class="spinner" style="width: 14px; height: 14px; border-width: 2px; margin-right: 8px;"></span>
+              <span>{{ isSavingProgress() ? 'Guardando...' : 'Guardar Progreso' }}</span>
+            </button>
+            <button
+              (click)="submitQuiz()"
+              class="btn btn-primary btn-submit"
+              [disabled]="!isAllAnswered() || isSubmitting()"
+            >
+              <span *ngIf="isSubmitting()" class="spinner" style="width: 14px; height: 14px; border-width: 2px; margin-right: 8px;"></span>
+              <span>{{ isSubmitting() ? 'Evaluando...' : 'Enviar Respuestas y Calificar' }}</span>
+            </button>
+          </div>
+          <span *ngIf="!isAllAnswered()" class="unanswered-warning" style="margin-top: 12px; display: block;">
             * Por favor responde todas las preguntas antes de enviar.
           </span>
+        </div>
+
+        <!-- Quiz Retry CTA at bottom -->
+        <div class="quiz-footer" *ngIf="quizResult() && !quizResult()?.passed">
+          <button (click)="resetQuiz()" class="btn btn-secondary btn-lg" style="width: 100%; justify-content: center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 4v6h-6M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            <span>Reintentar Cuestionario</span>
+          </button>
         </div>
       </div>
     </section>
@@ -410,7 +435,7 @@
           <span class="item-title">{{ item.title }}</span>
           <span class="item-meta">
             <span *ngIf="item.status === 'COMPLETED'" class="text-completed">
-              {{ authService.currentUser()?.role === 'ADMIN' ? '✓ Aprobada' : 'Aprobada (' + item.score + '%)' }}
+              {{ authService.currentUser()?.role === 'ADMIN' ? '✓ Aprobada' : 'Aprobada' }}
             </span>
             <span *ngIf="item.status === 'AVAILABLE' || authService.currentUser()?.role === 'ADMIN'" class="text-available">
               Disponible

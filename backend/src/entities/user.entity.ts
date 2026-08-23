@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { UserProgress } from './user-progress.entity';
 
@@ -42,4 +43,7 @@ export class User {
 
   @OneToMany(() => UserProgress, (progress) => progress.user)
   progressList: UserProgress[];
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt: Date;
 }

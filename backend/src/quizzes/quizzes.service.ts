@@ -19,6 +19,7 @@ export interface QuizEvaluationResult {
   message: string;
   nextLessonId?: string | null;
   nextLessonTitle?: string | null;
+  questionResults?: { questionId: string; isCorrect: boolean }[];
 }
 
 @Injectable()
@@ -62,10 +63,13 @@ export class QuizzesService {
 
     let correctCount = 0;
     const totalCount = questions.length;
+    const questionResults: { questionId: string; isCorrect: boolean }[] = [];
 
     questions.forEach((q) => {
       const selectedIndex = submittedMap.get(q.id);
-      if (selectedIndex !== undefined && selectedIndex === q.correctOptionIndex) {
+      const isCorrect = selectedIndex !== undefined && selectedIndex === q.correctOptionIndex;
+      questionResults.push({ questionId: q.id, isCorrect });
+      if (isCorrect) {
         correctCount++;
       }
     });
@@ -85,6 +89,8 @@ export class QuizzesService {
         status: ProgressStatus.AVAILABLE,
       });
     }
+
+    userProgress.attemptsCount = (userProgress.attemptsCount || 0) + 1;
 
     let nextLessonId: string | null = null;
     let nextLessonTitle: string | null = null;
@@ -153,7 +159,43 @@ export class QuizzesService {
         passingThreshold: this.PASSING_THRESHOLD,
         message: `Has obtenido ${score}% (${correctCount}/${totalCount} correctas). Se requiere al menos un ${this.PASSING_THRESHOLD}% para aprobar y desbloquear la siguiente lección.`,
         nextLessonId: null,
+        questionResults,
       };
     }
+  }
+
+  async saveProgress(
+    lessonId: string,
+    userId: string,
+    answers: AnswerItemDto[],
+  ): Promise<void> {
+    const lesson = await this.lessonRepository.findOne({
+      where: { id: lessonId },
+    });
+
+    if (!lesson) {
+      throw new NotFoundException('Lección no encontrada');
+    }
+
+    let userProgress = await this.userProgressRepository.findOne({
+      where: { userId, lessonId },
+    });
+
+    if (!userProgress) {
+      userProgress = this.userProgressRepository.create({
+        userId,
+        lessonId,
+        status: ProgressStatus.AVAILABLE,
+      });
+    }
+
+    // Map submitted answers by questionId
+    const submittedMap: Record<string, number> = {};
+    answers.forEach((ans) => {
+      submittedMap[ans.questionId] = ans.selectedOptionIndex;
+    });
+
+    userProgress.quizAnswers = submittedMap;
+    await this.userProgressRepository.save(userProgress);
   }
 }

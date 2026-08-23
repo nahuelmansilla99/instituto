@@ -87,7 +87,7 @@ export class AdminService {
     if (!course) {
       throw new NotFoundException('Curso no encontrado');
     }
-    await this.courseRepo.remove(course);
+    await this.courseRepo.softRemove(course);
     return { success: true };
   }
 
@@ -203,7 +203,7 @@ export class AdminService {
       }
     }
 
-    await this.lessonRepo.remove(lesson);
+    await this.lessonRepo.softRemove(lesson);
     return { success: true };
   }
 
@@ -395,7 +395,7 @@ export class AdminService {
       throw new NotFoundException('El alumno no se encuentra matriculado en este curso');
     }
 
-    await this.enrollmentRepo.remove(enrollment);
+    await this.enrollmentRepo.softRemove(enrollment);
     return { success: true, message: 'Alumno desmatriculado con éxito' };
   }
 

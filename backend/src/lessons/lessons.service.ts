@@ -79,6 +79,11 @@ export class LessonsService {
       const isFuture = l.availableAt && now < new Date(l.availableAt);
       const hasNoQuiz = !l.quizQuestions || l.quizQuestions.length === 0;
 
+      // Automatically downgrade from COMPLETED to AVAILABLE if a quiz was added and hasn't been evaluated
+      if (p && !hasNoQuiz && p.status === ProgressStatus.COMPLETED && p.score === null) {
+        p.status = ProgressStatus.AVAILABLE;
+      }
+
       let s: ProgressStatus = ProgressStatus.LOCKED;
       if (isTeacher) {
         s = p?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
@@ -147,6 +152,11 @@ export class LessonsService {
         targetProgress.status = ProgressStatus.COMPLETED;
         targetProgress.completedAt = new Date();
         await this.userProgressRepository.save(targetProgress);
+      } else if (!hasNoQuiz && targetProgress.status === ProgressStatus.COMPLETED && targetProgress.score === null) {
+        // Teacher added a quiz after the student had already completed the lesson just by viewing it
+        targetProgress.status = ProgressStatus.AVAILABLE;
+        targetProgress.completedAt = null;
+        await this.userProgressRepository.save(targetProgress);
       }
 
       // If this lesson has no quiz, automatically ensure the next lesson is unlocked
@@ -194,6 +204,8 @@ export class LessonsService {
       status: targetProgress ? targetProgress.status : calculatedStatus,
       score: targetProgress?.score ?? null,
       completedAt: targetProgress?.completedAt ?? null,
+      savedAnswers: targetProgress?.quizAnswers ?? {},
+      attemptsCount: targetProgress?.attemptsCount ?? 0,
       quizQuestions: questions,
       syllabus,
     };

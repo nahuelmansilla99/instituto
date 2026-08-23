@@ -31,4 +31,18 @@ export class QuizzesController {
       submitQuizDto.answers,
     );
   }
+
+  @Post(':id/quiz/save-progress')
+  @HttpCode(HttpStatus.OK)
+  saveProgress(
+    @Param('id') lessonId: string,
+    @Body() submitQuizDto: SubmitQuizDto,
+    @GetUser() user: User,
+  ) {
+    return this.quizzesService.saveProgress(
+      lessonId,
+      user.id,
+      submitQuizDto.answers,
+    );
+  }
 }

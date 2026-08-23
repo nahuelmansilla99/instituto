@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Lesson } from './lesson.entity';
 
@@ -29,4 +30,7 @@ export class Course {
 
   @OneToMany(() => Lesson, (lesson) => lesson.course)
   lessons: Lesson[];
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt: Date;
 }

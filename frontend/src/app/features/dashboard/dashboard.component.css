@@ -227,6 +227,34 @@
   color: #34d399 !important;
 }
 
+.pending-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(245, 158, 11, 0.9);
+  backdrop-filter: blur(8px);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.pulsing-dot-small {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px #fff;
+  animation: livePulse 1.2s infinite;
+}
+
 .card-body {
   padding: 24px;
   display: flex;

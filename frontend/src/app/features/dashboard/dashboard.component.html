@@ -98,11 +98,15 @@
             </div>
           </div>
 
-          <!-- Top Badge: Progress for Student, Lessons count for Teacher -->
           <div class="progress-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN'">
             <span [class.text-success]="course.progressPercentage === 100">
               {{ course.progressPercentage }}% Completado
             </span>
+          </div>
+          <!-- Pending Lesson Badge -->
+          <div class="pending-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN' && course.completedLessons < course.totalLessons">
+            <span class="pulsing-dot-small"></span>
+            Clase Pendiente
           </div>
           <div class="progress-badge progress-badge-teacher" *ngIf="authService.currentUser()?.role === 'ADMIN'">
             <span>📖 {{ course.totalLessons }} {{ course.totalLessons === 1 ? 'Clase' : 'Clases' }}</span>

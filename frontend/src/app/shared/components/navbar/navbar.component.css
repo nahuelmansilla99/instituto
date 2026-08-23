@@ -225,7 +225,7 @@
 
 
 @media (max-width: 640px) {
-  .brand-subtitle, .user-info {
+  .brand-text, .user-info {
     display: none;
   }
   .nav-actions {

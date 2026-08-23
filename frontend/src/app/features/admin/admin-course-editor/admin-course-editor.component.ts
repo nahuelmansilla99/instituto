@@ -87,6 +87,9 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly activeLesson = signal<any | null>(null);
   readonly activeQuestions = signal<AdminQuizQuestion[]>([]);
   readonly isSavingQuestion = signal(false);
+  
+  readonly isEditingQuestion = signal(false);
+  readonly currentEditingQuestionId = signal<string | null>(null);
 
   readonly questionForm = this.fb.group({
     questionText: ['', [Validators.required]],
@@ -495,13 +498,14 @@ export class AdminCourseEditorComponent implements OnInit {
   openQuestionsModal(lesson: any): void {
     this.activeLesson.set(lesson);
     this.showQuestionsModal.set(true);
-    this.questionForm.reset({ correctOptionIndex: 0 });
+    this.cancelEditQuestionMode();
     this.loadQuestions(lesson.id);
   }
 
   closeQuestionsModal(): void {
     this.showQuestionsModal.set(false);
     this.activeLesson.set(null);
+    this.cancelEditQuestionMode();
     const c = this.course();
     if (c) this.loadCourse(c.id);
   }
@@ -518,7 +522,26 @@ export class AdminCourseEditorComponent implements OnInit {
     return String.fromCharCode(65 + idx);
   }
 
-  addQuestion(): void {
+  openEditQuestionMode(q: AdminQuizQuestion): void {
+    this.isEditingQuestion.set(true);
+    this.currentEditingQuestionId.set(q.id);
+    this.questionForm.patchValue({
+      questionText: q.questionText,
+      optionA: q.options[0] || '',
+      optionB: q.options[1] || '',
+      optionC: q.options[2] || '',
+      optionD: q.options[3] || '',
+      correctOptionIndex: q.correctOptionIndex,
+    });
+  }
+
+  cancelEditQuestionMode(): void {
+    this.isEditingQuestion.set(false);
+    this.currentEditingQuestionId.set(null);
+    this.questionForm.reset({ correctOptionIndex: 0 });
+  }
+
+  saveQuestion(): void {
     const lesson = this.activeLesson();
     if (!lesson || this.questionForm.invalid) return;
 
@@ -538,17 +561,31 @@ export class AdminCourseEditorComponent implements OnInit {
       correctOptionIndex: Number(formVal.correctOptionIndex || 0),
     };
 
-    this.adminService.createQuestion(lesson.id, payload).subscribe({
-      next: () => {
-        this.isSavingQuestion.set(false);
-        this.questionForm.reset({ correctOptionIndex: 0 });
-        this.loadQuestions(lesson.id);
-      },
-      error: (err) => {
-        this.isSavingQuestion.set(false);
-        alert('Error al agregar pregunta: ' + (err.error?.message || 'Error desconocido'));
-      },
-    });
+    if (this.isEditingQuestion() && this.currentEditingQuestionId()) {
+      this.adminService.updateQuestion(this.currentEditingQuestionId()!, payload).subscribe({
+        next: () => {
+          this.isSavingQuestion.set(false);
+          this.cancelEditQuestionMode();
+          this.loadQuestions(lesson.id);
+        },
+        error: (err) => {
+          this.isSavingQuestion.set(false);
+          alert('Error al actualizar pregunta: ' + (err.error?.message || 'Error desconocido'));
+        },
+      });
+    } else {
+      this.adminService.createQuestion(lesson.id, payload).subscribe({
+        next: () => {
+          this.isSavingQuestion.set(false);
+          this.questionForm.reset({ correctOptionIndex: 0 });
+          this.loadQuestions(lesson.id);
+        },
+        error: (err) => {
+          this.isSavingQuestion.set(false);
+          alert('Error al agregar pregunta: ' + (err.error?.message || 'Error desconocido'));
+        },
+      });
+    }
   }
 
   deleteQuestion(questionId: string): void {
@@ -592,7 +629,7 @@ export class AdminCourseEditorComponent implements OnInit {
     lessonId: string,
     studentId: string,
     status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED',
-    score?: number,
+    score?: number | null,
   ): void {
     this.adminService
       .updateLessonStudentProgress(lessonId, studentId, status, score)

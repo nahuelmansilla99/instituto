@@ -6,6 +6,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Course } from './course.entity';
 import { QuizQuestion } from './quiz-question.entity';
@@ -52,4 +53,7 @@ export class Lesson {
 
   @OneToMany(() => UserProgress, (progress) => progress.lesson)
   userProgresses: UserProgress[];
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt: Date;
 }

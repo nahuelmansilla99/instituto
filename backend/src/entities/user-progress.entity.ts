@@ -6,6 +6,7 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Lesson } from './lesson.entity';
@@ -41,6 +42,12 @@ export class UserProgress {
   @Column({ name: 'completed_at', type: 'timestamp with time zone', nullable: true })
   completedAt: Date | null;
 
+  @Column({ type: 'jsonb', nullable: true })
+  quizAnswers: Record<string, number> | null;
+
+  @Column({ name: 'attempts_count', type: 'int', default: 0 })
+  attemptsCount: number;
+
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
@@ -51,4 +58,7 @@ export class UserProgress {
   @ManyToOne(() => Lesson, (lesson) => lesson.userProgresses, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'lesson_id' })
   lesson: Lesson;
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt: Date;
 }

@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 import { Course } from './course.entity';
@@ -49,4 +50,7 @@ export class CourseEnrollment {
   @ManyToOne(() => Course, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'course_id' })
   course: Course;
+
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt: Date;
 }

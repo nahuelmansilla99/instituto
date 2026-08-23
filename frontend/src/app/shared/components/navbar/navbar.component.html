@@ -16,16 +16,6 @@
 
     <!-- Right Side Nav -->
     <div class="nav-actions" *ngIf="authService.currentUser() as user">
-      <a routerLink="/dashboard" routerLinkActive="active-link" class="nav-link">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <span>{{ user.role === 'ADMIN' ? 'Mis Cursos' : 'Mis Cursos' }}</span>
-      </a>
-
       <!-- User Profile & Dropdown -->
       <div class="user-menu-container">
         <button class="user-chip" (click)="toggleDropdown()" [class.active]="isDropdownOpen">

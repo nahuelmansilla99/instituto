@@ -16,6 +16,8 @@ export interface LessonDetail {
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;
   completedAt: string | null;
+  savedAnswers?: Record<string, number>;
+  attemptsCount: number;
   quizQuestions: QuizQuestion[];
   syllabus: CourseLessonItem[];
 }

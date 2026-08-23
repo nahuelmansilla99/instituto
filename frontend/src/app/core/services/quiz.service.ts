@@ -20,4 +20,14 @@ export class QuizService {
       { answers },
     );
   }
+
+  saveProgress(
+    lessonId: string,
+    answers: QuizAnswerSubmission[],
+  ): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/lessons/${lessonId}/quiz/save-progress`,
+      { answers },
+    );
+  }
 }

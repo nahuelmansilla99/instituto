@@ -188,7 +188,7 @@ export class AdminService {
     lessonId: string,
     studentId: string,
     status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED',
-    score?: number,
+    score?: number | null,
   ): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/lessons/${lessonId}/students/${studentId}`, {
       status,

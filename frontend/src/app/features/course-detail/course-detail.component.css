@@ -398,6 +398,29 @@
   flex-wrap: wrap;
 }
 
+.pending-lesson-badge {
+  background: rgba(245, 158, 11, 0.9);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.pulsing-dot-small {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 4px #fff;
+  animation: livePulse 1.2s infinite;
+}
+
 .lesson-card-title {
   font-size: 1.15rem;
   margin: 0;

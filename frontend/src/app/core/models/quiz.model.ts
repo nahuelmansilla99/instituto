@@ -15,6 +15,11 @@ export interface QuizAnswerSubmission {
   selectedOptionIndex: number;
 }
 
+export interface QuizQuestionResult {
+  questionId: string;
+  isCorrect: boolean;
+}
+
 export interface QuizEvaluationResponse {
   passed: boolean;
   score: number;
@@ -24,4 +29,5 @@ export interface QuizEvaluationResponse {
   message: string;
   nextLessonId: string | null;
   nextLessonTitle: string | null;
+  questionResults?: QuizQuestionResult[];
 }

@@ -126,9 +126,17 @@
                     'status-badge-locked': lesson.status === 'LOCKED'
                   }"
                 >
-                  <ng-container *ngIf="lesson.status === 'COMPLETED'">✓ Aprobada ({{ lesson.score }}%)</ng-container>
+                  <ng-container *ngIf="lesson.status === 'COMPLETED'">
+                    ✓ {{ lesson.hasQuiz ? 'Aprobada (' + lesson.score + '%)' : 'Completada' }}
+                  </ng-container>
                   <ng-container *ngIf="lesson.status === 'AVAILABLE'">🔓 Disponible</ng-container>
                   <ng-container *ngIf="lesson.status === 'LOCKED'">🔒 Bloqueada</ng-container>
+                </span>
+
+                <!-- Pending Lesson Badge -->
+                <span class="pending-lesson-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE'">
+                  <span class="pulsing-dot-small"></span>
+                  Clase Pendiente
                 </span>
               </div>
 
@@ -149,7 +157,7 @@
                 <span *ngIf="lesson.meetUrl" class="meta-badge meta-meet">
                   🔴 Sesión Meet
                 </span>
-                <span class="meta-badge meta-quiz">
+                <span *ngIf="lesson.hasQuiz" class="meta-badge meta-quiz">
                   📝 Examen Multiple Choice (80% req.)
                 </span>
               </div>

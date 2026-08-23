@@ -27,6 +27,7 @@ export class LessonComponent implements OnInit {
   readonly lesson = signal<LessonDetail | null>(null);
   readonly isLoading = signal(true);
   readonly isSubmitting = signal(false);
+  readonly isSavingProgress = signal(false);
 
   // View Mode: 'content' | 'presentation'
   readonly activeLessonView = signal<'content' | 'presentation'>('content');
@@ -66,6 +67,11 @@ export class LessonComponent implements OnInit {
     this.coursesService.getLessonById(lessonId).subscribe({
       next: (data) => {
         this.lesson.set(data);
+        if (data.savedAnswers) {
+          this.selectedAnswers.set(data.savedAnswers);
+        } else {
+          this.selectedAnswers.set({});
+        }
         this.isLoading.set(false);
         const requestedView = this.route.snapshot.queryParams['view'];
         if (requestedView === 'presentation' || (data.presentationUrl && requestedView !== 'content')) {
@@ -90,6 +96,29 @@ export class LessonComponent implements OnInit {
       ...prev,
       [questionId]: optionIndex,
     }));
+  }
+
+  saveQuizProgress(): void {
+    const currentLesson = this.lesson();
+    if (!currentLesson) return;
+
+    this.isSavingProgress.set(true);
+
+    const answersPayload = Object.entries(this.selectedAnswers()).map(([questionId, selectedOptionIndex]) => ({
+      questionId,
+      selectedOptionIndex,
+    }));
+
+    this.quizService.saveProgress(currentLesson.id, answersPayload).subscribe({
+      next: () => {
+        this.isSavingProgress.set(false);
+        // Optionally show a toast or success message here
+      },
+      error: (err) => {
+        console.error('Failed to save progress', err);
+        this.isSavingProgress.set(false);
+      }
+    });
   }
 
   getOptionLetter(index: number): string {
@@ -126,6 +155,14 @@ export class LessonComponent implements OnInit {
         this.isSubmitting.set(false);
         this.quizResult.set(res);
 
+        // Update local lesson state
+        this.lesson.update(l => {
+          if (l) {
+            return { ...l, attemptsCount: l.attemptsCount + 1 };
+          }
+          return l;
+        });
+
         // If passed, refresh lesson syllabus to show updated status immediately
         if (res.passed) {
           this.coursesService.getLessonById(currentLesson.id).subscribe((updated) => {
@@ -137,6 +174,13 @@ export class LessonComponent implements OnInit {
         this.isSubmitting.set(false);
       },
     });
+  }
+
+  isQuestionCorrect(questionId: string): boolean | null {
+    const result = this.quizResult();
+    if (!result || !result.questionResults) return null;
+    const qRes = result.questionResults.find(r => r.questionId === questionId);
+    return qRes ? qRes.isCorrect : null;
   }
 
   resetQuiz(): void {

@@ -723,9 +723,14 @@
           <div class="q-header-row">
             <span class="q-badge">#{{ qIdx + 1 }}</span>
             <span class="q-text-bold">{{ q.questionText }}</span>
-            <button (click)="deleteQuestion(q.id)" class="btn-delete-q" title="Eliminar Pregunta">
-              🗑️
-            </button>
+            <div class="q-action-buttons" style="display: flex; gap: 8px;">
+              <button type="button" (click)="openEditQuestionMode(q)" class="btn-edit-q" title="Editar Pregunta" style="background: none; border: none; cursor: pointer; font-size: 1.1rem; opacity: 0.7; transition: opacity 0.2s;">
+                ✏️
+              </button>
+              <button type="button" (click)="deleteQuestion(q.id)" class="btn-delete-q" title="Eliminar Pregunta">
+                🗑️
+              </button>
+            </div>
           </div>
 
           <div class="q-options-grid">
@@ -742,10 +747,11 @@
         </div>
       </div>
 
-      <!-- Add New Question Form Box -->
-      <div class="add-question-box">
-        <h4>➕ Agregar Nueva Pregunta</h4>
-        <form [formGroup]="questionForm" (ngSubmit)="addQuestion()">
+      <!-- Add/Edit Question Form Box -->
+      <div class="add-question-box" [class.editing-mode]="isEditingQuestion()">
+        <h4 *ngIf="!isEditingQuestion()">➕ Agregar Nueva Pregunta</h4>
+        <h4 *ngIf="isEditingQuestion()" style="color: var(--primary-color);">✏️ Editar Pregunta</h4>
+        <form [formGroup]="questionForm" (ngSubmit)="saveQuestion()">
           <div class="form-group">
             <label class="form-label" for="qText">Enunciado de la Pregunta *</label>
             <input
@@ -829,13 +835,24 @@
             </div>
           </div>
 
-          <div class="q-add-actions">
+          <div class="q-add-actions" style="display: flex; gap: 12px; margin-top: 16px;">
+            <button
+              *ngIf="isEditingQuestion()"
+              type="button"
+              class="btn btn-secondary"
+              (click)="cancelEditQuestionMode()"
+              style="flex: 1;"
+            >
+              Cancelar
+            </button>
             <button
               type="submit"
-              class="btn btn-primary w-full"
+              class="btn btn-primary"
+              [class.w-full]="!isEditingQuestion()"
+              [style.flex]="isEditingQuestion() ? '1' : 'none'"
               [disabled]="questionForm.invalid || isSavingQuestion()"
             >
-              <span>{{ isSavingQuestion() ? 'Guardando...' : 'Guardar Pregunta' }}</span>
+              <span>{{ isSavingQuestion() ? 'Guardando...' : (isEditingQuestion() ? 'Guardar Cambios' : 'Guardar Pregunta') }}</span>
             </button>
           </div>
         </form>
@@ -913,6 +930,15 @@
                     title="Marcar clase como completada y desbloquear siguiente"
                   >
                     ✓ Aprobar (100%)
+                  </button>
+                  <button
+                    *ngIf="s.status === 'COMPLETED'"
+                    (click)="setStudentLessonStatus(l.id, s.studentId, 'AVAILABLE', null)"
+                    class="btn-sub-action"
+                    title="Deshacer aprobación y regresar a estado disponible"
+                    style="color: var(--danger-color, #ef4444); border-color: var(--danger-color, #ef4444);"
+                  >
+                    ↩️ Quitar Aprobado
                   </button>
                   <button
                     *ngIf="s.status === 'LOCKED'"

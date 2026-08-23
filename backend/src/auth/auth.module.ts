@@ -15,14 +15,18 @@ import { User } from '../entities/user.entity';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret:
-          configService.get<string>('JWT_SECRET') ||
-          'super_secret_jwt_key_development_only_12345',
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '7d',
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret) {
+          throw new Error('JWT_SECRET environment variable is missing');
+        }
+        return {
+          secret,
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '7d',
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

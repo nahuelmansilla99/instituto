@@ -9,6 +9,6 @@ export const getTypeOrmConfig = (): TypeOrmModuleOptions => ({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'elearning_db',
   entities: [User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment],
-  synchronize: process.env.DB_SYNCHRONIZE === 'false' ? false : true, // Keeps schema synchronized
+  synchronize: process.env.DB_SYNCHRONIZE === 'true', // Sync only when explicitly enabled
   logging: process.env.NODE_ENV === 'development',
 });

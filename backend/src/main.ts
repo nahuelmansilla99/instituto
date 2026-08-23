@@ -20,12 +20,13 @@ async function bootstrap() {
   app.use('/api/uploads', express.static(join(process.cwd(), 'uploads')));
 
   // Payload body limit for large presentation files
-  app.use(express.json({ limit: '200mb' }));
-  app.use(express.urlencoded({ limit: '200mb', extended: true }));
+  const maxUploadSize = process.env.MAX_UPLOAD_SIZE || '50mb';
+  app.use(express.json({ limit: maxUploadSize }));
+  app.use(express.urlencoded({ limit: maxUploadSize, extended: true }));
 
-  // Enable CORS for Angular frontend
+  // Enable CORS for frontend
   app.enableCors({
-    origin: true,
+    origin: process.env.FRONTEND_URL || 'http://localhost:4200',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

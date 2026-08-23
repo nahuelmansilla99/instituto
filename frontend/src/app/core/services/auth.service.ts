@@ -42,8 +42,12 @@ export class AuthService {
 
   private handleAuthSuccess(response: AuthResponse): void {
     localStorage.setItem('auth_token', response.token);
-    localStorage.setItem('auth_user', JSON.stringify(response.user));
-    this.currentUserSignal.set(response.user);
+    this.updateUser(response.user);
+  }
+
+  updateUser(user: User): void {
+    localStorage.setItem('auth_user', JSON.stringify(user));
+    this.currentUserSignal.set(user);
   }
 
   private getUserFromStorage(): User | null {

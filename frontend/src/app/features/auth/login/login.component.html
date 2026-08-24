@@ -12,19 +12,6 @@
       <p>Ingresa a tu cuenta de estudiante para continuar tus clases</p>
     </div>
 
-    <!-- Quick Demo Credentials Fill -->
-    <div class="demo-box">
-      <span class="demo-title">💡 Acceso Rápido de Prueba:</span>
-      <div class="demo-buttons">
-        <button type="button" (click)="fillCredentials('alumno@instituto.com', 'student123')" class="demo-btn">
-          🧑‍🎓 Alumno Demo
-        </button>
-        <button type="button" (click)="fillCredentials('admin@instituto.com', 'admin123')" class="demo-btn">
-          👨‍🏫 Profesor Demo
-        </button>
-      </div>
-    </div>
-
     <!-- Error Alert -->
     <div *ngIf="errorMessage()" class="alert-error animate-fade-in">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -38,8 +25,8 @@
     <!-- Login Form -->
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <!-- Google Sign-In Button -->
-      <div class="google-btn-container" style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
-        <asl-google-signin-button type="standard" size="large"></asl-google-signin-button>
+      <div class="google-btn-container" style="width: 100%; margin-bottom: 1.5rem;">
+        <asl-google-signin-button type="standard" size="large" [width]="400" style="width: 100%; display: block;"></asl-google-signin-button>
       </div>
 
       <div class="divider" style="display: flex; align-items: center; text-align: center; margin-bottom: 1.5rem; color: #666;">
@@ -54,7 +41,7 @@
           id="email"
           type="email"
           class="form-control"
-          placeholder="tu.email@instituto.com"
+          placeholder="tu.email@gmail.com"
           formControlName="email"
         />
         <div *ngIf="isFieldInvalid('email')" class="form-error">

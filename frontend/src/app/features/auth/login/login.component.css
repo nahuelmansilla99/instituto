@@ -124,3 +124,10 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Forzar que el botón de Google ocupe todo el ancho */
+::ng-deep .google-btn-container > asl-google-signin-button,
+::ng-deep .google-btn-container > asl-google-signin-button > div,
+::ng-deep .google-btn-container iframe {
+  width: 100% !important;
+}

@@ -49,9 +49,7 @@ export class LoginComponent implements OnInit {
     destroyRef?.onDestroy(() => authSub.unsubscribe());
   }
 
-  fillCredentials(email: string, pass: string): void {
-    this.loginForm.patchValue({ email, password: pass });
-  }
+
 
   isFieldInvalid(field: string): boolean {
     const control = this.loginForm.get(field);

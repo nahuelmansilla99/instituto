@@ -31,7 +31,17 @@ export class SysadminUsersComponent implements OnInit {
   isChangingPassword = signal(false);
   editPassword = signal('');
   confirmPassword = signal('');
+  showEditPassword = signal(false);
+  showConfirmPassword = signal(false);
   roles = Object.values(UserRole);
+
+  toggleShowEditPassword(): void {
+    this.showEditPassword.update(v => !v);
+  }
+
+  toggleShowConfirmPassword(): void {
+    this.showConfirmPassword.update(v => !v);
+  }
 
   // Confirm Modal State
   confirmingUser = signal<User | null>(null);

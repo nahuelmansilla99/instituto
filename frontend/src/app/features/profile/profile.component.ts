@@ -36,6 +36,10 @@ export class ProfileComponent implements OnInit {
   passwordMessage = '';
   passwordError = '';
 
+  showCurrentPassword = false;
+  showNewPassword = false;
+  showConfirmPassword = false;
+
   getInitials(name: string): string {
     if (!name) return 'U';
     const parts = name.trim().split(' ');

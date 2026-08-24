@@ -36,13 +36,13 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         UPDATE lessons 
         SET presentation_url = '/api/uploads/presentations/clase1-nestjs-angular.pptx',
             presentation_filename = 'Clase 1 - Introducción a NestJS.pptx'
-        WHERE id = 'l1000000-0000-0000-0000-000000000001' AND presentation_url IS NULL;
+        WHERE id = 'b1000000-0000-0000-0000-000000000001' AND presentation_url IS NULL;
       `);
       await this.lessonRepo.query(`
         UPDATE lessons 
         SET presentation_url = '/api/uploads/presentations/clase1-nestjs-angular.pptx',
             presentation_filename = 'Clase 2 - TypeORM y PostgreSQL.pptx'
-        WHERE id = 'l2000000-0000-0000-0000-000000000002' AND presentation_url IS NULL;
+        WHERE id = 'b2000000-0000-0000-0000-000000000002' AND presentation_url IS NULL;
       `);
 
       // Crear tabla de matriculaciones si no existe
@@ -159,11 +159,11 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
     // Lesson 1
     let lesson1 = await this.lessonRepo.findOne({
-      where: { id: 'l1000000-0000-0000-0000-000000000001' },
+      where: { id: 'b1000000-0000-0000-0000-000000000001' },
     });
     if (!lesson1) {
       lesson1 = this.lessonRepo.create({
-        id: 'l1000000-0000-0000-0000-000000000001',
+        id: 'b1000000-0000-0000-0000-000000000001',
         courseId: course1.id,
         title: '1. Introducción a la Arquitectura Modular de NestJS',
         orderNumber: 1,
@@ -175,14 +175,14 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
       const questionsL1 = [
         {
-          id: 'q1000000-0000-0000-0000-000000000001',
+          id: 'd1000000-0000-0000-0000-000000000001',
           lessonId: lesson1.id,
           questionText: '¿Cuál es el decorador utilizado en NestJS para definir una clase que encapsula controladores y proveedores?',
           options: ['@Injectable()', '@Module()', '@Component()', '@Controller()'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q1000000-0000-0000-0000-000000000002',
+          id: 'd1000000-0000-0000-0000-000000000002',
           lessonId: lesson1.id,
           questionText: '¿Qué rol cumplen los Controladores en una arquitectura NestJS?',
           options: [
@@ -194,21 +194,21 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           correctOptionIndex: 1,
         },
         {
-          id: 'q1000000-0000-0000-0000-000000000003',
+          id: 'd1000000-0000-0000-0000-000000000003',
           lessonId: lesson1.id,
           questionText: '¿Qué decorador debe tener una clase de servicio para poder ser inyectada en otras clases mediante IoC?',
           options: ['@Service()', '@Injectable()', '@Provider()', '@Autowired()'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q1000000-0000-0000-0000-000000000004',
+          id: 'd1000000-0000-0000-0000-000000000004',
           lessonId: lesson1.id,
           questionText: '¿Cuál es el framework HTTP por defecto sobre el que opera NestJS?',
           options: ['Fastify', 'Express', 'Koa', 'Hapi'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q1000000-0000-0000-0000-000000000005',
+          id: 'd1000000-0000-0000-0000-000000000005',
           lessonId: lesson1.id,
           questionText: '¿Cómo se inyecta un servicio en el constructor de un controlador en NestJS?',
           options: [
@@ -229,11 +229,11 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
     // Lesson 2
     let lesson2 = await this.lessonRepo.findOne({
-      where: { id: 'l2000000-0000-0000-0000-000000000002' },
+      where: { id: 'b2000000-0000-0000-0000-000000000002' },
     });
     if (!lesson2) {
       lesson2 = this.lessonRepo.create({
-        id: 'l2000000-0000-0000-0000-000000000002',
+        id: 'b2000000-0000-0000-0000-000000000002',
         courseId: course1.id,
         title: '2. Persistencia de Datos con TypeORM y PostgreSQL',
         orderNumber: 2,
@@ -243,14 +243,14 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
       const questionsL2 = [
         {
-          id: 'q2000000-0000-0000-0000-000000000001',
+          id: 'd2000000-0000-0000-0000-000000000001',
           lessonId: lesson2.id,
           questionText: '¿Qué decorador de TypeORM se utiliza para marcar una clase como una tabla en la base de datos?',
           options: ['@Table()', '@Entity()', '@Model()', '@Schema()'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q2000000-0000-0000-0000-000000000002',
+          id: 'd2000000-0000-0000-0000-000000000002',
           lessonId: lesson2.id,
           questionText: '¿Cuál es el patrón que utiliza TypeORM para consultar y guardar entidades a través de clases dedicadas?',
           options: [
@@ -262,7 +262,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           correctOptionIndex: 0,
         },
         {
-          id: 'q2000000-0000-0000-0000-000000000003',
+          id: 'd2000000-0000-0000-0000-000000000003',
           lessonId: lesson2.id,
           questionText: '¿Cómo se inyecta un Repositorio de TypeORM en un servicio NestJS?',
           options: [
@@ -274,14 +274,14 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           correctOptionIndex: 0,
         },
         {
-          id: 'q2000000-0000-0000-0000-000000000004',
+          id: 'd2000000-0000-0000-0000-000000000004',
           lessonId: lesson2.id,
           questionText: '¿Qué tipo de relación representa @ManyToOne?',
           options: ['Muchos a Muchos', 'Muchos a Uno', 'Uno a Uno', 'Uno a Muchos'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q2000000-0000-0000-0000-000000000005',
+          id: 'd2000000-0000-0000-0000-000000000005',
           lessonId: lesson2.id,
           questionText: '¿Por qué se desaconseja "synchronize: true" en entornos de producción?',
           options: [
@@ -302,11 +302,11 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
     // Lesson 3
     let lesson3 = await this.lessonRepo.findOne({
-      where: { id: 'l3000000-0000-0000-0000-000000000003' },
+      where: { id: 'b3000000-0000-0000-0000-000000000003' },
     });
     if (!lesson3) {
       lesson3 = this.lessonRepo.create({
-        id: 'l3000000-0000-0000-0000-000000000003',
+        id: 'b3000000-0000-0000-0000-000000000003',
         courseId: course1.id,
         title: '3. Frontend Reactivo con Angular Standalone Components',
         orderNumber: 3,
@@ -316,28 +316,28 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
       const questionsL3 = [
         {
-          id: 'q3000000-0000-0000-0000-000000000001',
+          id: 'd3000000-0000-0000-0000-000000000001',
           lessonId: lesson3.id,
           questionText: '¿Qué propiedad se define en el decorador @Component para habilitar Standalone Components en Angular?',
           options: ['standalone: true', 'modular: false', 'isolated: true', 'exportDefault: true'],
           correctOptionIndex: 0,
         },
         {
-          id: 'q3000000-0000-0000-0000-000000000002',
+          id: 'd3000000-0000-0000-0000-000000000002',
           lessonId: lesson3.id,
           questionText: '¿Cuál es la nueva primitiva reactiva introducida en Angular para manejo síncrono de estado?',
           options: ['BehaviorSubject', 'Signals (signal, computed, effect)', 'EventEmitter', 'NgZone'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q3000000-0000-0000-0000-000000000003',
+          id: 'd3000000-0000-0000-0000-000000000003',
           lessonId: lesson3.id,
           questionText: '¿Qué función alternativa al constructor se usa modernamente en Angular para inyección de dependencias?',
           options: ['getService()', 'inject()', 'provide()', 'useDependency()'],
           correctOptionIndex: 1,
         },
         {
-          id: 'q3000000-0000-0000-0000-000000000004',
+          id: 'd3000000-0000-0000-0000-000000000004',
           lessonId: lesson3.id,
           questionText: '¿Cómo se agregan directivas como CommonModule o FormsModule a un Standalone Component?',
           options: [
@@ -349,7 +349,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           correctOptionIndex: 1,
         },
         {
-          id: 'q3000000-0000-0000-0000-000000000005',
+          id: 'd3000000-0000-0000-0000-000000000005',
           lessonId: lesson3.id,
           questionText: '¿Qué función de Angular inicializa la aplicación con componentes standalone?',
           options: [

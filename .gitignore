@@ -37,3 +37,6 @@ Thumbs.db
 
 # Docker
 .docker/
+.env
+
+backend/.env

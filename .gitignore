@@ -40,3 +40,7 @@ Thumbs.db
 .env
 
 backend/.env
+
+# Environment variables
+.env
+backend/.env

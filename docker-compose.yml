@@ -48,6 +48,8 @@ services:
       dockerfile: Dockerfile
     container_name: elearning_frontend
     restart: always
+    environment:
+      BACKEND_URL: http://backend:3000
     ports:
       - "4200:80"
     depends_on:

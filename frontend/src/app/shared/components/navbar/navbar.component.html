@@ -24,7 +24,7 @@
           </div>
           <div class="user-info">
             <span class="user-name">{{ user.name }}</span>
-            <span class="user-role">{{ user.role === 'ADMIN' ? 'Profesor' : 'Alumno' }}</span>
+            <span class="user-role">{{ user.role === 'SYSADMIN' ? 'Sysadmin' : (user.role === 'ADMIN' ? 'Profesor' : 'Alumno') }}</span>
           </div>
           <svg class="chevron-icon" [class.rotated]="isDropdownOpen" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="6 9 12 15 18 9"></polyline>
@@ -39,6 +39,15 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             <span>Mi Perfil</span>
+          </a>
+          <a *ngIf="user.role === 'SYSADMIN'" routerLink="/sysadmin/users" class="dropdown-item" (click)="isDropdownOpen = false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>Gestión de Usuarios</span>
           </a>
           <button (click)="confirmLogout()" class="dropdown-item text-danger">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

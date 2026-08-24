@@ -12,6 +12,7 @@ import { UserProgress } from './user-progress.entity';
 export enum UserRole {
   STUDENT = 'STUDENT',
   ADMIN = 'ADMIN',
+  SYSADMIN = 'SYSADMIN',
 }
 
 @Entity('users')

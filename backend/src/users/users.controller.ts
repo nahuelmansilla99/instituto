@@ -1,8 +1,10 @@
-import { Controller, Get, Patch, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Body, UseGuards, Query, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { GetUser } from '../auth/get-user.decorator';
-import { User } from '../entities/user.entity';
+import { User, UserRole } from '../entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
@@ -34,5 +36,42 @@ export class UsersController {
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.usersService.changePassword(user.id, changePasswordDto);
+  }
+
+  // --- Sysadmin Endpoints ---
+
+  @Get()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SYSADMIN)
+  findAll(@Query('page') page: string, @Query('limit') limit: string) {
+    return this.usersService.findAll(Number(page) || 1, Number(limit) || 10);
+  }
+
+  @Patch(':id/role')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SYSADMIN)
+  updateRole(@Param('id') id: string, @Body('role') role: UserRole) {
+    return this.usersService.updateRole(id, role);
+  }
+
+  @Patch(':id/password')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SYSADMIN)
+  adminResetPassword(@Param('id') id: string, @Body('password') password: string) {
+    return this.usersService.adminResetPassword(id, password);
+  }
+
+  @Post(':id/deactivate')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SYSADMIN)
+  deactivateUser(@Param('id') id: string) {
+    return this.usersService.deactivateUser(id);
+  }
+
+  @Post(':id/reactivate')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.SYSADMIN)
+  reactivateUser(@Param('id') id: string) {
+    return this.usersService.reactivateUser(id);
   }
 }

@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { User } from '../entities/user.entity';
+import { User, UserRole } from '../entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
@@ -41,5 +41,64 @@ export class UsersService {
     await this.userRepository.save(user);
 
     return { message: 'Contraseña actualizada exitosamente' };
+  }
+
+  // --- Sysadmin Methods ---
+
+  async findAll(page: number = 1, limit: number = 10) {
+    const [users, total] = await this.userRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { createdAt: 'DESC', id: 'ASC' },
+      withDeleted: true,
+    });
+
+    return {
+      data: users.map(user => {
+        const { passwordHash, ...result } = user;
+        return result;
+      }),
+      total,
+      page,
+      limit,
+    };
+  }
+
+  async updateRole(userId: string, role: UserRole) {
+    const user = await this.userRepository.findOne({ where: { id: userId }, withDeleted: true });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+    user.role = role;
+    await this.userRepository.save(user);
+    const { passwordHash, ...result } = user;
+    return result;
+  }
+
+  async adminResetPassword(userId: string, newPassword: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId }, withDeleted: true });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await this.userRepository.save(user);
+
+    return { message: 'Contraseña del usuario actualizada por sysadmin' };
+  }
+
+  async deactivateUser(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado o ya desactivado');
+    await this.userRepository.softRemove(user);
+    return { message: 'Usuario dado de baja exitosamente' };
+  }
+
+  async reactivateUser(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId }, withDeleted: true });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    await this.userRepository.recover(user);
+    return { message: 'Usuario reactivado exitosamente' };
   }
 }

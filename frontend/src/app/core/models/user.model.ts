@@ -1,6 +1,7 @@
 export enum UserRole {
   STUDENT = 'STUDENT',
   ADMIN = 'ADMIN',
+  SYSADMIN = 'SYSADMIN',
 }
 
 export interface User {
@@ -8,6 +9,7 @@ export interface User {
   email: string;
   name: string;
   role: UserRole;
+  deletedAt?: Date;
 }
 
 export interface AuthResponse {

@@ -14,7 +14,6 @@ import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { GetUser } from './get-user.decorator';
 import { User } from '../entities/user.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -41,11 +40,5 @@ export class AuthController {
   @Get('me')
   getMe(@GetUser() user: User) {
     return this.authService.getMe(user.id);
-  }
-
-  @HttpCode(HttpStatus.OK)
-  @Post('forgot-password')
-  forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto.email);
   }
 }

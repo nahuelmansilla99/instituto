@@ -3,7 +3,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Enum Types
 DO $$ BEGIN
-    CREATE TYPE user_role_enum AS ENUM ('STUDENT', 'ADMIN');
+    CREATE TYPE user_role_enum AS ENUM ('STUDENT', 'ADMIN', 'SYSADMIN');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -83,7 +83,8 @@ CREATE TABLE IF NOT EXISTS user_progress (
 INSERT INTO users (id, email, password_hash, name, role)
 VALUES 
 ('a0000000-0000-0000-0000-000000000001', 'admin@instituto.com', '$2b$10$dC6R1DWBw8pWzJzoQ4KaqegY0Ucof7ixt69cZoGxF.HHUtfXNVPLK', 'Profesor Administrador', 'ADMIN'),
-('a0000000-0000-0000-0000-000000000002', 'alumno@instituto.com', '$2b$10$sptF5WY5.j/oBvocDMv6Ve9x0q8bX6NKou8Z2bYQTDl2j4ZyVbWby', 'Juan Pérez (Alumno)', 'STUDENT')
+('a0000000-0000-0000-0000-000000000002', 'alumno@instituto.com', '$2b$10$sptF5WY5.j/oBvocDMv6Ve9x0q8bX6NKou8Z2bYQTDl2j4ZyVbWby', 'Juan Pérez (Alumno)', 'STUDENT'),
+('a0000000-0000-0000-0000-000000000003', 'sysadmin@instituto.com', '$2b$10$dC6R1DWBw8pWzJzoQ4KaqegY0Ucof7ixt69cZoGxF.HHUtfXNVPLK', 'Super Administrador', 'SYSADMIN')
 ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, name = EXCLUDED.name, role = EXCLUDED.role;
 
 -- Course 1: Full-Stack Web Development con NestJS y Angular

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { sysadminGuard } from './core/guards/sysadmin.guard';
 
 export const routes: Routes = [
   {
@@ -12,11 +13,6 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login.component').then((m) => m.LoginComponent),
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () =>
-      import('./features/auth/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
   },
   {
     path: 'register',
@@ -49,6 +45,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/admin/admin-dashboard/admin-dashboard.component').then(
         (m) => m.AdminDashboardComponent,
+      ),
+  },
+  {
+    path: 'sysadmin/users',
+    canActivate: [authGuard, sysadminGuard],
+    loadComponent: () =>
+      import('./features/sysadmin/sysadmin-users/sysadmin-users.component').then(
+        (m) => m.SysadminUsersComponent,
       ),
   },
   {

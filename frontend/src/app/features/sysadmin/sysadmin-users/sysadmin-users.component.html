@@ -1,0 +1,159 @@
+<app-navbar></app-navbar>
+
+<div class="dashboard-page">
+  <div class="glass-card full-height">
+    <div class="header-section">
+      <h2>Gestión de Usuarios</h2>
+      <p class="subtitle">Administra los roles y contraseñas de los usuarios del sistema</p>
+    </div>
+
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <div *ngIf="!isLoading()" class="table-container">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Fecha de baja</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users()" [class.deleted-user]="user.deletedAt">
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="role-badge" [ngClass]="user.role.toLowerCase()">
+                {{ user.role }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="user.deletedAt ? 'inactive' : 'active'">
+                {{ user.deletedAt ? 'Dado de baja' : 'Activo' }}
+              </span>
+            </td>
+            <td>
+              {{ user.deletedAt ? (user.deletedAt | date:'short') : '-' }}
+            </td>
+            <td>
+              <button class="btn btn-primary btn-sm" style="margin-right: 8px;" (click)="openEditModal(user)">
+                Editar
+              </button>
+              <button class="btn btn-sm" [ngClass]="user.deletedAt ? 'btn-primary' : 'btn-secondary'" (click)="toggleUserStatus(user)">
+                {{ user.deletedAt ? 'Dar de alta' : 'Dar de baja' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <button 
+          class="btn btn-secondary btn-sm" 
+          [disabled]="currentPage() === 1"
+          (click)="prevPage()"
+        >
+          Anterior
+        </button>
+        <span class="page-info">
+          Página {{ currentPage() }} de {{ Math.ceil(totalUsers() / limit()) }}
+        </span>
+        <button 
+          class="btn btn-secondary btn-sm" 
+          [disabled]="currentPage() * limit() >= totalUsers()"
+          (click)="nextPage()"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" *ngIf="editingUser()" (click)="closeEditModal()">
+  <div class="modal-content glass-card" (click)="$event.stopPropagation()">
+    <h3>Editar Usuario</h3>
+    <p class="modal-subtitle">{{ editingUser()?.name }} ({{ editingUser()?.email }})</p>
+
+    <div class="form-group">
+      <label>Rol</label>
+      <select class="form-control" [ngModel]="editRole()" (ngModelChange)="editRole.set($event)">
+        <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+      </select>
+    </div>
+
+    <div class="form-group" *ngIf="!isChangingPassword()">
+      <button class="btn btn-secondary w-full" (click)="togglePasswordChange()">Editar contraseña</button>
+    </div>
+
+    <ng-container *ngIf="isChangingPassword()">
+      <div class="form-group">
+        <label>Nueva Contraseña</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          placeholder="Ingrese nueva contraseña"
+          [ngModel]="editPassword()"
+          (ngModelChange)="editPassword.set($event)"
+        />
+      </div>
+      <div class="form-group">
+        <label>Repetir Nueva Contraseña</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          placeholder="Repita la contraseña"
+          [ngModel]="confirmPassword()"
+          (ngModelChange)="confirmPassword.set($event)"
+        />
+      </div>
+    </ng-container>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="saveChanges()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" *ngIf="confirmingUser()" (click)="closeConfirmModal()">
+  <div class="modal-content glass-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon text-danger" *ngIf="confirmAction() === 'deactivate'">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <div class="modal-icon text-success" *ngIf="confirmAction() === 'reactivate'">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="modal-title">{{ confirmAction() === 'deactivate' ? 'Confirmar Baja' : 'Confirmar Alta' }}</h3>
+    </div>
+    
+    <p class="modal-message">
+      ¿Estás seguro que deseas {{ confirmAction() === 'deactivate' ? 'dar de baja' : 'dar de alta' }} al usuario <strong>{{ confirmingUser()?.name }}</strong>?
+    </p>
+    
+    <div class="modal-actions">
+      <button class="btn btn-secondary" (click)="closeConfirmModal()">Cancelar</button>
+      <button 
+        class="btn" 
+        [ngClass]="confirmAction() === 'deactivate' ? 'btn-primary' : 'btn-primary'" 
+        (click)="executeStatusChange()"
+      >
+        {{ confirmAction() === 'deactivate' ? 'Sí, dar de baja' : 'Sí, dar de alta' }}
+      </button>
+    </div>
+  </div>
+</div>

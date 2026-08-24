@@ -20,6 +20,11 @@ export class LoginComponent implements OnInit {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly showPassword = signal(false);
+
+  togglePasswordVisibility(): void {
+    this.showPassword.update(v => !v);
+  }
 
   readonly loginForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

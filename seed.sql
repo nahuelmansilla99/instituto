@@ -72,6 +72,8 @@ CREATE TABLE IF NOT EXISTS user_progress (
     completed_at TIMESTAMP WITH TIME ZONE,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP WITH TIME ZONE,
+    "quizAnswers" JSONB,
+    attempts_count INTEGER DEFAULT 0,
     UNIQUE(user_id, lesson_id)
 );
 

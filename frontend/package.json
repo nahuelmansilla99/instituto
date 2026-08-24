@@ -9,6 +9,7 @@
     "watch": "ng build --watch --configuration development"
   },
   "dependencies": {
+    "@abacritt/angularx-social-login": "^2.2.0",
     "@aiden0z/pptx-renderer": "^1.2.4",
     "@angular/animations": "^17.3.0",
     "@angular/common": "^17.3.0",

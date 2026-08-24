@@ -11,7 +11,9 @@ import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { JwtPayload } from './jwt.strategy';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
@@ -88,6 +90,51 @@ export class AuthService {
       },
       token,
     };
+  }
+
+  async googleLogin(googleLoginDto: GoogleLoginDto) {
+    const { token } = googleLoginDto;
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const client = new OAuth2Client(clientId);
+
+    try {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: clientId,
+      });
+      const payload = ticket.getPayload();
+      const email = payload.email.toLowerCase().trim();
+
+      let user = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      if (!user) {
+        // Create user if not exists
+        user = this.userRepository.create({
+          email,
+          // Generate a random password since they login with google
+          passwordHash: await bcrypt.hash(Math.random().toString(36).slice(-8), 10),
+          name: payload.name || 'Estudiante',
+          role: UserRole.STUDENT,
+        });
+        user = await this.userRepository.save(user);
+      }
+
+      const jwtToken = this.generateToken(user);
+
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        },
+        token: jwtToken,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Token de Google inválido');
+    }
   }
 
   async getMe(userId: string) {

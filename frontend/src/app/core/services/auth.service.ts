@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { User, AuthResponse } from '../models';
+import { SocialAuthService } from '@abacritt/angularx-social-login';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ import { User, AuthResponse } from '../models';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly socialAuthService = inject(SocialAuthService);
   private readonly apiUrl = environment.apiUrl;
 
   private currentUserSignal = signal<User | null>(this.getUserFromStorage());
@@ -29,11 +31,27 @@ export class AuthService {
     );
   }
 
-  logout(): void {
+  loginWithGoogle(token: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/google`, { token }).pipe(
+      tap((res) => this.handleAuthSuccess(res)),
+    );
+  }
+
+  async logout(): Promise<void> {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     this.currentUserSignal.set(null);
-    this.router.navigate(['/login']);
+    
+    // Attempt to sign out from Google as well so it doesn't auto-login next time
+    try {
+      await this.socialAuthService.signOut();
+    } catch (e) {
+      // Ignore error if user wasn't logged in with Google
+    }
+
+    // Force a full page reload to clear Google Identity Services internal state
+    // and avoid the 403 Forbidden iframe error when re-rendering the button.
+    window.location.href = '/login';
   }
 
   getToken(): string | null {

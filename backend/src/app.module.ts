@@ -10,6 +10,7 @@ import { LessonsModule } from './lessons/lessons.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { AdminModule } from './admin/admin.module';
 import { UsersModule } from './users/users.module';
+import { MailService } from './mail/mail.service';
 
 @Module({
   imports: [
@@ -28,6 +29,6 @@ import { UsersModule } from './users/users.module';
     AdminModule,
     UsersModule,
   ],
-  providers: [DatabaseSeedService],
+  providers: [DatabaseSeedService, MailService],
 })
 export class AppModule {}

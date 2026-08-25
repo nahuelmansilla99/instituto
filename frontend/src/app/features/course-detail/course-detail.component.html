@@ -109,56 +109,58 @@
           [class.card-locked]="lesson.status === 'LOCKED'"
         >
           <div class="lesson-card-main">
-            <!-- Order Indicator -->
-            <div class="order-indicator">
-              <span class="order-number">#{{ lesson.orderNumber || (idx + 1) }}</span>
-            </div>
-
             <!-- Lesson Info -->
             <div class="lesson-card-info">
-              <div class="lesson-header-line">
+              <div class="lesson-title-row">
+                <span class="order-indicator-inline">#{{ lesson.orderNumber || (idx + 1) }}</span>
                 <h3 class="lesson-card-title">{{ lesson.title }}</h3>
+              </div>
+              <div class="lesson-badges-row">
                 <span
                   class="badge-lesson-status"
+                  *ngIf="lesson.status !== 'AVAILABLE'"
                   [ngClass]="{
                     'status-badge-completed': lesson.status === 'COMPLETED',
-                    'status-badge-available': lesson.status === 'AVAILABLE',
                     'status-badge-locked': lesson.status === 'LOCKED'
                   }"
                 >
                   <ng-container *ngIf="lesson.status === 'COMPLETED'">
                     ✓ {{ lesson.hasQuiz ? 'Aprobada (' + lesson.score + '%)' : 'Completada' }}
                   </ng-container>
-                  <ng-container *ngIf="lesson.status === 'AVAILABLE'">🔓 Disponible</ng-container>
                   <ng-container *ngIf="lesson.status === 'LOCKED'">🔒 Bloqueada</ng-container>
                 </span>
 
                 <!-- Pending Lesson Badge -->
-                <span class="pending-lesson-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE'">
-                  <span class="pulsing-dot-small"></span>
-                  Clase Pendiente
+                <span class="pending-lesson-badge minimal-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE'">
+                  <span class="pulsing-dot-small warning"></span>
+                  Pendiente
                 </span>
-              </div>
 
-              <div class="lesson-card-meta">
-                <span *ngIf="lesson.availableAt" class="meta-badge meta-schedule">
-                  🗓️ {{ isFutureDate(lesson.availableAt) ? 'Estreno: ' : 'Habilitada: ' }}{{ lesson.availableAt | date:'dd/MM/yyyy HH:mm' }}
+                <!-- Quiz Status Badge -->
+                <ng-container *ngIf="lesson.hasQuiz && authService.currentUser()?.role !== 'ADMIN'">
+                  <!-- Pending Exam (Red) -->
+                  <span class="pending-exam-badge minimal-badge" *ngIf="lesson.status === 'AVAILABLE'">
+                    <span class="pulsing-dot-small danger"></span>
+                    Examen Pendiente
+                  </span>
+                  <!-- Completed/Passed Exam (Green) -->
+                  <span class="quiz-completed-badge minimal-badge" *ngIf="lesson.status === 'COMPLETED'">
+                    ✓ Examen Aprobado ({{ lesson.score }}%)
+                  </span>
+                </ng-container>
+
+                <span *ngIf="lesson.availableAt" class="meta-badge minimal-badge meta-schedule">
+                  🗓️ {{ isFutureDate(lesson.availableAt) ? 'Estreno: ' : '' }}{{ lesson.availableAt | date:'dd/MM/yy HH:mm' }}
                 </span>
                 <span
                   *ngIf="lesson.presentationUrl"
-                  class="meta-badge meta-ppt"
-                  [class.meta-ppt-clickable]="lesson.status !== 'LOCKED'"
-                  (click)="lesson.status !== 'LOCKED' ? openLessonPresentation(lesson.id) : null"
-                  [title]="'Haz clic para abrir la presentación interactiva'"
+                  class="meta-badge minimal-badge meta-ppt"
                 >
-                  <ng-container *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi Disponible</ng-container>
-                  <ng-container *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 PowerPoint / Diapositivas</ng-container>
+                  <ng-container *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi</ng-container>
+                  <ng-container *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 Diapositivas</ng-container>
                 </span>
-                <span *ngIf="lesson.meetUrl" class="meta-badge meta-meet">
-                  🔴 Sesión Meet
-                </span>
-                <span *ngIf="lesson.hasQuiz" class="meta-badge meta-quiz">
-                  📝 Examen Multiple Choice (80% req.)
+                <span *ngIf="lesson.meetUrl" class="meta-badge minimal-badge meta-meet">
+                  🔴 Meet
                 </span>
               </div>
             </div>
@@ -179,13 +181,11 @@
               </button>
 
               <button
-                *ngIf="lesson.presentationUrl"
-                (click)="openLessonPresentation(lesson.id)"
-                class="btn btn-ppt-quick"
-                [title]="isPreziUrl(lesson.presentationUrl) ? 'Abrir presentación Prezi interactiva' : 'Abrir diapositivas e interactuar con el PowerPoint'"
+                *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE' && lesson.hasQuiz"
+                (click)="startLesson(lesson.id)"
+                class="btn btn-warning w-full"
               >
-                <span *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi</span>
-                <span *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 Diapositivas</span>
+                📝 Realizar examen
               </button>
             </div>
 

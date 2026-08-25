@@ -182,7 +182,7 @@
 
               <button
                 *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE' && lesson.hasQuiz"
-                (click)="startLesson(lesson.id)"
+                (click)="startExam(lesson.id)"
                 class="btn btn-warning w-full"
               >
                 📝 Realizar examen

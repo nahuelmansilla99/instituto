@@ -550,3 +550,46 @@ textarea.form-control {
   padding-top: 18px;
   border-top: 1px solid var(--border-subtle);
 }
+
+/* Empty State Styling */
+.empty-state {
+  padding: 60px 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 600px;
+  margin: 40px auto;
+  border-radius: var(--radius-lg);
+}
+
+.empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  animation: floatEmptyIcon 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+.empty-state h3 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  max-width: 480px;
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+@keyframes floatEmptyIcon {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+

@@ -358,58 +358,87 @@
   min-width: 280px;
 }
 
-.order-indicator {
-  width: 44px;
-  height: 44px;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.35);
-  color: #c084fc;
-  border-radius: var(--radius-sm);
+.lesson-title-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 1rem;
-  flex-shrink: 0;
+  gap: 8px;
 }
 
-.card-completed .order-indicator {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.4);
+.order-indicator-inline {
+  color: #c084fc;
+  font-weight: 800;
+  font-size: 1.15rem;
+  opacity: 0.9;
+}
+
+.card-completed .order-indicator-inline {
   color: #34d399;
 }
 
-.card-locked .order-indicator {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: var(--border-subtle);
+.card-locked .order-indicator-inline {
   color: var(--text-muted);
 }
 
 .lesson-card-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  width: 100%;
 }
 
-.lesson-header-line {
+.lesson-badges-row {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: 4px;
 }
 
 .pending-lesson-badge {
-  background: rgba(245, 158, 11, 0.9);
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
+  color: #fbbf24;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #fff;
-  border: 1px solid rgba(251, 191, 36, 0.5);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  gap: 4px;
+}
+
+.pending-exam-badge {
+  color: #f87171;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quiz-completed-badge {
+  color: #34d399;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pulsing-dot-small.warning {
+  background: #fbbf24;
+  box-shadow: 0 0 4px #fbbf24;
+}
+
+.pulsing-dot-small.danger {
+  background: #f87171;
+  box-shadow: 0 0 4px #f87171;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: #fff;
+  border: 1px solid #d97706;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #d97706;
 }
 
 .pulsing-dot-small {
@@ -425,31 +454,23 @@
   font-size: 1.15rem;
   margin: 0;
   color: #fff;
+  line-height: 1.3;
 }
 
 .badge-lesson-status {
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .status-badge-completed {
   color: #34d399;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-}
-
-.status-badge-available {
-  color: #c084fc;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.35);
 }
 
 .status-badge-locked {
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-subtle);
 }
 
 .lesson-card-meta {
@@ -457,24 +478,22 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 2px;
 }
 
 .meta-badge {
-  font-size: 0.72rem;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+  font-size: 0.75rem;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .meta-schedule {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.35);
   color: #38bdf8;
 }
 
 .meta-ppt {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
   color: #fbbf24;
 }
 
@@ -484,20 +503,15 @@
 }
 
 .meta-ppt-clickable:hover {
-  background: rgba(245, 158, 11, 0.3);
-  border-color: #f59e0b;
+  color: #fcd34d;
   transform: scale(1.04);
 }
 
 .meta-meet {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
   color: #fca5a5;
 }
 
 .meta-quiz {
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.3);
   color: #a5b4fc;
 }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -10,6 +10,19 @@ import {
   StudentSummary,
   StudentCourseProgressReport,
 } from '../../../core/models';
+
+export interface MergedStudentRow {
+  studentId: string;
+  name: string;
+  email: string;
+  isEnrolled: boolean;
+  enrollmentId?: string;
+  enrolledAt?: string;
+  totalLessons?: number;
+  completedLessons?: number;
+  progressPercentage?: number;
+  averageScore?: number | null;
+}
 
 @Component({
   selector: 'app-admin-course-editor',
@@ -36,14 +49,39 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly enrolledStudents = signal<EnrolledStudentReport[]>([]);
   readonly allPlatformStudents = signal<StudentSummary[]>([]);
   readonly isLoadingStudents = signal(false);
-  readonly showEnrollModal = signal(false);
-  readonly isEnrolling = signal(false);
+  
+  readonly mergedStudentsList = computed<MergedStudentRow[]>(() => {
+    const all = this.allPlatformStudents();
+    const enrolled = this.enrolledStudents();
+    
+    return all.map(student => {
+      const enrolledData = enrolled.find(e => e.studentId === student.id);
+      if (enrolledData) {
+        return {
+          studentId: enrolledData.studentId,
+          name: enrolledData.name,
+          email: enrolledData.email,
+          isEnrolled: true,
+          enrollmentId: enrolledData.enrollmentId,
+          enrolledAt: enrolledData.enrolledAt,
+          totalLessons: enrolledData.totalLessons,
+          completedLessons: enrolledData.completedLessons,
+          progressPercentage: enrolledData.progressPercentage,
+          averageScore: enrolledData.averageScore
+        };
+      } else {
+        return {
+          studentId: student.id,
+          name: student.name,
+          email: student.email,
+          isEnrolled: false
+        };
+      }
+    });
+  });
+
   readonly showStudentProgressModal = signal(false);
   readonly selectedStudentReport = signal<StudentCourseProgressReport | null>(null);
-
-  readonly enrollForm = this.fb.group({
-    emailOrUserId: ['', [Validators.required]],
-  });
 
   // Course Edit Modal
   readonly showEditCourseModal = signal(false);
@@ -151,10 +189,19 @@ export class AdminCourseEditorComponent implements OnInit {
 
   loadEnrolledStudents(courseId: string): void {
     this.isLoadingStudents.set(true);
-    this.adminService.getCourseStudents(courseId).subscribe({
-      next: (data) => {
-        this.enrolledStudents.set(data);
-        this.isLoadingStudents.set(false);
+    
+    this.adminService.getAllStudents().subscribe({
+      next: (allStudents) => {
+        this.allPlatformStudents.set(allStudents);
+        this.adminService.getCourseStudents(courseId).subscribe({
+          next: (enrolled) => {
+            this.enrolledStudents.set(enrolled);
+            this.isLoadingStudents.set(false);
+          },
+          error: () => {
+            this.isLoadingStudents.set(false);
+          },
+        });
       },
       error: () => {
         this.isLoadingStudents.set(false);
@@ -185,63 +232,37 @@ export class AdminCourseEditorComponent implements OnInit {
     return Math.round(sum / list.length);
   }
 
-  openEnrollModal(): void {
-    this.enrollForm.reset();
-    this.showEnrollModal.set(true);
-    this.adminService.getAllStudents().subscribe({
-      next: (students) => {
-        this.allPlatformStudents.set(students);
-      },
-    });
-  }
-
-  onSelectStudentDropdown(event: any): void {
-    const selectedEmail = event.target.value;
-    if (selectedEmail) {
-      this.enrollForm.patchValue({ emailOrUserId: selectedEmail });
-    }
-  }
-
-  submitEnrollStudent(): void {
-    const c = this.course();
-    if (!c || this.enrollForm.invalid) return;
-
-    this.isEnrolling.set(true);
-    const emailOrUserId = this.enrollForm.value.emailOrUserId!;
-
-    this.adminService.enrollStudent(c.id, emailOrUserId).subscribe({
-      next: () => {
-        this.isEnrolling.set(false);
-        this.showEnrollModal.set(false);
-        this.loadEnrolledStudents(c.id);
-      },
-      error: (err) => {
-        this.isEnrolling.set(false);
-        alert('Error al matricular alumno: ' + (err.error?.message || 'Verifica el correo'));
-      },
-    });
-  }
-
-  unenrollStudent(student: EnrolledStudentReport): void {
-    if (!confirm(`¿Estás seguro de desmatricular a "${student.name}" de este curso?`)) {
-      return;
-    }
+  toggleEnrollment(student: MergedStudentRow): void {
     const c = this.course();
     if (!c) return;
 
-    this.adminService.unenrollStudent(c.id, student.studentId).subscribe({
-      next: () => {
-        this.loadEnrolledStudents(c.id);
-      },
-      error: (err) => {
-        alert('Error al desmatricular alumno: ' + (err.error?.message || 'Error'));
-      },
-    });
+    if (student.isEnrolled) {
+      if (!confirm(`¿Estás seguro de desmatricular a "${student.name}" de este curso?`)) {
+        return;
+      }
+      this.adminService.unenrollStudent(c.id, student.studentId).subscribe({
+        next: () => {
+          this.loadEnrolledStudents(c.id);
+        },
+        error: (err) => {
+          alert('Error al desmatricular: ' + (err.error?.message || ''));
+        }
+      });
+    } else {
+      this.adminService.enrollStudent(c.id, student.email).subscribe({
+        next: () => {
+          this.loadEnrolledStudents(c.id);
+        },
+        error: (err) => {
+          alert('Error al matricular: ' + (err.error?.message || ''));
+        }
+      });
+    }
   }
 
-  viewStudentProgress(student: EnrolledStudentReport): void {
+  viewStudentProgress(student: MergedStudentRow): void {
     const c = this.course();
-    if (!c) return;
+    if (!c || !student.isEnrolled) return;
 
     this.adminService.getStudentCourseProgress(c.id, student.studentId).subscribe({
       next: (report) => {
@@ -250,7 +271,7 @@ export class AdminCourseEditorComponent implements OnInit {
       },
       error: (err) => {
         alert('Error al cargar progreso del alumno: ' + (err.error?.message || 'Error'));
-      },
+      }
     });
   }
 

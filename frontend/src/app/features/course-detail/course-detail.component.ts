@@ -50,6 +50,12 @@ export class CourseDetailComponent implements OnInit {
     this.router.navigate(['/lessons', lessonId]);
   }
 
+  startExam(lessonId: string): void {
+    this.router.navigate(['/lessons', lessonId], {
+      queryParams: { action: 'start-quiz' },
+    });
+  }
+
   isPreziUrl(url?: string | null): boolean {
     return !!url && url.toLowerCase().includes('prezi.com');
   }

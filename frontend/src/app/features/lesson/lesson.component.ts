@@ -74,12 +74,23 @@ export class LessonComponent implements OnInit {
         }
         this.isLoading.set(false);
         const requestedView = this.route.snapshot.queryParams['view'];
-        if (requestedView === 'presentation' || (data.presentationUrl && requestedView !== 'content')) {
+        const requestedAction = this.route.snapshot.queryParams['action'];
+        
+        if (requestedAction === 'start-quiz' && data.quizQuestions?.length > 0) {
+          this.isQuizStarted.set(true);
+          this.activeLessonView.set('content');
+          setTimeout(() => {
+            document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        } else if (requestedView === 'presentation' || (data.presentationUrl && requestedView !== 'content')) {
           this.activeLessonView.set('presentation');
         } else {
           this.activeLessonView.set('content');
         }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        if (requestedAction !== 'start-quiz') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       },
       error: (err) => {
         this.isLoading.set(false);

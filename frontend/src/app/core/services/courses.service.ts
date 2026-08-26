@@ -23,6 +23,14 @@ export class CoursesService {
     return this.http.get<LessonDetail>(`${this.apiUrl}/lessons/${lessonId}`);
   }
 
+  updateLessonProgress(lessonId: string, data: { hasViewedContent?: boolean; hasViewedSheets?: boolean }): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/lessons/${lessonId}/progress`, data);
+  }
+
+  getStudentProgress(userId: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/progress/${userId}`);
+  }
+
   downloadTechnicalSheet(filename: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/lessons/downloads/technical-sheets/${filename}`, {
       responseType: 'blob'

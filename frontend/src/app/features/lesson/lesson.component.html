@@ -1,490 +1,181 @@
 <app-navbar></app-navbar>
 
-<div class="lesson-layout" *ngIf="lesson() as currentLesson">
-  <!-- MAIN LESSON CONTENT AREA -->
-  <main class="content-area">
-    <!-- Breadcrumb & Top bar -->
-    <div class="lesson-top-bar">
-      <nav class="lesson-breadcrumb">
-        <a routerLink="/dashboard" class="breadcrumb-link">
-          <span>Mis Cursos</span>
+<main class="lesson-page" *ngIf="lesson() as l">
+  <div class="lesson-container">
+    
+    <!-- Sidebar: Temario -->
+    <aside class="lesson-sidebar">
+      <div class="sidebar-header">
+        <a [routerLink]="['/courses', l.courseId]" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Volver al curso
         </a>
-        <span class="breadcrumb-separator">/</span>
-        <a [routerLink]="authService.isAdmin() ? ['/admin/courses', currentLesson.courseId] : ['/courses', currentLesson.courseId]" class="breadcrumb-link">
-          <span>{{ currentLesson.courseTitle }}</span>
-        </a>
-        <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current">Clase #{{ currentLesson.orderNumber }}</span>
-      </nav>
-
-      <!-- Teacher Navigation Shortcut -->
-      <div *ngIf="authService.isAdmin()" class="teacher-top-shortcuts">
-        <a [routerLink]="['/admin/courses', currentLesson.courseId]" class="btn btn-secondary btn-sm" title="Ir a la administración de este curso">
-          <span>⚙️ Panel de Gestión del Curso</span>
-        </a>
+        <h3 class="course-title-sidebar">{{ l.courseTitle }}</h3>
       </div>
-    </div>
-
-    <!-- Lesson Header -->
-    <header class="lesson-header animate-fade-in">
-      <div class="header-badges">
-        <span class="badge badge-available">Clase {{ currentLesson.orderNumber }}</span>
-        <span *ngIf="authService.isAdmin()" class="badge badge-role-tag">
-          👨‍🏫 Vista de Profesor
-        </span>
-        <span *ngIf="!authService.isAdmin() && currentLesson.status === 'COMPLETED'" class="badge badge-completed">
-          ✓ Aprobada ({{ currentLesson.score }}%)
-        </span>
-      </div>
-      <h1>{{ currentLesson.title }}</h1>
-    </header>
-
-    <!-- Live Google Meet Banner if available -->
-    <div *ngIf="currentLesson.meetUrl || currentLesson.courseMeetUrl" class="live-meet-lesson-banner glass-card animate-fade-in">
-      <div class="meet-banner-content">
-        <span class="live-pulse-dot"></span>
-        <div>
-          <strong>🔴 Sesión en Vivo Disponible</strong>
-          <p>Únete a la clase interactiva con el profesor vía Google Meet</p>
-        </div>
-      </div>
-      <a [href]="currentLesson.meetUrl || currentLesson.courseMeetUrl" target="_blank" class="btn btn-primary btn-meet-join">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="23 7 16 12 23 17 23 7"></polygon>
-          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-        </svg>
-        <span>Unirse a la Clase en Vivo</span>
-      </a>
-    </div>
-
-    <!-- LESSON VIEW MODE TABS -->
-    <div class="lesson-mode-tabs animate-fade-in">
-      <button
-        (click)="activeLessonView.set('content')"
-        class="mode-tab-btn"
-        [class.mode-tab-active]="activeLessonView() === 'content'"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
-        <span>📖 Guía y Contenido de la Clase</span>
-      </button>
-
-      <button
-        (click)="activeLessonView.set('presentation')"
-        class="mode-tab-btn"
-        [class.mode-tab-active]="activeLessonView() === 'presentation'"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-          <line x1="8" y1="21" x2="16" y2="21"></line>
-          <line x1="12" y1="17" x2="12" y2="21"></line>
-        </svg>
-        <span *ngIf="isPreziUrl(currentLesson.presentationUrl)">🌀 Pantalla de Presentación Prezi</span>
-        <span *ngIf="!isPreziUrl(currentLesson.presentationUrl)">📊 Pantalla de Presentación / Diapositivas</span>
-        <span *ngIf="currentLesson.presentationUrl" class="tab-badge-ppt">Disponible</span>
-      </button>
-    </div>
-
-    <!-- TAB 1: HTML / CONTENT VIEW -->
-    <div *ngIf="activeLessonView() === 'content'" class="tab-content-pane animate-fade-in">
-      <!-- Presentation Material (PowerPoint / Prezi / PDF) Quick Box -->
-      <div *ngIf="currentLesson.presentationUrl" class="lesson-presentation-box glass-card animate-fade-in mb-3">
-        <div class="presentation-main-row">
-          <div class="presentation-icon-box">
-            <span *ngIf="isPreziUrl(currentLesson.presentationUrl)">🌀</span>
-            <span *ngIf="!isPreziUrl(currentLesson.presentationUrl)">📊</span>
+      
+      <div class="syllabus-list">
+        <div 
+          *ngFor="let item of l.syllabus" 
+          class="syllabus-item"
+          [class.active]="item.id === l.id"
+          [class.locked]="item.status === 'LOCKED'"
+          [class.completed]="item.status === 'COMPLETED'"
+          (click)="selectLesson(item)"
+        >
+          <div class="item-icon">
+            <svg *ngIf="item.status === 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <svg *ngIf="item.status === 'LOCKED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span *ngIf="item.status === 'AVAILABLE'" class="circle-icon"></span>
           </div>
-          <div class="presentation-info">
-            <h4>{{ isPreziUrl(currentLesson.presentationUrl) ? 'Presentación Interactiva Prezi' : 'Presentación y Diapositivas de la Clase' }}</h4>
-            <p>{{ isPreziUrl(currentLesson.presentationUrl) ? 'Explora la presentación de Prezi con zoom y animaciones interactivas.' : 'Material de diapositivas preparado por el profesor.' }}</p>
-            <span class="presentation-filename-badge">
-              📎 {{ currentLesson.presentationFilename || (isPreziUrl(currentLesson.presentationUrl) ? 'Presentación Prezi' : 'Presentación.pptx') }}
-            </span>
+          <div class="item-content">
+            <span class="item-title">{{ item.orderNumber }}. {{ item.title }}</span>
           </div>
         </div>
-        <div class="presentation-actions">
-          <button
-            (click)="activeLessonView.set('presentation')"
-            class="btn btn-secondary btn-view-ppt"
-          >
-            <span>👁️ Ver en Pantalla de Diapositivas</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <section class="lesson-main">
+      
+      <!-- 1. Encabezado de la clase -->
+      <div class="lesson-header">
+        <div class="lesson-meta-row">
+          <span class="lesson-number">Clase {{ l.orderNumber }}</span>
+          <span class="lesson-status-badge" [ngClass]="l.status.toLowerCase()">
+            {{ l.status === 'COMPLETED' ? 'Completada' : (l.status === 'LOCKED' ? 'Bloqueada' : 'En progreso') }}
+          </span>
+        </div>
+        <h2 class="lesson-title">{{ l.title }}</h2>
+      </div>
+
+      <!-- 2. Checklist de progreso -->
+      <div class="progress-checklist">
+        <!-- Chip 1: Contenido -->
+        <div class="progress-chip" [class.completed]="hasViewedContent() || (!l.presentationUrl && !l.content)">
+          <svg *ngIf="hasViewedContent() || (!l.presentationUrl && !l.content)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg *ngIf="!(hasViewedContent() || (!l.presentationUrl && !l.content))" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+          <span>Contenido visto</span>
+        </div>
+        <!-- Chip 2: Fichas -->
+        <div class="progress-chip" [class.completed]="isSheetsViewed">
+          <svg *ngIf="isSheetsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg *ngIf="!isSheetsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+          <span>Fichas revisadas</span>
+        </div>
+        <!-- Chip 3: Examen -->
+        <div class="progress-chip" [class.completed]="l.status === 'COMPLETED'">
+          <svg *ngIf="l.status === 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg *ngIf="l.status !== 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+          <span>{{ l.status === 'COMPLETED' ? 'Examen aprobado' : 'Examen pendiente' }}</span>
+        </div>
+      </div>
+
+      <!-- 3. Sección "Contenido de la clase" -->
+      <div class="section-container" *ngIf="l.presentationUrl || l.content">
+        <h4 class="section-title">Contenido de la clase</h4>
+        
+        <div class="content-card">
+          <div class="content-info">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <span class="content-name">Presentación: {{ l.title }}</span>
+          </div>
+          <button *ngIf="!isPresentationOpen()" class="btn-accent" (click)="openPresentation()">Abrir</button>
+          <button *ngIf="isPresentationOpen()" class="btn-outline" (click)="closePresentation()">Ocultar</button>
+        </div>
+
+        <div class="presentation-embed animate-fade-in" *ngIf="isPresentationOpen()">
+          <app-presentation-viewer 
+            *ngIf="l.presentationUrl"
+            [presentationUrl]="l.presentationUrl"
+            [title]="l.title">
+          </app-presentation-viewer>
+          <div class="html-content" *ngIf="l.content" [innerHTML]="l.content"></div>
+        </div>
+      </div>
+
+      <!-- 4. Sección "Fichas técnicas" -->
+      <div class="section-container" *ngIf="l.technicalSheets && l.technicalSheets.length > 0">
+        <h4 class="section-title">Fichas técnicas</h4>
+        
+        <div class="sheets-list">
+          <div class="sheet-item" *ngFor="let sheet of l.technicalSheets">
+            <div class="sheet-info">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <span class="sheet-name">{{ sheet.originalName }}</span>
+            </div>
+            <button class="btn-icon" (click)="downloadTechnicalSheet(sheet)" title="Descargar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+          </div>
+        </div>
+        
+        <label class="manual-check-label" *ngIf="!isSheetsViewed">
+          <input type="checkbox" [checked]="manualSheetsViewed()" (change)="toggleManualSheetsViewed()">
+          Marcar fichas como revisadas
+        </label>
+      </div>
+
+      <!-- 5. Sección "Examen" -->
+      <div class="section-container exam-section" *ngIf="l.quizQuestions && l.quizQuestions.length > 0">
+        <div class="exam-header-row">
+          <div>
+            <h4 class="section-title" style="margin-bottom: 4px;">Examen de la clase</h4>
+            <span class="exam-subtitle">Obligatorio para desbloquear clase {{ l.orderNumber + 1 }}</span>
+          </div>
+          
+          <button 
+            class="btn-accent" 
+            [class.btn-disabled]="!isExamUnlocked" 
+            [disabled]="!isExamUnlocked"
+            (click)="startQuizSection()"
+            [title]="!isExamUnlocked ? 'Completá el contenido y las fichas para habilitar el examen' : ''">
+            <svg *ngIf="!isExamUnlocked" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            {{ l.status === 'COMPLETED' ? 'Reintentar examen' : 'Rendir examen' }}
           </button>
-          <a
-            *ngIf="!isPreziUrl(currentLesson.presentationUrl)"
-            [href]="currentLesson.presentationUrl"
-            target="_blank"
-            [download]="currentLesson.presentationFilename || 'presentacion'"
-            class="btn btn-primary btn-download-ppt"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span>Descargar Archivo</span>
-          </a>
-          <a
-            *ngIf="isPreziUrl(currentLesson.presentationUrl)"
-            [href]="currentLesson.presentationUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="btn btn-primary btn-download-ppt"
-          >
-            <span>↗️ Abrir en Prezi</span>
-          </a>
         </div>
-      </div>
 
-      <!-- Lesson Content Viewer (HTML / Slides / Video) -->
-      <section class="lesson-player glass-card animate-fade-in">
-        <div class="lesson-html-content" [innerHTML]="currentLesson.content"></div>
-      </section>
+        <!-- Quiz Area -->
+        <div id="quiz-section" class="quiz-area animate-fade-in" *ngIf="isQuizStarted()">
+          <div *ngIf="quizResult()" class="quiz-result-card" [class.passed]="quizResult()?.passed" [class.failed]="!quizResult()?.passed">
+            <h3>{{ quizResult()?.passed ? '¡Felicitaciones! Aprobaste el examen' : 'No alcanzaste la nota mínima' }}</h3>
+            <p class="score-display">Tu calificación: {{ quizResult()?.score }}%</p>
+            <button class="btn-accent" style="margin-top: 15px;" (click)="resetQuiz()">Reintentar</button>
+            <button class="btn-outline" style="margin-top: 15px; margin-left: 10px;" *ngIf="quizResult()?.passed && getNextLesson()" (click)="goToNextSyllabusLesson()">Siguiente clase ➔</button>
+          </div>
 
-      <!-- Material Complementario / Fichas Tecnicas -->
-      <section *ngIf="currentLesson.technicalSheets && currentLesson.technicalSheets.length > 0" class="lesson-technical-sheets glass-card animate-fade-in" style="margin-top: 20px;">
-        <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #fff;">
-          📚 Material Complementario
-        </h3>
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div *ngFor="let sheet of currentLesson.technicalSheets" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <span style="font-size: 24px;">📄</span>
-              <div>
-                <h4 style="margin: 0; font-size: 15px; font-weight: 500; color: #fff;">{{ sheet.originalName }}</h4>
-                <span style="font-size: 12px; color: #aaa;" *ngIf="sheet.fileSize">{{ (sheet.fileSize / 1024 / 1024) | number:'1.1-2' }} MB</span>
+          <div *ngIf="!quizResult()">
+            <div class="quiz-questions">
+              <div *ngFor="let q of l.quizQuestions; let qIdx = index" class="question-card">
+                <p class="question-text"><strong>{{ qIdx + 1 }}.</strong> {{ q.questionText }}</p>
+                <div class="options-list">
+                  <label *ngFor="let opt of q.options; let optIdx = index" 
+                         class="option-label"
+                         [class.selected]="selectedAnswers()[q.id] === optIdx">
+                    <input type="radio" 
+                           [name]="'q_' + q.id" 
+                           [value]="optIdx"
+                           [checked]="selectedAnswers()[q.id] === optIdx"
+                           (change)="onSelectOption(q.id, optIdx)">
+                    <span class="option-letter">{{ getOptionLetter(optIdx) }}</span>
+                    <span class="option-text">{{ opt }}</span>
+                  </label>
+                </div>
               </div>
             </div>
-            <button (click)="downloadTechnicalSheet(sheet)" class="btn btn-secondary btn-sm" title="Descargar material">
-              ⬇️ Descargar
-            </button>
+            
+            <div class="quiz-actions" style="margin-top: 20px;">
+              <button class="btn-outline" (click)="saveQuizProgress()" [disabled]="isSavingProgress()">
+                {{ isSavingProgress() ? 'Guardando...' : 'Guardar progreso' }}
+              </button>
+              <button class="btn-accent" style="margin-left: 10px;" (click)="submitQuiz()" [disabled]="!isAllAnswered() || isSubmitting()">
+                {{ isSubmitting() ? 'Enviando...' : 'Enviar respuestas' }}
+              </button>
+            </div>
+            <p class="warning-text" style="margin-top: 10px; color: #D85A30; font-size: 14px;" *ngIf="!isAllAnswered()">Debes responder todas las preguntas para enviar el examen.</p>
           </div>
         </div>
-      </section>
-    </div>
-
-    <!-- TAB 2: POWERPOINT PRESENTATION SCREEN -->
-    <div *ngIf="activeLessonView() === 'presentation'" class="tab-content-pane animate-fade-in">
-      <!-- If Presentation Exists: Native Interactive Viewer -->
-      <div *ngIf="currentLesson.presentationUrl" class="presentation-active-wrapper animate-fade-in">
-        <app-presentation-viewer
-          [presentationUrl]="currentLesson.presentationUrl"
-          [presentationFilename]="currentLesson.presentationFilename || 'Presentación.pptx'"
-          [title]="currentLesson.title"
-        ></app-presentation-viewer>
       </div>
 
-      <!-- If No Presentation in Lesson -->
-      <div *ngIf="!currentLesson.presentationUrl" class="empty-presentation-box glass-card animate-fade-in">
-        <div class="empty-icon">📊</div>
-        <h3>Esta clase aún no cuenta con PowerPoint adjunto</h3>
-        <p>Puedes consultar la explicación teórica completa en la pestaña <strong>"Guía y Contenido de la Clase"</strong>.</p>
-        <button (click)="activeLessonView.set('content')" class="btn btn-primary" style="margin-top: 12px;">
-          Ir a la Guía de la Clase ➔
-        </button>
-      </div>
-    </div>
-
-    <!-- NO QUIZ REQUIRED - COMPLETION & NEXT LESSON BANNER -->
-    <section
-      *ngIf="currentLesson.quizQuestions.length === 0"
-      class="lesson-end-action-box glass-card animate-fade-in"
-    >
-      <div class="end-action-badge">✅ Fin de la Lección</div>
-      <h2>¡Has completado el contenido de esta clase!</h2>
-      <p *ngIf="!authService.isAdmin()">
-        Esta clase no requiere examen de evaluación. Puedes continuar directamente a la siguiente lección del curso.
-      </p>
-      <p *ngIf="authService.isAdmin()">
-        Esta clase no tiene preguntas de evaluación asignadas. Puedes agregar preguntas de opción múltiple desde el editor del curso si lo deseas.
-      </p>
-
-      <div class="end-action-buttons">
-        <button
-          *ngIf="getNextLesson() as nextL"
-          (click)="goToNextSyllabusLesson()"
-          class="btn btn-primary btn-lg btn-start-quiz-cta"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          <span>Siguiente Clase: {{ nextL.title }} ➔</span>
-        </button>
-
-        <a
-          *ngIf="authService.isAdmin()"
-          [routerLink]="['/admin/courses', currentLesson.courseId]"
-          class="btn btn-secondary"
-        >
-          ✏️ Agregar Preguntas en el Editor
-        </a>
-
-        <a [routerLink]="['/courses', currentLesson.courseId]" class="btn btn-secondary">
-          Volver al Temario del Curso
-        </a>
-      </div>
     </section>
-
-    <!-- LESSON FINISHED & QUIZ TRIGGER PROMPT -->
-    <section
-      *ngIf="!isQuizStarted() && !quizResult() && (currentLesson.status !== 'COMPLETED' || authService.isAdmin()) && currentLesson.quizQuestions.length > 0"
-      class="lesson-end-action-box glass-card animate-fade-in"
-    >
-      <div class="end-action-badge">🎯 Fin del Contenido de la Clase</div>
-      <h2>¿Deseas revisar la evaluación de esta clase?</h2>
-      <p *ngIf="!authService.isAdmin()">
-        Rinde el examen de opción múltiple para evaluar lo aprendido y desbloquear automáticamente la siguiente lección del curso.
-      </p>
-      <p *ngIf="authService.isAdmin()">
-        Como docente tienes todas las clases habilitadas. Puedes previsualizar el examen aquí o modificar las preguntas en el editor del curso.
-      </p>
-
-      <div class="end-action-buttons">
-        <button (click)="startQuizSection()" class="btn btn-primary btn-lg btn-start-quiz-cta">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 11l3 3L22 4"></path>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-          </svg>
-          <span>📝 {{ authService.isAdmin() ? 'Previsualizar Examen' : 'Iniciar Examen de la Clase ➔' }}</span>
-        </button>
-
-        <a
-          *ngIf="authService.isAdmin()"
-          [routerLink]="['/admin/courses', currentLesson.courseId]"
-          class="btn btn-secondary"
-        >
-          ✏️ Editar Preguntas en el Editor
-        </a>
-
-        <a
-          *ngIf="!authService.isAdmin()"
-          [routerLink]="['/courses', currentLesson.courseId]"
-          class="btn btn-secondary"
-        >
-          Volver al Temario
-        </a>
-      </div>
-    </section>
-
-    <!-- QUIZ & PROGRESSION EVALUATION SECTION -->
-    <section
-      *ngIf="(isQuizStarted() || quizResult() || (currentLesson.status === 'COMPLETED' && !authService.isAdmin())) && currentLesson.quizQuestions.length > 0"
-      class="quiz-section glass-card animate-fade-in"
-      id="quiz-section"
-    >
-      <div class="quiz-header">
-        <div class="quiz-badge-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 11l3 3L22 4"></path>
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-          </svg>
-        </div>
-        <div>
-          <h2>Evaluación de la Clase</h2>
-          <p class="quiz-subtitle" *ngIf="!authService.isAdmin()">
-            Responde las siguientes preguntas. Necesitas al menos un <strong>80%</strong> para aprobar y desbloquear la siguiente lección.
-            <span *ngIf="currentLesson.attemptsCount > 0" style="color: #64748b; font-weight: 500;">(Intentos realizados: {{ currentLesson.attemptsCount }})</span>
-          </p>
-          <p class="quiz-subtitle" *ngIf="authService.isAdmin()">
-            👨‍🏫 <strong>Vista de Docente:</strong> Puedes probar las respuestas interactivamente. Las siguientes clases ya están habilitadas para ti.
-          </p>
-        </div>
-      </div>
-
-      <!-- EVALUATION RESULT BANNER -->
-      <div *ngIf="quizResult() as result" class="result-banner animate-fade-in" [class.result-passed]="result.passed" [class.result-failed]="!result.passed">
-        <div class="result-icon">
-          <span *ngIf="result.passed">🎉</span>
-          <span *ngIf="!result.passed">⚠️</span>
-        </div>
-        <div class="result-text">
-          <h3>{{ result.passed ? '¡Cuestionario Aprobado!' : 'Cuestionario No Aprobado' }}</h3>
-          <p>{{ result.message }}</p>
-        </div>
-        <div class="result-actions">
-          <!-- If Passed and Next Lesson Exists -->
-          <button
-            *ngIf="result.passed && result.nextLessonId"
-            (click)="goToNextLesson(result.nextLessonId)"
-            class="btn btn-success"
-          >
-            <span>Siguiente Lección</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
-          </button>
-
-          <!-- If Passed and Course Completed -->
-          <a
-            *ngIf="result.passed && !result.nextLessonId"
-            routerLink="/dashboard"
-            class="btn btn-primary"
-          >
-            <span>¡Curso Completado! Volver al Panel</span>
-          </a>
-
-          <!-- If Failed: Retry Button -->
-          <button
-            *ngIf="!result.passed"
-            (click)="resetQuiz()"
-            class="btn btn-secondary"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M23 4v6h-6M1 20v-6h6"/>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-            </svg>
-            <span>Reintentar Cuestionario</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- QUIZ QUESTIONS LIST -->
-      <div class="questions-list" *ngIf="!quizResult() || !quizResult()?.passed">
-        <div
-          *ngFor="let question of currentLesson.quizQuestions; let qIndex = index"
-          class="question-card"
-        >
-          <h4 class="question-title">
-            <span class="q-number">{{ qIndex + 1 }}.</span>
-            {{ question.questionText }}
-            <span *ngIf="isQuestionCorrect(question.id) === true" style="color: #10b981; margin-left: 8px; font-size: 0.9em;">✅ Correcta</span>
-            <span *ngIf="isQuestionCorrect(question.id) === false" style="color: #ef4444; margin-left: 8px; font-size: 0.9em;">❌ Incorrecta</span>
-          </h4>
-
-          <div class="options-group">
-            <label
-              *ngFor="let option of question.options; let optIndex = index"
-              class="option-item"
-              [class.option-selected]="selectedAnswers()[question.id] === optIndex"
-            >
-              <input
-                type="radio"
-                [name]="'question_' + question.id"
-                [value]="optIndex"
-                [checked]="selectedAnswers()[question.id] === optIndex"
-                (change)="onSelectOption(question.id, optIndex)"
-                class="option-radio"
-                [disabled]="(currentLesson.status === 'COMPLETED' && !authService.isAdmin()) || quizResult() !== null"
-              />
-              <span class="option-indicator">{{ getOptionLetter(optIndex) }}</span>
-              <span class="option-text">{{ option }}</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Quiz Submit CTA -->
-        <div class="quiz-footer" *ngIf="(currentLesson.status !== 'COMPLETED' || authService.isAdmin()) && !quizResult()">
-          <div class="quiz-footer-buttons" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-            <button
-              (click)="saveQuizProgress()"
-              class="btn btn-secondary"
-              [disabled]="isSavingProgress() || isSubmitting()"
-            >
-              <span *ngIf="isSavingProgress()" class="spinner" style="width: 14px; height: 14px; border-width: 2px; margin-right: 8px;"></span>
-              <span>{{ isSavingProgress() ? 'Guardando...' : 'Guardar Progreso' }}</span>
-            </button>
-            <button
-              (click)="submitQuiz()"
-              class="btn btn-primary btn-submit"
-              [disabled]="!isAllAnswered() || isSubmitting()"
-            >
-              <span *ngIf="isSubmitting()" class="spinner" style="width: 14px; height: 14px; border-width: 2px; margin-right: 8px;"></span>
-              <span>{{ isSubmitting() ? 'Evaluando...' : 'Enviar Respuestas y Calificar' }}</span>
-            </button>
-          </div>
-          <span *ngIf="!isAllAnswered()" class="unanswered-warning" style="margin-top: 12px; display: block;">
-            * Por favor responde todas las preguntas antes de enviar.
-          </span>
-        </div>
-
-        <!-- Quiz Retry CTA at bottom -->
-        <div class="quiz-footer" *ngIf="quizResult() && !quizResult()?.passed">
-          <button (click)="resetQuiz()" class="btn btn-secondary btn-lg" style="width: 100%; justify-content: center;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M23 4v6h-6M1 20v-6h6"/>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-            </svg>
-            <span>Reintentar Cuestionario</span>
-          </button>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- SYLLABUS / TEMARIO SIDEBAR -->
-  <aside class="syllabus-sidebar">
-    <div class="sidebar-header">
-      <div>
-        <h3>Temario del Curso</h3>
-        <span class="syllabus-count">{{ currentLesson.syllabus.length }} Clases</span>
-      </div>
-      <a [routerLink]="['/courses', currentLesson.courseId]" class="btn-return-syllabus-link" title="Ver temario completo">
-        <span>← Ver Temario</span>
-      </a>
-    </div>
-
-    <nav class="syllabus-nav">
-      <button
-        *ngFor="let item of currentLesson.syllabus"
-        (click)="selectLesson(item)"
-        class="syllabus-item"
-        [class.active-lesson]="item.id === currentLesson.id"
-        [class.completed-lesson]="item.status === 'COMPLETED'"
-        [class.locked-lesson]="!authService.isAdmin() && item.status === 'LOCKED'"
-        [disabled]="!authService.isAdmin() && item.status === 'LOCKED'"
-      >
-        <!-- Status Icon -->
-        <div class="item-status-icon">
-          <!-- Completed -->
-          <svg *ngIf="item.status === 'COMPLETED'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-completed">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          <!-- Available / Active -->
-          <svg *ngIf="item.status === 'AVAILABLE' || authService.isAdmin()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-available">
-            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-          </svg>
-          <!-- Locked (Students only) -->
-          <svg *ngIf="!authService.isAdmin() && item.status === 'LOCKED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-locked">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-        </div>
-
-        <!-- Item Text -->
-        <div class="item-info">
-          <span class="item-title">{{ item.title }}</span>
-          <span class="item-meta">
-            <span *ngIf="item.status === 'COMPLETED'" class="text-completed">
-              {{ authService.isAdmin() ? '✓ Aprobada' : 'Aprobada' }}
-            </span>
-            <span *ngIf="item.status === 'AVAILABLE' || authService.isAdmin()" class="text-available">
-              Disponible
-            </span>
-            <span *ngIf="!authService.isAdmin() && item.status === 'LOCKED'" class="text-locked">
-              Bloqueada
-            </span>
-          </span>
-        </div>
-      </button>
-    </nav>
-  </aside>
-</div>
-
-<!-- Error Screen -->
-<div *ngIf="errorMessage()" class="lesson-loading animate-fade-in">
-  <div class="alert-error-box glass-card">
-    <span class="error-emoji">⚠️</span>
-    <h3>No se pudo cargar la clase</h3>
-    <p>{{ errorMessage() }}</p>
-    <a routerLink="/dashboard" class="btn btn-primary" style="margin-top: 16px;">
-      Volver a Mis Cursos
-    </a>
   </div>
-</div>
-
-<!-- Loading Screen -->
-<div *ngIf="isLoading() && !errorMessage()" class="lesson-loading">
-  <div class="spinner-large"></div>
-  <p>Cargando clase y temario...</p>
-</div>
+</main>

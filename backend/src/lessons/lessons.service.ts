@@ -206,6 +206,8 @@ export class LessonsService {
       completedAt: targetProgress?.completedAt ?? null,
       savedAnswers: targetProgress?.quizAnswers ?? {},
       attemptsCount: targetProgress?.attemptsCount ?? 0,
+      hasViewedContent: targetProgress?.hasViewedContent ?? false,
+      hasViewedSheets: targetProgress?.hasViewedSheets ?? false,
       quizQuestions: questions,
       technicalSheets: lesson.technicalSheets || [],
       syllabus,
@@ -225,5 +227,30 @@ export class LessonsService {
     }
 
     return res.sendFile(filePath);
+  }
+
+  async updateProgress(lessonId: string, user: User, dto: { hasViewedContent?: boolean; hasViewedSheets?: boolean }) {
+    let progress = await this.userProgressRepository.findOne({
+      where: { lessonId, userId: user.id }
+    });
+
+    if (!progress) {
+      progress = this.userProgressRepository.create({
+        lessonId,
+        userId: user.id,
+        hasViewedContent: dto.hasViewedContent ?? false,
+        hasViewedSheets: dto.hasViewedSheets ?? false,
+      });
+    } else {
+      if (dto.hasViewedContent !== undefined) {
+        progress.hasViewedContent = dto.hasViewedContent;
+      }
+      if (dto.hasViewedSheets !== undefined) {
+        progress.hasViewedSheets = dto.hasViewedSheets;
+      }
+    }
+
+    await this.userProgressRepository.save(progress);
+    return { success: true, progress };
   }
 }

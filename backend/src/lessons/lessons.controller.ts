@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Res, Patch, Body } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { GetUser } from '../auth/get-user.decorator';
@@ -17,5 +17,14 @@ export class LessonsController {
   @Get('downloads/technical-sheets/:filename')
   downloadTechnicalSheet(@Param('filename') filename: string, @Res() res) {
     return this.lessonsService.downloadTechnicalSheet(filename, res);
+  }
+
+  @Patch(':id/progress')
+  updateProgress(
+    @Param('id') id: string,
+    @GetUser() user: User,
+    @Body() dto: { hasViewedContent?: boolean; hasViewedSheets?: boolean }
+  ) {
+    return this.lessonsService.updateProgress(id, user, dto);
   }
 }

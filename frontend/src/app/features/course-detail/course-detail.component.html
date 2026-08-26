@@ -21,7 +21,7 @@
     </div>
 
     <!-- Teacher Course Management Banner -->
-    <div *ngIf="authService.currentUser()?.role === 'ADMIN' && course() as c" class="teacher-course-alert glass-card animate-fade-in">
+    <div *ngIf="authService.isAdmin() && course() as c" class="teacher-course-alert glass-card animate-fade-in">
       <div class="teacher-alert-info">
         <span class="badge-role-tag">👨‍🏫 Modo Profesor Activo</span>
         <h4>Gestión del Curso y Vista Previa</h4>
@@ -42,10 +42,10 @@
         <div class="hero-details">
           <div class="hero-badge-row">
             <span class="badge-tag">🎓 Curso Virtual</span>
-            <span *ngIf="authService.currentUser()?.role !== 'ADMIN'" class="badge-status-completion" [class.badge-completed]="c.progressPercentage === 100">
+            <span *ngIf="!authService.isAdmin()" class="badge-status-completion" [class.badge-completed]="c.progressPercentage === 100">
               {{ c.progressPercentage === 100 ? '✅ Completado' : (c.progressPercentage > 0 ? '⏳ En Progreso' : '✨ Por Iniciar') }}
             </span>
-            <span *ngIf="authService.currentUser()?.role === 'ADMIN'" class="badge-status-completion badge-completed">
+            <span *ngIf="authService.isAdmin()" class="badge-status-completion badge-completed">
               👨‍🏫 Profesor Asignado
             </span>
           </div>
@@ -131,13 +131,13 @@
                 </span>
 
                 <!-- Pending Lesson Badge -->
-                <span class="pending-lesson-badge minimal-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE'">
+                <span class="pending-lesson-badge minimal-badge" *ngIf="!authService.isAdmin() && lesson.status === 'AVAILABLE'">
                   <span class="pulsing-dot-small warning"></span>
                   Pendiente
                 </span>
 
                 <!-- Quiz Status Badge -->
-                <ng-container *ngIf="lesson.hasQuiz && authService.currentUser()?.role !== 'ADMIN'">
+                <ng-container *ngIf="lesson.hasQuiz && !authService.isAdmin()">
                   <!-- Pending Exam (Red) -->
                   <span class="pending-exam-badge minimal-badge" *ngIf="lesson.status === 'AVAILABLE'">
                     <span class="pulsing-dot-small danger"></span>
@@ -181,7 +181,7 @@
               </button>
 
               <button
-                *ngIf="authService.currentUser()?.role !== 'ADMIN' && lesson.status === 'AVAILABLE' && lesson.hasQuiz"
+                *ngIf="!authService.isAdmin() && lesson.status === 'AVAILABLE' && lesson.hasQuiz"
                 (click)="startExam(lesson.id)"
                 class="btn btn-warning w-full"
               >

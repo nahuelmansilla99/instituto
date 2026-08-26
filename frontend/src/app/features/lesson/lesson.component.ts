@@ -221,7 +221,7 @@ export class LessonComponent implements OnInit {
   }
 
   selectLesson(item: { id: string; status: string }): void {
-    if (this.authService.currentUser()?.role !== 'ADMIN' && item.status === 'LOCKED') return;
+    if (!this.authService.isAdmin() && item.status === 'LOCKED') return;
     this.router.navigate(['/lessons', item.id]);
   }
 

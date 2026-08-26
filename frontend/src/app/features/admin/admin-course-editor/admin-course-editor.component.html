@@ -360,7 +360,28 @@
   </div>
 </div>
 
-<!-- MODAL: ENROLL STUDENT (Removed as replaced by table toggle) -->
+<!-- Confirm Unenroll Modal -->
+<div class="unenroll-modal-overlay" *ngIf="showUnenrollConfirmModal()" (click)="cancelUnenroll()">
+  <div class="unenroll-modal-content" (click)="$event.stopPropagation()">
+    <div class="unenroll-modal-header">
+      <div class="unenroll-modal-icon text-danger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+      </div>
+      <h3 class="unenroll-modal-title">Confirmar Baja</h3>
+    </div>
+    
+    <p class="unenroll-modal-message">
+      ¿Estás seguro que deseas dar de baja al estudiante <strong>{{ studentToUnenroll()?.name }}</strong> de este curso?
+    </p>
+    
+    <div class="unenroll-modal-actions">
+      <button class="unenroll-btn-cancel" (click)="cancelUnenroll()">Cancelar</button>
+      <button class="unenroll-btn-confirm" (click)="confirmUnenroll()">Sí, dar de baja</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL: STUDENT DETAILED PROGRESS & QUIZ SCORES -->
 <div class="modal-backdrop animate-fade-in" *ngIf="showStudentProgressModal()">

@@ -18,6 +18,10 @@ export class AuthService {
   private currentUserSignal = signal<User | null>(this.getUserFromStorage());
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly isAuthenticated = computed(() => !!this.currentUserSignal());
+  readonly isAdmin = computed(() => {
+    const user = this.currentUserSignal();
+    return user ? (user.role === 'ADMIN' || user.role === 'SYSADMIN') : false;
+  });
 
   register(data: { name: string; email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/register`, data).pipe(

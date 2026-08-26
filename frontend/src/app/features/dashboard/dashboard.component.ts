@@ -62,7 +62,7 @@ export class DashboardComponent implements OnInit {
   }
 
   openCourse(courseId: string): void {
-    if (this.authService.currentUser()?.role === 'ADMIN') {
+    if (this.authService.isAdmin()) {
       this.router.navigate(['/admin/courses', courseId]);
     } else {
       this.router.navigate(['/courses', courseId]);

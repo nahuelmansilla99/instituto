@@ -5,14 +5,14 @@
     <!-- Hero Section -->
     <section class="hero-section glass-card animate-fade-in" *ngIf="authService.currentUser() as user">
       <div class="hero-content">
-        <span class="hero-badge" *ngIf="user.role === 'ADMIN'">👨‍🏫 Panel del Profesor</span>
-        <span class="hero-badge" *ngIf="user.role !== 'ADMIN'">🎓 Panel del Estudiante</span>
+        <span class="hero-badge" *ngIf="(user.role === 'ADMIN' || user.role === 'SYSADMIN')">👨‍🏫 Panel del Profesor</span>
+        <span class="hero-badge" *ngIf="(user.role !== 'ADMIN' && user.role !== 'SYSADMIN')">🎓 Panel del Estudiante</span>
         
         <h1>¡Hola de nuevo, <span class="gradient-text">{{ user.name }}</span>!</h1>
-        <p *ngIf="user.role === 'ADMIN'">
+        <p *ngIf="(user.role === 'ADMIN' || user.role === 'SYSADMIN')">
           Gestiona tus cursos, añade nuevas clases interactivas, adjunta material y administra a tus estudiantes matriculados.
         </p>
-        <p *ngIf="user.role !== 'ADMIN'">
+        <p *ngIf="(user.role !== 'ADMIN' && user.role !== 'SYSADMIN')">
           Continúa con tus clases y responde los cuestionarios para desbloquear los siguientes módulos.
         </p>
       </div>
@@ -23,11 +23,11 @@
             <span class="stat-number">{{ courses().length }}</span>
             <span class="stat-label">Cursos Activos</span>
           </div>
-          <div class="stat-box" *ngIf="user.role === 'ADMIN'">
+          <div class="stat-box" *ngIf="(user.role === 'ADMIN' || user.role === 'SYSADMIN')">
             <span class="stat-number">{{ getTotalLessons() }}</span>
             <span class="stat-label">Total de Clases</span>
           </div>
-          <div class="stat-box" *ngIf="user.role !== 'ADMIN'">
+          <div class="stat-box" *ngIf="(user.role !== 'ADMIN' && user.role !== 'SYSADMIN')">
             <span class="stat-number">{{ getTotalCompletedLessons() }}</span>
             <span class="stat-label">Clases Aprobadas</span>
           </div>
@@ -35,7 +35,7 @@
 
         <!-- Teacher Create New Course Button -->
         <button
-          *ngIf="user.role === 'ADMIN'"
+          *ngIf="(user.role === 'ADMIN' || user.role === 'SYSADMIN')"
           (click)="openCreateModal()"
           class="btn btn-primary btn-hero-create"
         >
@@ -51,9 +51,9 @@
     <!-- Courses Grid Header -->
     <div class="section-header">
       <div>
-        <h2>{{ authService.currentUser()?.role === 'ADMIN' ? 'Tus Cursos Asignados' : 'Cursos Disponibles' }}</h2>
+        <h2>{{ authService.isAdmin() ? 'Tus Cursos Asignados' : 'Cursos Disponibles' }}</h2>
         <p class="section-desc">
-          {{ authService.currentUser()?.role === 'ADMIN' ? 'Selecciona un curso para gestionar su temario, exámenes y alumnos matriculados' : 'Selecciona un curso para continuar tu aprendizaje paso a paso' }}
+          {{ authService.isAdmin() ? 'Selecciona un curso para gestionar su temario, exámenes y alumnos matriculados' : 'Selecciona un curso para continuar tu aprendizaje paso a paso' }}
         </p>
       </div>
     </div>
@@ -67,11 +67,11 @@
     <!-- Empty State -->
     <div *ngIf="!isLoading() && courses().length === 0" class="empty-state glass-card animate-fade-in">
       <div class="empty-icon">📚</div>
-      <h3 *ngIf="authService.currentUser()?.role === 'ADMIN'">Aún no has creado ningún curso</h3>
-      <p *ngIf="authService.currentUser()?.role === 'ADMIN'">Comienza creando tu primer curso con el botón superior "Crear Nuevo Curso".</p>
+      <h3 *ngIf="authService.isAdmin()">Aún no has creado ningún curso</h3>
+      <p *ngIf="authService.isAdmin()">Comienza creando tu primer curso con el botón superior "Crear Nuevo Curso".</p>
       
-      <h3 *ngIf="authService.currentUser()?.role !== 'ADMIN'">Aún no tienes cursos asignados</h3>
-      <p *ngIf="authService.currentUser()?.role !== 'ADMIN'">El profesor debe matricularte en los cursos correspondientes para que puedas acceder al contenido y rendir los exámenes.</p>
+      <h3 *ngIf="!authService.isAdmin()">Aún no tienes cursos asignados</h3>
+      <p *ngIf="!authService.isAdmin()">El profesor debe matricularte en los cursos correspondientes para que puedas acceder al contenido y rendir los exámenes.</p>
     </div>
 
     <!-- Courses Grid -->
@@ -86,7 +86,7 @@
           (click)="openCourse(course.id)"
           role="button"
           tabindex="0"
-          [title]="authService.currentUser()?.role === 'ADMIN' ? 'Haz clic para administrar este curso' : 'Haz clic para ver las clases del curso'"
+          [title]="authService.isAdmin() ? 'Haz clic para administrar este curso' : 'Haz clic para ver las clases del curso'"
         >
           <img [src]="course.thumbnailUrl || 'https://images.unsplash.com/photo-1509391366360-2e959784a276?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'" [alt]="course.title" class="course-thumb" />
           
@@ -94,21 +94,21 @@
           <div class="thumb-hover-overlay">
             <div class="thumb-cta-pill">
               <span class="pill-icon">📚</span>
-              <span class="pill-text">{{ authService.currentUser()?.role === 'ADMIN' ? 'Administrar Curso' : 'Ver Clases del Curso' }}</span>
+              <span class="pill-text">{{ authService.isAdmin() ? 'Administrar Curso' : 'Ver Clases del Curso' }}</span>
             </div>
           </div>
 
-          <div class="progress-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN'">
+          <div class="progress-badge" *ngIf="!authService.isAdmin()">
             <span [class.text-success]="course.progressPercentage === 100">
               {{ course.progressPercentage }}% Completado
             </span>
           </div>
           <!-- Pending Lesson Badge -->
-          <div class="pending-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN' && course.completedLessons < course.totalLessons">
+          <div class="pending-badge" *ngIf="!authService.isAdmin() && course.completedLessons < course.totalLessons">
             <span class="pulsing-dot-small"></span>
             Clase Pendiente
           </div>
-          <div class="progress-badge progress-badge-teacher" *ngIf="authService.currentUser()?.role === 'ADMIN'">
+          <div class="progress-badge progress-badge-teacher" *ngIf="authService.isAdmin()">
             <span>📖 {{ course.totalLessons }} {{ course.totalLessons === 1 ? 'Clase' : 'Clases' }}</span>
           </div>
         </div>
@@ -121,7 +121,7 @@
           <p class="course-desc">{{ course.description }}</p>
 
           <!-- Student Progress Bar -->
-          <div class="course-progress-section" *ngIf="authService.currentUser()?.role !== 'ADMIN'">
+          <div class="course-progress-section" *ngIf="!authService.isAdmin()">
             <div class="progress-info">
               <span>Progreso del Curso</span>
               <span class="progress-count">{{ course.completedLessons }} de {{ course.totalLessons }} clases</span>
@@ -151,8 +151,8 @@
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
               </svg>
-              <span *ngIf="authService.currentUser()?.role === 'ADMIN'">Administrar Curso / Ver Clases ➔</span>
-              <span *ngIf="authService.currentUser()?.role !== 'ADMIN'">Ver Clases y Contenido ({{ course.totalLessons }}) ➔</span>
+              <span *ngIf="authService.isAdmin()">Administrar Curso / Ver Clases ➔</span>
+              <span *ngIf="!authService.isAdmin()">Ver Clases y Contenido ({{ course.totalLessons }}) ➔</span>
             </button>
           </div>
         </div>

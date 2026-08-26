@@ -62,7 +62,7 @@ export class LessonsService {
     const progressMap = new Map<string, UserProgress>();
     userProgressList.forEach((p) => progressMap.set(p.lessonId, p));
 
-    const isTeacher = user.role === UserRole.ADMIN;
+    const isTeacher = user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN;
     const now = new Date();
     const isScheduledFuture = lesson.availableAt && now < new Date(lesson.availableAt);
 

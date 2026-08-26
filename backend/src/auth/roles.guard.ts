@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('Usuario no autenticado');
     }
 
-    const hasRole = requiredRoles.includes(user.role);
+    const hasRole = requiredRoles.includes(user.role) || (user.role === UserRole.SYSADMIN && requiredRoles.includes(UserRole.ADMIN));
     if (!hasRole) {
       throw new ForbiddenException('No tienes permisos de Administrador/Profesor para realizar esta acción');
     }

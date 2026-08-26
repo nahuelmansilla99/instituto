@@ -11,8 +11,8 @@
         </div>
         <div class="profile-hero-info">
           <h1>Hola, <span class="gradient-text">{{ authService.currentUser()?.name }}</span></h1>
-          <p class="role-badge" *ngIf="authService.currentUser()?.role === 'ADMIN'">👨‍🏫 Profesor</p>
-          <p class="role-badge" *ngIf="authService.currentUser()?.role !== 'ADMIN'">🎓 Estudiante</p>
+          <p class="role-badge" *ngIf="authService.isAdmin()">👨‍🏫 Profesor</p>
+          <p class="role-badge" *ngIf="!authService.isAdmin()">🎓 Estudiante</p>
           <p class="profile-email">{{ authService.currentUser()?.email }}</p>
         </div>
       </div>

@@ -10,7 +10,7 @@
           <span>Mis Cursos</span>
         </a>
         <span class="breadcrumb-separator">/</span>
-        <a [routerLink]="authService.currentUser()?.role === 'ADMIN' ? ['/admin/courses', currentLesson.courseId] : ['/courses', currentLesson.courseId]" class="breadcrumb-link">
+        <a [routerLink]="authService.isAdmin() ? ['/admin/courses', currentLesson.courseId] : ['/courses', currentLesson.courseId]" class="breadcrumb-link">
           <span>{{ currentLesson.courseTitle }}</span>
         </a>
         <span class="breadcrumb-separator">/</span>
@@ -18,7 +18,7 @@
       </nav>
 
       <!-- Teacher Navigation Shortcut -->
-      <div *ngIf="authService.currentUser()?.role === 'ADMIN'" class="teacher-top-shortcuts">
+      <div *ngIf="authService.isAdmin()" class="teacher-top-shortcuts">
         <a [routerLink]="['/admin/courses', currentLesson.courseId]" class="btn btn-secondary btn-sm" title="Ir a la administración de este curso">
           <span>⚙️ Panel de Gestión del Curso</span>
         </a>
@@ -29,10 +29,10 @@
     <header class="lesson-header animate-fade-in">
       <div class="header-badges">
         <span class="badge badge-available">Clase {{ currentLesson.orderNumber }}</span>
-        <span *ngIf="authService.currentUser()?.role === 'ADMIN'" class="badge badge-role-tag">
+        <span *ngIf="authService.isAdmin()" class="badge badge-role-tag">
           👨‍🏫 Vista de Profesor
         </span>
-        <span *ngIf="authService.currentUser()?.role !== 'ADMIN' && currentLesson.status === 'COMPLETED'" class="badge badge-completed">
+        <span *ngIf="!authService.isAdmin() && currentLesson.status === 'COMPLETED'" class="badge badge-completed">
           ✓ Aprobada ({{ currentLesson.score }}%)
         </span>
       </div>
@@ -172,10 +172,10 @@
     >
       <div class="end-action-badge">✅ Fin de la Lección</div>
       <h2>¡Has completado el contenido de esta clase!</h2>
-      <p *ngIf="authService.currentUser()?.role !== 'ADMIN'">
+      <p *ngIf="!authService.isAdmin()">
         Esta clase no requiere examen de evaluación. Puedes continuar directamente a la siguiente lección del curso.
       </p>
-      <p *ngIf="authService.currentUser()?.role === 'ADMIN'">
+      <p *ngIf="authService.isAdmin()">
         Esta clase no tiene preguntas de evaluación asignadas. Puedes agregar preguntas de opción múltiple desde el editor del curso si lo deseas.
       </p>
 
@@ -192,7 +192,7 @@
         </button>
 
         <a
-          *ngIf="authService.currentUser()?.role === 'ADMIN'"
+          *ngIf="authService.isAdmin()"
           [routerLink]="['/admin/courses', currentLesson.courseId]"
           class="btn btn-secondary"
         >
@@ -207,15 +207,15 @@
 
     <!-- LESSON FINISHED & QUIZ TRIGGER PROMPT -->
     <section
-      *ngIf="!isQuizStarted() && !quizResult() && (currentLesson.status !== 'COMPLETED' || authService.currentUser()?.role === 'ADMIN') && currentLesson.quizQuestions.length > 0"
+      *ngIf="!isQuizStarted() && !quizResult() && (currentLesson.status !== 'COMPLETED' || authService.isAdmin()) && currentLesson.quizQuestions.length > 0"
       class="lesson-end-action-box glass-card animate-fade-in"
     >
       <div class="end-action-badge">🎯 Fin del Contenido de la Clase</div>
       <h2>¿Deseas revisar la evaluación de esta clase?</h2>
-      <p *ngIf="authService.currentUser()?.role !== 'ADMIN'">
+      <p *ngIf="!authService.isAdmin()">
         Rinde el examen de opción múltiple para evaluar lo aprendido y desbloquear automáticamente la siguiente lección del curso.
       </p>
-      <p *ngIf="authService.currentUser()?.role === 'ADMIN'">
+      <p *ngIf="authService.isAdmin()">
         Como docente tienes todas las clases habilitadas. Puedes previsualizar el examen aquí o modificar las preguntas en el editor del curso.
       </p>
 
@@ -225,11 +225,11 @@
             <path d="M9 11l3 3L22 4"></path>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
           </svg>
-          <span>📝 {{ authService.currentUser()?.role === 'ADMIN' ? 'Previsualizar Examen' : 'Iniciar Examen de la Clase ➔' }}</span>
+          <span>📝 {{ authService.isAdmin() ? 'Previsualizar Examen' : 'Iniciar Examen de la Clase ➔' }}</span>
         </button>
 
         <a
-          *ngIf="authService.currentUser()?.role === 'ADMIN'"
+          *ngIf="authService.isAdmin()"
           [routerLink]="['/admin/courses', currentLesson.courseId]"
           class="btn btn-secondary"
         >
@@ -237,7 +237,7 @@
         </a>
 
         <a
-          *ngIf="authService.currentUser()?.role !== 'ADMIN'"
+          *ngIf="!authService.isAdmin()"
           [routerLink]="['/courses', currentLesson.courseId]"
           class="btn btn-secondary"
         >
@@ -248,7 +248,7 @@
 
     <!-- QUIZ & PROGRESSION EVALUATION SECTION -->
     <section
-      *ngIf="(isQuizStarted() || quizResult() || (currentLesson.status === 'COMPLETED' && authService.currentUser()?.role !== 'ADMIN')) && currentLesson.quizQuestions.length > 0"
+      *ngIf="(isQuizStarted() || quizResult() || (currentLesson.status === 'COMPLETED' && !authService.isAdmin())) && currentLesson.quizQuestions.length > 0"
       class="quiz-section glass-card animate-fade-in"
       id="quiz-section"
     >
@@ -261,11 +261,11 @@
         </div>
         <div>
           <h2>Evaluación de la Clase</h2>
-          <p class="quiz-subtitle" *ngIf="authService.currentUser()?.role !== 'ADMIN'">
+          <p class="quiz-subtitle" *ngIf="!authService.isAdmin()">
             Responde las siguientes preguntas. Necesitas al menos un <strong>80%</strong> para aprobar y desbloquear la siguiente lección.
             <span *ngIf="currentLesson.attemptsCount > 0" style="color: #64748b; font-weight: 500;">(Intentos realizados: {{ currentLesson.attemptsCount }})</span>
           </p>
-          <p class="quiz-subtitle" *ngIf="authService.currentUser()?.role === 'ADMIN'">
+          <p class="quiz-subtitle" *ngIf="authService.isAdmin()">
             👨‍🏫 <strong>Vista de Docente:</strong> Puedes probar las respuestas interactivamente. Las siguientes clases ya están habilitadas para ti.
           </p>
         </div>
@@ -344,7 +344,7 @@
                 [checked]="selectedAnswers()[question.id] === optIndex"
                 (change)="onSelectOption(question.id, optIndex)"
                 class="option-radio"
-                [disabled]="(currentLesson.status === 'COMPLETED' && authService.currentUser()?.role !== 'ADMIN') || quizResult() !== null"
+                [disabled]="(currentLesson.status === 'COMPLETED' && !authService.isAdmin()) || quizResult() !== null"
               />
               <span class="option-indicator">{{ getOptionLetter(optIndex) }}</span>
               <span class="option-text">{{ option }}</span>
@@ -353,7 +353,7 @@
         </div>
 
         <!-- Quiz Submit CTA -->
-        <div class="quiz-footer" *ngIf="(currentLesson.status !== 'COMPLETED' || authService.currentUser()?.role === 'ADMIN') && !quizResult()">
+        <div class="quiz-footer" *ngIf="(currentLesson.status !== 'COMPLETED' || authService.isAdmin()) && !quizResult()">
           <div class="quiz-footer-buttons" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <button
               (click)="saveQuizProgress()"
@@ -410,8 +410,8 @@
         class="syllabus-item"
         [class.active-lesson]="item.id === currentLesson.id"
         [class.completed-lesson]="item.status === 'COMPLETED'"
-        [class.locked-lesson]="authService.currentUser()?.role !== 'ADMIN' && item.status === 'LOCKED'"
-        [disabled]="authService.currentUser()?.role !== 'ADMIN' && item.status === 'LOCKED'"
+        [class.locked-lesson]="!authService.isAdmin() && item.status === 'LOCKED'"
+        [disabled]="!authService.isAdmin() && item.status === 'LOCKED'"
       >
         <!-- Status Icon -->
         <div class="item-status-icon">
@@ -420,11 +420,11 @@
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
           <!-- Available / Active -->
-          <svg *ngIf="item.status === 'AVAILABLE' || authService.currentUser()?.role === 'ADMIN'" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-available">
+          <svg *ngIf="item.status === 'AVAILABLE' || authService.isAdmin()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-available">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
           <!-- Locked (Students only) -->
-          <svg *ngIf="authService.currentUser()?.role !== 'ADMIN' && item.status === 'LOCKED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-locked">
+          <svg *ngIf="!authService.isAdmin() && item.status === 'LOCKED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-locked">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
@@ -435,12 +435,12 @@
           <span class="item-title">{{ item.title }}</span>
           <span class="item-meta">
             <span *ngIf="item.status === 'COMPLETED'" class="text-completed">
-              {{ authService.currentUser()?.role === 'ADMIN' ? '✓ Aprobada' : 'Aprobada' }}
+              {{ authService.isAdmin() ? '✓ Aprobada' : 'Aprobada' }}
             </span>
-            <span *ngIf="item.status === 'AVAILABLE' || authService.currentUser()?.role === 'ADMIN'" class="text-available">
+            <span *ngIf="item.status === 'AVAILABLE' || authService.isAdmin()" class="text-available">
               Disponible
             </span>
-            <span *ngIf="authService.currentUser()?.role !== 'ADMIN' && item.status === 'LOCKED'" class="text-locked">
+            <span *ngIf="!authService.isAdmin() && item.status === 'LOCKED'" class="text-locked">
               Bloqueada
             </span>
           </span>

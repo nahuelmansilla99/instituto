@@ -232,22 +232,16 @@ export class AdminCourseEditorComponent implements OnInit {
     return Math.round(sum / list.length);
   }
 
+  readonly showUnenrollConfirmModal = signal(false);
+  readonly studentToUnenroll = signal<MergedStudentRow | null>(null);
+
   toggleEnrollment(student: MergedStudentRow): void {
     const c = this.course();
     if (!c) return;
 
     if (student.isEnrolled) {
-      if (!confirm(`¿Estás seguro de desmatricular a "${student.name}" de este curso?`)) {
-        return;
-      }
-      this.adminService.unenrollStudent(c.id, student.studentId).subscribe({
-        next: () => {
-          this.loadEnrolledStudents(c.id);
-        },
-        error: (err) => {
-          alert('Error al desmatricular: ' + (err.error?.message || ''));
-        }
-      });
+      this.studentToUnenroll.set(student);
+      this.showUnenrollConfirmModal.set(true);
     } else {
       this.adminService.enrollStudent(c.id, student.email).subscribe({
         next: () => {
@@ -258,6 +252,28 @@ export class AdminCourseEditorComponent implements OnInit {
         }
       });
     }
+  }
+
+  cancelUnenroll(): void {
+    this.showUnenrollConfirmModal.set(false);
+    this.studentToUnenroll.set(null);
+  }
+
+  confirmUnenroll(): void {
+    const student = this.studentToUnenroll();
+    const c = this.course();
+    if (!c || !student) return;
+
+    this.adminService.unenrollStudent(c.id, student.studentId).subscribe({
+      next: () => {
+        this.loadEnrolledStudents(c.id);
+        this.cancelUnenroll();
+      },
+      error: (err) => {
+        alert('Error al desmatricular: ' + (err.error?.message || ''));
+        this.cancelUnenroll();
+      }
+    });
   }
 
   viewStudentProgress(student: MergedStudentRow): void {

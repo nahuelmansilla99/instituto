@@ -114,7 +114,7 @@ export class CoursesService {
 
       let status: ProgressStatus = ProgressStatus.LOCKED;
 
-      if (user.role === UserRole.ADMIN) {
+      if (user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN) {
         status = progress?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
       } else if (isFutureScheduled) {
         // Future scheduled release

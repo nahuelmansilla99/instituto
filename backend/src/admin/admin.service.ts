@@ -370,10 +370,12 @@ export class AdminService {
 
     let enrollment = await this.enrollmentRepo.findOne({
       where: { userId: student.id, courseId },
+      withDeleted: true,
     });
 
     if (enrollment) {
       enrollment.status = EnrollmentStatus.ACTIVE;
+      enrollment.deletedAt = null;
       return this.enrollmentRepo.save(enrollment);
     }
 

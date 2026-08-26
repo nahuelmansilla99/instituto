@@ -131,6 +131,56 @@ export class AdminController {
   }
 
   // ----------------------------------------------------
+  // FICHAS TÉCNICAS (PDFs COMPLEMENTARIOS)
+  // ----------------------------------------------------
+  @Post('lessons/:lessonId/technical-sheets')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = path.join(process.cwd(), 'uploads', 'technical-sheets');
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = path.extname(file.originalname);
+          cb(null, `ficha-${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (ext !== '.pdf') {
+          return cb(
+            new BadRequestException(
+              'Formato no permitido. Solo se admiten archivos PDF (.pdf)',
+            ),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+    }),
+  )
+  uploadTechnicalSheet(
+    @Param('lessonId') lessonId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Debes seleccionar un archivo PDF');
+    }
+    return this.adminService.uploadTechnicalSheet(lessonId, file);
+  }
+
+  @Delete('technical-sheets/:id')
+  deleteTechnicalSheet(@Param('id') id: string) {
+    return this.adminService.deleteTechnicalSheet(id);
+  }
+
+  // ----------------------------------------------------
   // PREGUNTAS DEL CUESTIONARIO (MULTIPLE CHOICE)
   // ----------------------------------------------------
   @Get('lessons/:lessonId/questions')

@@ -91,7 +91,7 @@ export class CoursesService {
     // Fetch lessons directly from repository with quiz questions
     const sortedLessons = await this.lessonRepository.find({
       where: { courseId },
-      relations: ['quizQuestions'],
+      relations: ['quizQuestions', 'technicalSheets'],
       order: { orderNumber: 'ASC' },
     });
 
@@ -150,6 +150,7 @@ export class CoursesService {
         hasQuiz: !hasNoQuiz,
         status,
         score: progress?.score ?? null,
+        technicalSheets: lesson.technicalSheets || [],
       };
     });
 

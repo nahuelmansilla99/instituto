@@ -248,4 +248,22 @@ export class LessonComponent implements OnInit {
       }
     }
   }
+
+  downloadTechnicalSheet(sheet: any): void {
+    this.coursesService.downloadTechnicalSheet(sheet.fileUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = sheet.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        alert('No se pudo descargar el archivo.');
+      }
+    });
+  }
 }

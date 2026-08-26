@@ -25,7 +25,7 @@ export class LessonsService {
   async findOne(lessonId: string, user: User) {
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
-      relations: ['course'],
+      relations: ['course', 'technicalSheets'],
     });
 
     if (!lesson) {
@@ -207,7 +207,23 @@ export class LessonsService {
       savedAnswers: targetProgress?.quizAnswers ?? {},
       attemptsCount: targetProgress?.attemptsCount ?? 0,
       quizQuestions: questions,
+      technicalSheets: lesson.technicalSheets || [],
       syllabus,
     };
+  }
+
+  downloadTechnicalSheet(filename: string, res: any) {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Ensure filename doesn't contain path traversal
+    const safeFilename = path.basename(filename);
+    const filePath = path.join(process.cwd(), 'uploads', 'technical-sheets', safeFilename);
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('El archivo no existe o fue eliminado');
+    }
+
+    return res.sendFile(filePath);
   }
 }

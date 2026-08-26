@@ -141,6 +141,27 @@
       <section class="lesson-player glass-card animate-fade-in">
         <div class="lesson-html-content" [innerHTML]="currentLesson.content"></div>
       </section>
+
+      <!-- Material Complementario / Fichas Tecnicas -->
+      <section *ngIf="currentLesson.technicalSheets && currentLesson.technicalSheets.length > 0" class="lesson-technical-sheets glass-card animate-fade-in" style="margin-top: 20px;">
+        <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; color: #fff;">
+          📚 Material Complementario
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div *ngFor="let sheet of currentLesson.technicalSheets" style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 24px;">📄</span>
+              <div>
+                <h4 style="margin: 0; font-size: 15px; font-weight: 500; color: #fff;">{{ sheet.originalName }}</h4>
+                <span style="font-size: 12px; color: #aaa;" *ngIf="sheet.fileSize">{{ (sheet.fileSize / 1024 / 1024) | number:'1.1-2' }} MB</span>
+              </div>
+            </div>
+            <button (click)="downloadTechnicalSheet(sheet)" class="btn btn-secondary btn-sm" title="Descargar material">
+              ⬇️ Descargar
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- TAB 2: POWERPOINT PRESENTATION SCREEN -->

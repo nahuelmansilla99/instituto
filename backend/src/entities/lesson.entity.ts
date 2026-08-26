@@ -11,6 +11,7 @@ import {
 import { Course } from './course.entity';
 import { QuizQuestion } from './quiz-question.entity';
 import { UserProgress } from './user-progress.entity';
+import { TechnicalSheet } from './technical-sheet.entity';
 
 @Entity('lessons')
 export class Lesson {
@@ -53,6 +54,9 @@ export class Lesson {
 
   @OneToMany(() => UserProgress, (progress) => progress.lesson)
   userProgresses: UserProgress[];
+
+  @OneToMany(() => TechnicalSheet, (ts) => ts.lesson)
+  technicalSheets: TechnicalSheet[];
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date;

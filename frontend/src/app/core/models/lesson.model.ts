@@ -19,5 +19,6 @@ export interface LessonDetail {
   savedAnswers?: Record<string, number>;
   attemptsCount: number;
   quizQuestions: QuizQuestion[];
+  technicalSheets?: any[];
   syllabus: CourseLessonItem[];
 }

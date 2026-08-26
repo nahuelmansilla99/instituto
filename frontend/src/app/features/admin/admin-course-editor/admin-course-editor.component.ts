@@ -726,6 +726,48 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   // ----------------------------------------------------
+  // GESTIÓN DE FICHAS TÉCNICAS
+  // ----------------------------------------------------
+  onTechnicalSheetSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.uploadTechnicalSheet(lesson.id, file).subscribe({
+      next: () => {
+        this.presentationSuccessMessage.set(`Ficha técnica subida correctamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al subir ficha técnica: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+
+    event.target.value = '';
+  }
+
+  removeTechnicalSheet(sheet: any): void {
+    if (!confirm(`¿Estás seguro de eliminar la ficha técnica "${sheet.originalName}"?`)) {
+      return;
+    }
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.deleteTechnicalSheet(sheet.id).subscribe({
+      next: () => {
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al eliminar ficha técnica: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
   // GESTIÓN DEL CURSO (EDITAR / ELIMINAR / PREVIEW)
   // ----------------------------------------------------
   openEditCourseModal(): void {

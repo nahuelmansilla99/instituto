@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Course, Lesson, QuizQuestion, User, UserRole, UserProgress, CourseEnrollment, EnrollmentStatus, ProgressStatus } from '../entities';
+import { Course, Lesson, QuizQuestion, User, UserRole, UserProgress, CourseEnrollment, EnrollmentStatus, ProgressStatus, TechnicalSheet } from '../entities';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
@@ -27,6 +27,8 @@ export class AdminService {
     private readonly progressRepo: Repository<UserProgress>,
     @InjectRepository(CourseEnrollment)
     private readonly enrollmentRepo: Repository<CourseEnrollment>,
+    @InjectRepository(TechnicalSheet)
+    private readonly technicalSheetRepo: Repository<TechnicalSheet>,
   ) {}
 
   // ----------------------------------------------------
@@ -42,7 +44,7 @@ export class AdminService {
   async getCourseAdmin(id: string): Promise<Course> {
     const course = await this.courseRepo.findOne({
       where: { id },
-      relations: ['lessons', 'lessons.quizQuestions'],
+      relations: ['lessons', 'lessons.quizQuestions', 'lessons.technicalSheets'],
       order: {
         lessons: {
           orderNumber: 'ASC',
@@ -204,6 +206,50 @@ export class AdminService {
     }
 
     await this.lessonRepo.softRemove(lesson);
+    return { success: true };
+  }
+
+  // ----------------------------------------------------
+  // FICHAS TÉCNICAS (PDFs COMPLEMENTARIOS)
+  // ----------------------------------------------------
+  async uploadTechnicalSheet(lessonId: string, file: Express.Multer.File): Promise<TechnicalSheet> {
+    const lesson = await this.lessonRepo.findOne({ where: { id: lessonId } });
+    if (!lesson) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+
+    const existingSheets = await this.technicalSheetRepo.find({
+      where: { lessonId },
+      order: { orderNumber: 'DESC' },
+      take: 1,
+    });
+    const nextOrderNumber = existingSheets.length > 0 ? existingSheets[0].orderNumber + 1 : 1;
+
+    const sheet = this.technicalSheetRepo.create({
+      lessonId,
+      originalName: file.originalname,
+      fileUrl: file.filename, // We will just store filename since we use a secure endpoint to download
+      fileSize: file.size,
+      orderNumber: nextOrderNumber,
+    });
+
+    return this.technicalSheetRepo.save(sheet);
+  }
+
+  async deleteTechnicalSheet(id: string): Promise<{ success: boolean }> {
+    const sheet = await this.technicalSheetRepo.findOne({ where: { id } });
+    if (!sheet) {
+      throw new NotFoundException('Ficha técnica no encontrada');
+    }
+
+    const filePath = path.join(process.cwd(), 'uploads', 'technical-sheets', sheet.fileUrl);
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (_) {}
+    }
+
+    await this.technicalSheetRepo.remove(sheet);
     return { success: true };
   }
 

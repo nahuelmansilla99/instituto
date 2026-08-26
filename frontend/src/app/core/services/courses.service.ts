@@ -22,4 +22,10 @@ export class CoursesService {
   getLessonById(lessonId: string): Observable<LessonDetail> {
     return this.http.get<LessonDetail>(`${this.apiUrl}/lessons/${lessonId}`);
   }
+
+  downloadTechnicalSheet(filename: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/lessons/downloads/technical-sheets/${filename}`, {
+      responseType: 'blob'
+    });
+  }
 }

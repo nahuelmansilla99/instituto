@@ -221,6 +221,35 @@
               <span class="preview-label">Vista Previa del Contenido:</span>
               <div class="preview-box" [innerHTML]="lesson.content || 'Sin contenido'"></div>
             </div>
+
+            <!-- Fichas Tecnicas -->
+            <div class="lesson-technical-sheets-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0; font-size: 14px; color: #aaa;">Fichas Técnicas (PDF)</h4>
+                <label class="btn btn-secondary btn-sm" title="Subir nueva Ficha Técnica PDF">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    (change)="onTechnicalSheetSelected($event, lesson)"
+                    class="file-input-hidden"
+                  />
+                  <span>➕ Agregar PDF</span>
+                </label>
+              </div>
+              <div *ngIf="!lesson.technicalSheets || lesson.technicalSheets.length === 0" style="font-size: 12px; color: #666;">
+                No hay fichas técnicas para esta clase.
+              </div>
+              <div class="technical-sheets-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <div *ngFor="let sheet of lesson.technicalSheets" style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #ff4d4f; font-size: 16px;">📄</span>
+                    <span style="font-size: 13px; color: #e1e1e1;">{{ sheet.originalName }}</span>
+                    <span *ngIf="sheet.fileSize" style="font-size: 11px; color: #888;">({{ (sheet.fileSize / 1024 / 1024) | number:'1.1-2' }} MB)</span>
+                  </div>
+                  <button (click)="removeTechnicalSheet(sheet)" class="btn-icon btn-icon-delete" title="Eliminar ficha técnica">❌</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

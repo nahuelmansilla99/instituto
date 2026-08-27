@@ -394,8 +394,17 @@
   margin-top: 4px;
 }
 
+.minimal-badge {
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-hover);
+}
+
 .pending-lesson-badge {
   color: var(--status-warning);
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
@@ -405,6 +414,8 @@
 
 .pending-exam-badge {
   color: var(--status-danger);
+  background: var(--status-danger-bg);
+  border-color: rgba(239, 68, 68, 0.3);
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
@@ -414,6 +425,8 @@
 
 .quiz-completed-badge {
   color: var(--badge-completed-text);
+  background: var(--status-completed-bg);
+  border-color: rgba(16, 185, 129, 0.3);
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
@@ -431,14 +444,18 @@
   box-shadow: 0 0 4px var(--status-danger);
 }
 
-.btn-warning {
-  background: var(--status-warning);
-  color: var(--text-primary);
-  border: 1px solid var(--status-warning);
+.btn-exam {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transition: all 0.3s ease;
 }
 
-.btn-warning:hover:not(:disabled) {
-  background: var(--status-warning);
+.btn-exam:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
 }
 
 .pulsing-dot-small {
@@ -491,10 +508,14 @@
 
 .meta-schedule {
   color: var(--status-available);
+  background: var(--status-available-bg);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 .meta-ppt {
   color: var(--status-warning);
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
 }
 
 .meta-ppt-clickable {
@@ -509,6 +530,8 @@
 
 .meta-meet {
   color: var(--status-danger);
+  background: var(--status-danger-bg);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .meta-quiz {
@@ -627,9 +650,15 @@
   }
 
   .lesson-badges-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .minimal-badge {
+    padding: 2px 6px !important;
+    font-size: 0.65rem !important;
   }
 
   .breadcrumb-nav {

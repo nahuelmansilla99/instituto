@@ -134,9 +134,6 @@
                     'status-badge-locked': lesson.status === 'LOCKED'
                   }"
                 >
-                  <ng-container *ngIf="lesson.status === 'COMPLETED'">
-                    ✓ {{ lesson.hasQuiz ? 'Aprobada (' + lesson.score + '%)' : 'Completada' }}
-                  </ng-container>
                   <ng-container *ngIf="lesson.status === 'LOCKED'">🔒 Bloqueada</ng-container>
                 </span>
 
@@ -193,7 +190,7 @@
               <button
                 *ngIf="!authService.isAdmin() && lesson.status === 'AVAILABLE' && lesson.hasQuiz"
                 (click)="startExam(lesson.id)"
-                class="btn btn-warning w-full"
+                class="btn btn-exam w-full"
               >
                 📝 Realizar examen
               </button>

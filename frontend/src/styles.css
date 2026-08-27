@@ -143,6 +143,8 @@
   --status-danger-hover: #b71c1c;
   
   --status-warning: #ed6c02;
+  --status-alert: #e7c41f;
+  --status-alert-bg: rgba(231, 196, 31, 0.1);
 
   /* States */
   --bg-disabled: #F0F0F0;

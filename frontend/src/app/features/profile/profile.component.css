@@ -1,7 +1,7 @@
 .profile-page {
   padding-top: 80px; /* Leave space for navbar */
   min-height: 100vh;
-  background-color: var(--background-color, #121212);
+  background-color: var(--bg-main);
 }
 
 .profile-container {
@@ -15,8 +15,8 @@
   padding: 2.5rem;
   margin-bottom: 2rem;
   border-radius: 20px;
-  background: linear-gradient(145deg, rgba(30, 30, 30, 0.8), rgba(20, 20, 20, 0.9));
-  border: 1px solid var(--border-color, #333);
+  background: var(--card-gradient);
+  border: 1px solid var(--border-subtle);
 }
 
 .profile-hero-content {
@@ -29,13 +29,13 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-color, #6366f1), var(--secondary-color, #ec4899));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 2.5rem;
   font-weight: 700;
-  color: white;
+  color: var(--text-on-primary);
   box-shadow: 0 8px 16px var(--primary-light);
 }
 
@@ -43,14 +43,14 @@
   font-size: 2.5rem;
   font-weight: 800;
   margin: 0 0 0.5rem 0;
-  color: var(--text-color, var(--text-inverse));
+  color: var(--text-primary);
 }
 
 .role-badge {
   display: inline-block;
   padding: 0.3rem 0.8rem;
   background: var(--primary-light);
-  color: var(--primary-color, #818cf8);
+  color: var(--primary);
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -59,7 +59,7 @@
 }
 
 .profile-email {
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   font-size: 1rem;
   margin: 0;
 }
@@ -80,8 +80,8 @@
 .card {
   padding: 2rem;
   border-radius: 20px;
-  background: rgba(30, 30, 30, 0.6);
-  border: 1px solid var(--border-color, #333);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
 }
@@ -90,11 +90,11 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0 0 0.5rem 0;
-  color: var(--text-color, var(--text-inverse));
+  color: var(--text-primary);
 }
 
 .card-header p {
-  color: var(--text-secondary, #a1a1aa);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   margin: 0 0 1.5rem 0;
 }
@@ -116,32 +116,32 @@
 .form-group label {
   font-weight: 500;
   font-size: 0.95rem;
-  color: var(--text-color, var(--text-inverse));
+  color: var(--text-primary);
 }
 
 .form-group input {
   padding: 0.875rem 1rem;
   border-radius: 12px;
-  border: 1px solid var(--border-color, #333);
-  background: rgba(18, 18, 18, 0.8);
-  color: var(--text-color, var(--text-inverse));
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-input);
+  color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.3s ease;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: var(--primary-color, #6366f1);
+  border-color: var(--primary);
   box-shadow: 0 0 0 4px var(--primary-light);
-  background: rgba(18, 18, 18, 1);
+  background: var(--bg-input-focus);
 }
 
 .form-group input.is-invalid {
-  border-color: var(--danger-color, var(--status-danger));
+  border-color: var(--status-danger);
 }
 
 .error-message {
-  color: var(--danger-color, var(--status-danger));
+  color: var(--status-danger);
   font-size: 0.85rem;
   margin-top: 0.25rem;
 }
@@ -162,13 +162,13 @@
 
 .alert-success {
   background-color: var(--status-completed-bg);
-  color: #34d399;
+  color: var(--status-completed);
   border: 1px solid var(--status-completed-bg);
 }
 
 .alert-danger {
   background-color: var(--status-danger-bg);
-  color: #f87171;
+  color: var(--status-danger);
   border: 1px solid var(--status-danger-bg);
 }
 
@@ -190,8 +190,8 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-color, #6366f1), #818cf8);
-  color: white;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: var(--text-on-primary);
   box-shadow: 0 4px 12px var(--primary-light);
 }
 
@@ -205,8 +205,8 @@
 }
 
 .btn-primary:disabled {
-  background: var(--border-color, #333);
-  color: var(--text-secondary, #a1a1aa);
+  background: var(--border-subtle);
+  color: var(--text-secondary);
   box-shadow: none;
   cursor: not-allowed;
 }
@@ -218,7 +218,7 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--primary-color, #6366f1), var(--secondary-color, #ec4899));
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

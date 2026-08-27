@@ -9,16 +9,16 @@
   gap: 20px;
   padding: 20px 28px;
   margin-bottom: 24px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(30, 41, 59, 0.9) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.5);
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--bg-surface-elevated) 100%);
+  border: 1px solid var(--border-active);
+  box-shadow: 0 0 20px var(--primary-light);
   flex-wrap: wrap;
 }
 
 .teacher-alert-info h4 {
   font-size: 1.15rem;
   margin-bottom: 4px;
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .teacher-alert-info p {
@@ -32,9 +32,9 @@
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #c084fc;
-  background: rgba(139, 92, 246, 0.25);
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid var(--border-active);
   padding: 2px 8px;
   border-radius: var(--radius-full);
   margin-bottom: 4px;
@@ -64,7 +64,7 @@
 }
 
 .breadcrumb-link:hover {
-  color: #fff;
+  color: var(--text-primary);
 }
 
 .breadcrumb-separator {
@@ -72,7 +72,7 @@
 }
 
 .breadcrumb-current {
-  color: #c084fc;
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -85,8 +85,8 @@
 .spinner-large {
   width: 48px;
   height: 48px;
-  border: 3px solid rgba(139, 92, 246, 0.2);
-  border-top-color: #a855f7;
+  border: 3px solid var(--primary-light);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   margin: 0 auto 16px;
@@ -100,9 +100,9 @@
 .course-hero-card {
   padding: 36px;
   margin-bottom: 40px;
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.95) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.35);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  background: var(--card-gradient);
+  border: 1px solid var(--border-active);
+  box-shadow: 0 10px 30px var(--shadow-lg);
 }
 
 .hero-layout {
@@ -121,7 +121,7 @@
 .hero-media {
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px var(--shadow-md);
   aspect-ratio: 16 / 10;
 }
 
@@ -148,9 +148,9 @@
 .badge-tag {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #c084fc;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid var(--border-active);
   padding: 3px 10px;
   border-radius: var(--radius-full);
 }
@@ -158,17 +158,17 @@
 .badge-status-completion {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #818cf8;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: var(--badge-available-text);
+  background: var(--status-available-bg);
+  border: 1px solid var(--border-active);
   padding: 3px 10px;
   border-radius: var(--radius-full);
 }
 
 .badge-completed {
-  color: #34d399 !important;
-  background: rgba(16, 185, 129, 0.15) !important;
-  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: var(--badge-completed-text) !important;
+  background: var(--status-completed-bg) !important;
+  border-color: var(--status-completed) !important;
 }
 
 .course-title {
@@ -191,8 +191,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 12px 18px;
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(15, 23, 42, 0.7) 100%);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: linear-gradient(135deg, var(--status-danger-bg) 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--status-danger);
   border-radius: var(--radius-sm);
   margin-top: 4px;
   flex-wrap: wrap;
@@ -202,8 +202,8 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #ef4444;
-  box-shadow: 0 0 10px #ef4444;
+  background: var(--status-danger);
+  box-shadow: 0 0 10px var(--status-danger);
   animation: pulse 1.5s infinite;
   flex-shrink: 0;
 }
@@ -221,7 +221,7 @@
 }
 
 .meet-callout-text strong {
-  color: #fca5a5;
+  color: var(--status-danger);
   font-size: 0.88rem;
 }
 
@@ -231,7 +231,7 @@
 }
 
 .btn-meet {
-  background: #ef4444 !important;
+  background: var(--status-danger) !important;
   border: none !important;
   font-size: 0.82rem;
   padding: 6px 14px;
@@ -259,26 +259,26 @@
 }
 
 .progress-percent {
-  color: #c084fc;
+  color: var(--primary);
   font-weight: 700;
 }
 
 .progress-track {
   height: 8px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border-subtle);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+  background: var(--primary);
   border-radius: var(--radius-full);
   transition: width 0.6s ease;
 }
 
 .fill-completed {
-  background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
+  background: linear-gradient(90deg, var(--status-completed) 0%, var(--badge-completed-text) 100%) !important;
 }
 
 /* Syllabus Section */
@@ -328,26 +328,26 @@
 }
 
 .card-available {
-  border: 1px solid rgba(139, 92, 246, 0.45);
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.12);
+  border: 1px solid var(--border-active);
+  background: var(--bg-surface-elevated);
+  box-shadow: 0 4px 20px var(--shadow-sm);
 }
 
 .card-available:hover {
-  border-color: #a855f7;
+  border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.25);
+  box-shadow: 0 8px 25px var(--primary-light);
 }
 
 .card-completed {
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid var(--status-completed);
+  background: linear-gradient(135deg, var(--status-completed-bg) 0%, var(--bg-card) 100%);
 }
 
 .card-locked {
   opacity: 0.6;
   border: 1px solid var(--border-subtle);
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--bg-disabled);
 }
 
 .lesson-card-main {
@@ -365,14 +365,14 @@
 }
 
 .order-indicator-inline {
-  color: #c084fc;
+  color: var(--primary);
   font-weight: 800;
   font-size: 1.15rem;
   opacity: 0.9;
 }
 
 .card-completed .order-indicator-inline {
-  color: #34d399;
+  color: var(--badge-completed-text);
 }
 
 .card-locked .order-indicator-inline {
@@ -395,7 +395,7 @@
 }
 
 .pending-lesson-badge {
-  color: #fbbf24;
+  color: var(--status-warning);
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
@@ -404,7 +404,7 @@
 }
 
 .pending-exam-badge {
-  color: #f87171;
+  color: var(--status-danger);
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
@@ -413,7 +413,7 @@
 }
 
 .quiz-completed-badge {
-  color: #34d399;
+  color: var(--badge-completed-text);
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-flex;
@@ -422,38 +422,38 @@
 }
 
 .pulsing-dot-small.warning {
-  background: #fbbf24;
-  box-shadow: 0 0 4px #fbbf24;
+  background: var(--status-warning);
+  box-shadow: 0 0 4px var(--status-warning);
 }
 
 .pulsing-dot-small.danger {
-  background: #f87171;
-  box-shadow: 0 0 4px #f87171;
+  background: var(--status-danger);
+  box-shadow: 0 0 4px var(--status-danger);
 }
 
 .btn-warning {
-  background: #f59e0b;
-  color: #fff;
-  border: 1px solid #d97706;
+  background: var(--status-warning);
+  color: var(--text-primary);
+  border: 1px solid var(--status-warning);
 }
 
 .btn-warning:hover:not(:disabled) {
-  background: #d97706;
+  background: var(--status-warning);
 }
 
 .pulsing-dot-small {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 4px #fff;
+  background: var(--text-primary);
+  box-shadow: 0 0 4px var(--text-primary);
   animation: livePulse 1.2s infinite;
 }
 
 .lesson-card-title {
   font-size: 1.15rem;
   margin: 0;
-  color: #fff;
+  color: var(--text-primary);
   line-height: 1.3;
 }
 
@@ -466,7 +466,7 @@
 }
 
 .status-badge-completed {
-  color: #34d399;
+  color: var(--badge-completed-text);
 }
 
 .status-badge-locked {
@@ -490,11 +490,11 @@
 }
 
 .meta-schedule {
-  color: #38bdf8;
+  color: var(--status-available);
 }
 
 .meta-ppt {
-  color: #fbbf24;
+  color: var(--status-warning);
 }
 
 .meta-ppt-clickable {
@@ -503,16 +503,16 @@
 }
 
 .meta-ppt-clickable:hover {
-  color: #fcd34d;
+  color: var(--status-warning);
   transform: scale(1.04);
 }
 
 .meta-meet {
-  color: #fca5a5;
+  color: var(--status-danger);
 }
 
 .meta-quiz {
-  color: #a5b4fc;
+  color: var(--primary);
 }
 
 .lesson-card-action {
@@ -532,18 +532,18 @@
 
 .btn-ppt-quick {
   width: 100%;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
+  background: var(--status-warning);
+  border: 1px solid var(--status-warning);
+  color: var(--status-warning);
   font-size: 0.85rem;
   padding: 6px 12px;
   font-weight: 600;
 }
 
 .btn-ppt-quick:hover {
-  background: rgba(245, 158, 11, 0.25);
-  border-color: #f59e0b;
-  color: #fef3c7;
+  background: var(--status-warning);
+  border-color: var(--status-warning);
+  color: var(--text-primary);
 }
 
 @media (max-width: 600px) {
@@ -559,7 +559,7 @@
   font-size: 0.78rem;
   color: var(--text-muted);
   padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-hover);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
 }

@@ -1,7 +1,8 @@
 /* ==========================================================================
    DESIGN SYSTEM & THEME TOKENS
    ========================================================================== */
-:root {
+
+[data-theme="dark"] {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Outfit', 'Inter', sans-serif;
 
@@ -80,68 +81,74 @@
   --app-result-passed-bg: rgba(76, 175, 80, 0.1);
   --app-result-passed-border: rgba(76, 175, 80, 0.3);
   --app-result-failed-bg: rgba(244, 67, 54, 0.1);
-  --app-result-failed-border: rgba(244, 67, 54, 0.3);
   */
-
-  /* Global Application Colors - Light Mode */
-  --app-bg-main: #EEF6F5; /* Color de fondo general de la aplicación (vistas principales) */
-  --app-text-title: #111111; /* Color oscuro para títulos principales y encabezados */
-  --app-text-primary: #333333; /* Color de texto base para párrafos y contenido general */
-  --app-text-secondary: #666666; /* Color para textos secundarios, descripciones o subtítulos */
-  
-  --app-accent-bg: #30a3d8; /* Color principal de la marca (botones primarios, iconos destacados) */
-  --app-accent-text: #EEF6F5; /* Color de texto sobre fondos con color de acento (ej. texto de botón) */
-  --app-accent-hover: rgba(48, 163, 216, 0.1); /* Color sutil para estados hover o fondos de elementos seleccionados */
-  
-  --app-success-bg: #EAF3DE; /* Fondo para alertas o estados de éxito (ej. aprobados, completados) */
-  --app-success-text: #27500A; /* Texto oscuro para legibilidad sobre fondos de éxito */
-  --app-success-icon: #4CAF50; /* Color vibrante para iconos de check o indicadores de éxito */
-  
-  --app-pending-bg: #F1EFE8; /* Fondo para estados pendientes, incompletos o inactivos */
-  --app-pending-text: #5F5E5A; /* Texto para acompañar estados pendientes (ej. "por revisar") */
-  
-  --app-border: rgba(0, 0, 0, 0.150); /* Color sutil para bordes de tarjetas, separadores y modales */
-  --app-card-bg: #fafafa; /* Fondo blanco humo para tarjetas, contenedores y modales */
-  
-  --app-item-bg-hover: rgba(0, 0, 0, 0.1); /* Efecto hover para items de listas o filas de tablas */
-  --app-item-bg-active: rgba(0, 0, 0, 0.1); /* Efecto cuando un item está activo o seleccionado (ej. menú) */
-  
-  --app-btn-disabled-bg: #F0F0F0; /* Fondo para botones que no se pueden clickear */
-  --app-btn-disabled-text: #999999; /* Texto gris para botones deshabilitados */
-  
-  /* Estados de resultados de evaluaciones (Quizzes/Exámenes) */
-  --app-result-passed-bg: rgba(76, 175, 80, 0.1); /* Fondo verde semitransparente para examen aprobado */
-  --app-result-passed-border: rgba(76, 175, 80, 0.3); /* Borde verde para tarjeta de examen aprobado */
-  --app-result-failed-bg: rgba(244, 67, 54, 0.1); /* Fondo rojo semitransparente para examen desaprobado */
-  --app-result-failed-border: rgba(244, 67, 54, 0.3); /* Borde rojo para tarjeta de examen desaprobado */
 }
 
 /* Light Theme Overrides */
-[data-theme="light"] {
-  --bg-main: #f3f6fa;
-  --bg-card: rgba(255, 255, 255, 0.7);
-  --bg-card-hover: rgba(255, 255, 255, 0.95);
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Outfit', 'Inter', sans-serif;
+  
+  /* Fondos y superficies */
+  --bg-main: #EEF6F5; /* Fondo principal muy claro y limpio */
+  --bg-card: #fafafa; /* Blanco puro para destacar sobre el fondo */
+  --bg-card-hover: rgba(250, 250, 250, 0.95);
   --bg-surface: #ffffff;
   --bg-surface-elevated: #ffffff;
+  
+  /* Inputs y Hover */
   --bg-input: rgba(255, 255, 255, 0.6);
   --bg-input-focus: rgba(255, 255, 255, 1);
-  --bg-hover: rgba(0, 0, 0, 0.04);
-  --bg-hover-strong: rgba(0, 0, 0, 0.08);
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-active: rgba(99, 102, 241, 0.5);
+  --bg-hover: rgba(0, 0, 0, 0.1); /* Efecto hover para items */
+  --bg-hover-strong: rgba(0, 0, 0, 0.15); /* Efecto cuando un item está activo */
+  
+  /* Bordes */
+  --border-subtle: rgba(0, 0, 0, 0.150); /* Borde muy sutil y elegante */
+  --border-active: rgba(48, 163, 216, 0.5);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  /* Textos */
+  --text-primary: #111111; /* Títulos casi negros para contraste */
+  --text-secondary: #333333; /* Texto principal oscuro y legible */
+  --text-muted: #666666; /* Gris medio para texto secundario */
 
-  --badge-completed-text: #059669;
-  --badge-available-text: #4338ca;
-
+  /* Marca y Estados */
+  --primary: #30a3d8; /* Mantenido (color de marca) */
+  --primary-hover: #258cb9;
+  --primary-light: rgba(48, 163, 216, 0.1);
+  --secondary: #8b5cf6; /* Puede usarse para acentos secundarios */
+  --accent-gradient: linear-gradient(135deg, #30a3d8 0%, #258cb9 100%);
   --card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+  
+  /* Status Colors */
+  --status-completed: #4CAF50;
+  --status-completed-bg: #EAF3DE;
+  --badge-completed-text: #27500A;
+  
+  --status-available: #30a3d8;
+  --status-available-bg: rgba(48, 163, 216, 0.15);
+  --badge-available-text: #30a3d8;
+  
+  --status-locked: #5F5E5A;
+  --status-locked-bg: #F1EFE8;
+  
+  --status-danger: #d32f2f;
+  --status-danger-bg: rgba(211, 47, 47, 0.1);
+  
+  --status-warning: #ed6c02;
+
+  /* Shadows & Glass */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.15);
+  --shadow-glow: 0 0 25px rgba(48, 163, 216, 0.15);
+  --shadow-glow-success: 0 0 25px rgba(76, 175, 80, 0.35);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
   --backdrop-blur: blur(24px);
 }
 

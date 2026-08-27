@@ -2,10 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--app-card-bg); /* Use pure background, or if you need opacity: */
+  background: var(--bg-card); /* Use pure background, or if you need opacity: */
   /* Fallback to adding opacity if supported, otherwise just use card bg */
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .navbar-container {
@@ -27,12 +27,12 @@
 .logo-icon {
   width: 40px;
   height: 40px;
-  background: var(--app-accent-bg);
+  background: var(--primary);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--app-accent-text);
+  color: var(#EEF6F5);
   box-shadow: 0 4px 12px rgba(48, 163, 216, 0.35);
 }
 
@@ -44,18 +44,18 @@
 .brand-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--app-text-title);
+  color: var(--text-primary);
   line-height: 1.1;
 }
 
 .gradient-text {
-  color: var(--app-accent-bg);
+  color: var(--primary);
   margin-left: 3px;
 }
 
 .brand-subtitle {
   font-size: 0.72rem;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   letter-spacing: 0.02em;
 }
 
@@ -71,27 +71,27 @@
   gap: 8px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   padding: 8px 14px;
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
 }
 
 .nav-link:hover, .active-link {
-  color: var(--app-text-title);
-  background: var(--app-item-bg-hover);
+  color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .nav-link-admin {
-  background: var(--app-accent-hover);
-  color: var(--app-accent-bg) !important;
+  background: var(--primary-light);
+  color: var(--primary) !important;
   border: 1px solid rgba(48, 163, 216, 0.3);
 }
 
 .nav-link-admin:hover, .active-link-admin {
-  background: var(--app-accent-bg) !important;
-  border-color: var(--app-accent-bg) !important;
-  color: var(--app-text-title) !important;
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--text-primary) !important;
   box-shadow: 0 0 14px rgba(48, 163, 216, 0.3);
 }
 
@@ -105,7 +105,7 @@
   gap: 10px;
   padding: 4px 12px 4px 6px;
   background: transparent;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -113,12 +113,12 @@
 }
 
 .user-chip:hover, .user-chip.active {
-  background: var(--app-item-bg-hover);
-  border-color: var(--app-accent-bg);
+  background: var(--bg-hover);
+  border-color: var(--primary);
 }
 
 .chevron-icon {
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   transition: transform 0.2s ease;
   margin-left: 2px;
 }
@@ -132,8 +132,8 @@
   top: calc(100% + 8px);
   right: 0;
   width: 200px;
-  background: var(--app-card-bg);
-  border: 1px solid var(--app-border);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 8px;
@@ -160,7 +160,7 @@
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
-  color: var(--app-text-primary);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -169,7 +169,7 @@
 }
 
 .dropdown-item:hover {
-  background: var(--app-item-bg-hover);
+  background: var(--bg-hover);
 }
 
 .dropdown-item.text-danger {
@@ -182,7 +182,7 @@
 
 .dropdown-divider {
   height: 1px;
-  background: var(--app-border);
+  background: var(--border-subtle);
   margin: 4px 0;
 }
 
@@ -190,9 +190,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--app-accent-hover);
-  border: 1px solid var(--app-accent-bg);
-  color: var(--app-accent-bg);
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,13 +208,13 @@
 .user-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--app-text-title);
+  color: var(--text-primary);
   line-height: 1.1;
 }
 
 .user-role {
   font-size: 0.7rem;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

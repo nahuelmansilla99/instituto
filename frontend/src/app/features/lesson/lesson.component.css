@@ -3,8 +3,8 @@
 .lesson-page {
   padding-top: 80px; /* offset navbar */
   min-height: 100vh;
-  background-color: var(--app-bg-main);
-  color: var(--app-text-primary);
+  background-color: var(--bg-main);
+  color: var(--text-secondary);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -27,8 +27,8 @@
 /* Sidebar: Temario */
 .lesson-sidebar {
   width: 100%;
-  background: var(--app-card-bg);
-  border: 1px solid var(--app-border);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 20px;
 }
@@ -44,7 +44,7 @@
 
 .sidebar-header {
   margin-bottom: 20px;
-  border-bottom: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 15px;
 }
 
@@ -52,7 +52,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
   margin-bottom: 10px;
@@ -60,11 +60,11 @@
 }
 
 .back-link:hover {
-  color: var(--app-text-primary);
+  color: var(--text-secondary);
 }
 
 .course-title-sidebar {
-  color: var(--app-text-title);
+  color: var(--text-primary);
   margin: 0;
   font-size: 16px;
   font-weight: 500;
@@ -87,12 +87,12 @@
 }
 
 .syllabus-item:hover {
-  background: var(--app-item-bg-hover);
+  background: var(--bg-hover);
 }
 
 .syllabus-item.active {
-  background: var(--app-item-bg-active);
-  border-left: 3px solid var(--app-accent-bg);
+  background: var(--bg-hover-strong);
+  border-left: 3px solid var(--primary);
 }
 
 .syllabus-item.locked {
@@ -104,17 +104,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
 }
 
 .syllabus-item.completed .item-icon {
-  color: var(--app-success-icon); /* generic green or use var */
+  color: var(--status-completed); /* generic green or use var */
 }
 
 .circle-icon {
   width: 10px;
   height: 10px;
-  border: 2px solid var(--app-text-secondary);
+  border: 2px solid var(--text-muted);
   border-radius: 50%;
 }
 
@@ -149,7 +149,7 @@
 
 .lesson-number {
   font-size: 13px;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -158,21 +158,21 @@
   font-size: 12px;
   padding: 3px 8px;
   border-radius: 4px;
-  background: var(--app-pending-bg);
-  color: var(--app-pending-text);
+  background: var(--status-locked-bg);
+  color: var(--status-locked);
   font-weight: 500;
 }
 
 .lesson-status-badge.completed {
-  background: var(--app-success-bg);
-  color: var(--app-success-text);
+  background: var(--status-completed-bg);
+  color: var(--badge-completed-text);
 }
 
 .lesson-title {
   font-size: 24px;
   font-weight: 500;
   margin: 0;
-  color: var(--app-text-primary);
+  color: var(--text-secondary);
 }
 
 
@@ -195,8 +195,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--app-pending-bg);
-  color: var(--app-pending-text);
+  background: var(--status-locked-bg);
+  color: var(--status-locked);
   padding: 10px;
   border-radius: 8px;
   font-size: 14px;
@@ -205,17 +205,17 @@
 }
 
 .progress-chip.completed {
-  background: var(--app-success-bg);
-  color: var(--app-success-text);
+  background: var(--status-completed-bg);
+  color: var(--badge-completed-text);
 }
 
 
 /* Section Containers (Cards) */
 .section-container {
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 20px;
-  background: var(--app-card-bg);
+  background: var(--bg-card);
 }
 
 .section-title {
@@ -223,7 +223,7 @@
   margin-bottom: 15px;
   font-size: 16px;
   font-weight: 500;
-  color: var(--app-text-title);
+  color: var(--text-primary);
 }
 
 /* 3. Contenido de la clase */
@@ -232,7 +232,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: rgba(255,255,255,0.02);
 }
@@ -248,8 +248,8 @@
 }
 
 .btn-accent {
-  background: var(--app-accent-bg);
-  color: var(--app-accent-text);
+  background: var(--primary);
+  color: var(#EEF6F5);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -266,8 +266,8 @@
 }
 
 .btn-accent:disabled, .btn-disabled {
-  background: var(--app-btn-disabled-bg);
-  color: var(--app-btn-disabled-text);
+  background: var(#F0F0F0);
+  color: var(#999999);
   cursor: not-allowed;
 }
 
@@ -289,7 +289,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   background: rgba(255,255,255,0.02);
 }
@@ -307,7 +307,7 @@
 .btn-icon {
   background: none;
   border: none;
-  color: var(--app-text-title);
+  color: var(--text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -317,8 +317,8 @@
 }
 
 .btn-icon:hover {
-  background: var(--app-item-bg-active);
-  color: var(--app-text-primary);
+  background: var(--bg-hover-strong);
+  color: var(--text-secondary);
 }
 
 .manual-check-label {
@@ -327,13 +327,13 @@
   gap: 8px;
   margin-top: 15px;
   font-size: 14px;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
 }
 
 /* 5. Examen */
 .exam-section {
-  border-top: 2px solid var(--app-item-bg-hover);
+  border-top: 2px solid var(--bg-hover);
 }
 
 .exam-header-row {
@@ -346,13 +346,13 @@
 
 .exam-subtitle {
   font-size: 13px;
-  color: var(--app-text-secondary);
+  color: var(--text-muted);
 }
 
 .quiz-area {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid var(--app-border);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .question-card {
@@ -375,7 +375,7 @@
   align-items: center;
   gap: 10px;
   padding: 12px;
-  border: 1px solid var(--app-border);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
@@ -383,12 +383,12 @@
 }
 
 .option-label:hover {
-  background: var(--app-item-bg-hover);
+  background: var(--bg-hover);
 }
 
 .option-label.selected {
-  border-color: var(--app-accent-bg);
-  background: var(--app-accent-hover);
+  border-color: var(--primary);
+  background: var(--primary-light);
 }
 
 .option-letter {
@@ -398,20 +398,20 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(--app-btn-disabled-bg);
+  background: var(#F0F0F0);
   font-size: 12px;
   font-weight: bold;
 }
 
 .option-label.selected .option-letter {
-  background: var(--app-accent-bg);
-  color: var(--app-text-primary);
+  background: var(--primary);
+  color: var(--text-secondary);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--app-text-primary);
-  border: 1px solid var(--app-text-primary);
+  color: var(--text-secondary);
+  border: 1px solid var(--text-secondary);
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 600;
@@ -420,7 +420,7 @@
 }
 
 .btn-outline:hover {
-  background: var(--app-item-bg-active);
+  background: var(--bg-hover-strong);
 }
 
 .quiz-result-card {
@@ -430,17 +430,17 @@
 }
 
 .quiz-result-card.passed {
-  background: var(--app-result-passed-bg);
-  border: 1px solid var(--app-result-passed-border);
+  background: var(rgba(76, 175, 80, 0.1));
+  border: 1px solid var(rgba(76, 175, 80, 0.3));
 }
 
 .quiz-result-card.failed {
-  background: var(--app-result-failed-bg);
-  border: 1px solid var(--app-result-failed-border);
+  background: var(rgba(244, 67, 54, 0.1));
+  border: 1px solid var(rgba(244, 67, 54, 0.3));
 }
 
 .score-display {
-  color: var(--app-text-primary);
+  color: var(--text-secondary);
   font-size: 18px;
   font-weight: bold;
   margin: 10px 0;

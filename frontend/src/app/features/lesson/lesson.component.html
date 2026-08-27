@@ -6,10 +6,6 @@
     <!-- Sidebar: Temario -->
     <aside class="lesson-sidebar">
       <div class="sidebar-header">
-        <a [routerLink]="['/courses', l.courseId]" class="back-link">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Volver al curso
-        </a>
         <h3 class="course-title-sidebar">{{ l.courseTitle }}</h3>
       </div>
       
@@ -36,6 +32,10 @@
 
     <!-- Main Content -->
     <section class="lesson-main">
+      <a [routerLink]="['/courses', l.courseId]" class="back-link" style="margin-bottom: -15px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver al curso
+      </a>
       
       <!-- 1. Encabezado de la clase -->
       <div class="lesson-header">
@@ -49,21 +49,21 @@
       </div>
 
       <!-- 2. Checklist de progreso -->
-      <div class="progress-checklist">
+      <div class="progress-checklist" *ngIf="(l.presentationUrl || l.content) || (l.technicalSheets && l.technicalSheets.length > 0) || (l.quizQuestions && l.quizQuestions.length > 0)">
         <!-- Chip 1: Contenido -->
-        <div class="progress-chip" [class.completed]="hasViewedContent() || (!l.presentationUrl && !l.content)">
-          <svg *ngIf="hasViewedContent() || (!l.presentationUrl && !l.content)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <svg *ngIf="!(hasViewedContent() || (!l.presentationUrl && !l.content))" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+        <div class="progress-chip" *ngIf="l.presentationUrl || l.content" [class.completed]="hasViewedContent()">
+          <svg *ngIf="hasViewedContent()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg *ngIf="!hasViewedContent()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
           <span>Contenido visto</span>
         </div>
         <!-- Chip 2: Fichas -->
-        <div class="progress-chip" [class.completed]="isSheetsViewed">
+        <div class="progress-chip" *ngIf="l.technicalSheets && l.technicalSheets.length > 0" [class.completed]="isSheetsViewed">
           <svg *ngIf="isSheetsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
           <svg *ngIf="!isSheetsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
           <span>Fichas revisadas</span>
         </div>
         <!-- Chip 3: Examen -->
-        <div class="progress-chip" [class.completed]="l.status === 'COMPLETED'">
+        <div class="progress-chip" *ngIf="l.quizQuestions && l.quizQuestions.length > 0" [class.completed]="l.status === 'COMPLETED'">
           <svg *ngIf="l.status === 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
           <svg *ngIf="l.status !== 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
           <span>{{ l.status === 'COMPLETED' ? 'Examen aprobado' : 'Examen pendiente' }}</span>

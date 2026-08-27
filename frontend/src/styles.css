@@ -26,6 +26,7 @@
 
   /* Brand Accents */
   --primary: #6366f1;
+  --text-on-primary: #ffffff;
   --primary-hover: #4f46e5;
   --primary-light: rgba(99, 102, 241, 0.15);
   --secondary: #8b5cf6;
@@ -43,7 +44,12 @@
   --status-locked-bg: rgba(100, 116, 139, 0.15);
   --status-danger: #ef4444;
   --status-danger-bg: rgba(239, 68, 68, 0.15);
+  --status-danger-hover: #dc2626;
   --status-warning: #f59e0b;
+
+  /* States */
+  --bg-disabled: #333333;
+  --text-disabled: #777777;
 
   /* Shadows & Glass */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -113,6 +119,7 @@
 
   /* Marca y Estados */
   --primary: #30a3d8; /* Mantenido (color de marca) */
+  --text-on-primary: #EEF6F5; /* Color del texto/icono sobre fondo primario */
   --primary-hover: #258cb9;
   --primary-light: rgba(48, 163, 216, 0.1);
   --secondary: #8b5cf6; /* Puede usarse para acentos secundarios */
@@ -133,8 +140,13 @@
   
   --status-danger: #d32f2f;
   --status-danger-bg: rgba(211, 47, 47, 0.1);
+  --status-danger-hover: #b71c1c;
   
   --status-warning: #ed6c02;
+
+  /* States */
+  --bg-disabled: #F0F0F0;
+  --text-disabled: #999999;
 
   /* Shadows & Glass */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);

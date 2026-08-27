@@ -249,7 +249,7 @@
 
 .btn-accent {
   background: var(--primary);
-  color: var(#EEF6F5);
+  color: var(--text-on-primary);
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
@@ -266,8 +266,8 @@
 }
 
 .btn-accent:disabled, .btn-disabled {
-  background: var(#F0F0F0);
-  color: var(#999999);
+  background: var(--bg-disabled);
+  color: var(--text-disabled);
   cursor: not-allowed;
 }
 
@@ -398,7 +398,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: var(#F0F0F0);
+  background: var(--bg-disabled);
   font-size: 12px;
   font-weight: bold;
 }

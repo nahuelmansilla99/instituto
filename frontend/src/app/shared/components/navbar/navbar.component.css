@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(#EEF6F5);
+  color: var(--text-on-primary);
   box-shadow: 0 4px 12px rgba(48, 163, 216, 0.35);
 }
 
@@ -173,7 +173,7 @@
 }
 
 .dropdown-item.text-danger {
-  color: #d32f2f;
+  color: var(--status-danger);
 }
 
 .dropdown-item.text-danger:hover {
@@ -337,7 +337,7 @@
 }
 
 .btn-confirm:hover {
-  background: #dc2626; /* A slightly darker red for hover */
+  background: var(--status-danger-hover); /* A slightly darker red for hover */
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }

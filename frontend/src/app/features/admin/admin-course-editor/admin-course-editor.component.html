@@ -222,6 +222,34 @@
               <div class="preview-box" [innerHTML]="lesson.content || 'Sin contenido'"></div>
             </div>
 
+            <!-- Documentacion -->
+            <div class="lesson-documents-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="margin: 0; font-size: 14px; color: #aaa;">Documentación de la Clase (PDF)</h4>
+                <label class="btn btn-secondary btn-sm" title="Subir nueva Documentación PDF">
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    (change)="onLessonDocumentSelected($event, lesson)"
+                    class="file-input-hidden"
+                  />
+                  <span>➕ Agregar PDF</span>
+                </label>
+              </div>
+              <div *ngIf="!lesson.lessonDocuments || lesson.lessonDocuments.length === 0" style="font-size: 12px; color: #666;">
+                No hay documentación para esta clase.
+              </div>
+              <div class="lesson-documents-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <div *ngFor="let doc of lesson.lessonDocuments" style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; align-items: center;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #61b1ff; font-size: 16px;">📚</span>
+                    <span style="font-size: 13px; color: #e1e1e1;">{{ doc.originalName }}</span>
+                    <span *ngIf="doc.fileSize" style="font-size: 11px; color: #888;">({{ (doc.fileSize / 1024 / 1024) | number:'1.1-2' }} MB)</span>
+                  </div>
+                  <button (click)="removeLessonDocument(doc)" class="btn-icon btn-icon-delete" title="Eliminar documento">❌</button>
+                </div>
+              </div>
+            </div>
             <!-- Fichas Tecnicas -->
             <div class="lesson-technical-sheets-section" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -250,6 +278,7 @@
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>

@@ -49,7 +49,7 @@
       </div>
 
       <!-- 2. Checklist de progreso -->
-      <div class="progress-checklist" *ngIf="(l.presentationUrl || l.content) || (l.technicalSheets && l.technicalSheets.length > 0) || (l.quizQuestions && l.quizQuestions.length > 0)">
+      <div class="progress-checklist" *ngIf="(l.presentationUrl || l.content) || (l.technicalSheets && l.technicalSheets.length > 0) || (l.quizQuestions && l.quizQuestions.length > 0) || (l.lessonDocuments && l.lessonDocuments.length > 0)">
         <!-- Chip 1: Contenido -->
         <div class="progress-chip" *ngIf="l.presentationUrl || l.content" [class.completed]="hasViewedContent()">
           <svg *ngIf="hasViewedContent()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -62,7 +62,13 @@
           <svg *ngIf="!isSheetsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
           <span>Fichas revisadas</span>
         </div>
-        <!-- Chip 3: Examen -->
+        <!-- Chip 3: Documentacion -->
+        <div class="progress-chip" *ngIf="l.lessonDocuments && l.lessonDocuments.length > 0" [class.completed]="isDocsViewed">
+          <svg *ngIf="isDocsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg *ngIf="!isDocsViewed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+          <span>Documentación leída</span>
+        </div>
+        <!-- Chip 4: Examen -->
         <div class="progress-chip" *ngIf="l.quizQuestions && l.quizQuestions.length > 0" [class.completed]="l.status === 'COMPLETED'">
           <svg *ngIf="l.status === 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
           <svg *ngIf="l.status !== 'COMPLETED'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
@@ -76,7 +82,7 @@
         
         <div class="content-card">
           <div class="content-info">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D85A30" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--lesson-accent-bg);" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
             <span class="content-name">Presentación: {{ l.title }}</span>
           </div>
           <button *ngIf="!isPresentationOpen()" class="btn-accent" (click)="openPresentation()">Abrir</button>
@@ -100,7 +106,7 @@
         <div class="sheets-list">
           <div class="sheet-item" *ngFor="let sheet of l.technicalSheets">
             <div class="sheet-info">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--lesson-text-secondary);" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               <span class="sheet-name">{{ sheet.originalName }}</span>
             </div>
             <button class="btn-icon" (click)="downloadTechnicalSheet(sheet)" title="Descargar">
@@ -112,6 +118,28 @@
         <label class="manual-check-label" *ngIf="!isSheetsViewed">
           <input type="checkbox" [checked]="manualSheetsViewed()" (change)="toggleManualSheetsViewed()">
           Marcar fichas como revisadas
+        </label>
+      </div>
+
+      <!-- Documentacion -->
+      <div class="section-container" *ngIf="l.lessonDocuments && l.lessonDocuments.length > 0">
+        <h4 class="section-title">Documentación de la clase</h4>
+        
+        <div class="sheets-list">
+          <div class="sheet-item" *ngFor="let doc of l.lessonDocuments">
+            <div class="sheet-info">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: var(--lesson-text-title);" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <span class="sheet-name">{{ doc.originalName }}</span>
+            </div>
+            <button class="btn-icon" (click)="downloadLessonDocument(doc)" title="Descargar">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </button>
+          </div>
+        </div>
+        
+        <label class="manual-check-label" *ngIf="!isDocsViewed">
+          <input type="checkbox" [checked]="manualDocsViewed()" (change)="toggleManualDocsViewed()">
+          Marcar documentación como leída
         </label>
       </div>
 
@@ -137,7 +165,7 @@
         <!-- Quiz Area -->
         <div id="quiz-section" class="quiz-area animate-fade-in" *ngIf="isQuizStarted()">
           <div *ngIf="quizResult()" class="quiz-result-card" [class.passed]="quizResult()?.passed" [class.failed]="!quizResult()?.passed">
-            <h3>{{ quizResult()?.passed ? '¡Felicitaciones! Aprobaste el examen' : 'No alcanzaste la nota mínima' }}</h3>
+            <h3 class="score-display">{{ quizResult()?.passed ? '¡Felicitaciones! Aprobaste el examen' : 'No alcanzaste la nota mínima' }}</h3>
             <p class="score-display">Tu calificación: {{ quizResult()?.score }}%</p>
             <button class="btn-accent" style="margin-top: 15px;" (click)="resetQuiz()">Reintentar</button>
             <button class="btn-outline" style="margin-top: 15px; margin-left: 10px;" *ngIf="quizResult()?.passed && getNextLesson()" (click)="goToNextSyllabusLesson()">Siguiente clase ➔</button>
@@ -171,7 +199,7 @@
                 {{ isSubmitting() ? 'Enviando...' : 'Enviar respuestas' }}
               </button>
             </div>
-            <p class="warning-text" style="margin-top: 10px; color: #D85A30; font-size: 14px;" *ngIf="!isAllAnswered()">Debes responder todas las preguntas para enviar el examen.</p>
+            <p class="warning-text" style="margin-top: 10px; color: var(--lesson-accent-bg); font-size: 14px;" *ngIf="!isAllAnswered()">Debes responder todas las preguntas para enviar el examen.</p>
           </div>
         </div>
       </div>

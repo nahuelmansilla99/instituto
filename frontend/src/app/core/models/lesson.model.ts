@@ -20,7 +20,9 @@ export interface LessonDetail {
   attemptsCount: number;
   hasViewedContent?: boolean;
   hasViewedSheets?: boolean;
+  hasViewedDocs?: boolean;
   quizQuestions: QuizQuestion[];
   technicalSheets?: any[];
+  lessonDocuments?: any[];
   syllabus: CourseLessonItem[];
 }

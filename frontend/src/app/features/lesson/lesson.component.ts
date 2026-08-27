@@ -82,6 +82,7 @@ export class LessonComponent implements OnInit {
         // Restore progress from DB
         this.hasViewedContent.set(data.hasViewedContent ?? false);
         this.manualSheetsViewed.set(data.hasViewedSheets ?? false);
+        this.manualDocsViewed.set(data.hasViewedDocs ?? false);
 
         // Auto-complete content if none exists
         if (!data.presentationUrl && !data.content && !this.hasViewedContent()) {
@@ -126,7 +127,7 @@ export class LessonComponent implements OnInit {
     // If lesson is completed, exam is unlocked
     if (this.lesson()?.status === 'COMPLETED') return true;
     
-    return this.hasViewedContent() && this.isSheetsViewed;
+    return this.hasViewedContent() && this.isSheetsViewed && this.isDocsViewed;
   }
 
   openPresentation(): void {
@@ -321,6 +322,55 @@ export class LessonComponent implements OnInit {
       },
       error: () => {
         alert('No se pudo descargar el archivo.');
+      }
+    });
+  }
+
+  // --- Documentation Documents ---
+  readonly downloadedDocs = signal<Set<string>>(new Set());
+  readonly manualDocsViewed = signal(false);
+
+  get isDocsViewed(): boolean {
+    const l = this.lesson();
+    if (!l) return false;
+    if (!l.lessonDocuments || l.lessonDocuments.length === 0) return true;
+    if (this.manualDocsViewed()) return true;
+    return this.downloadedDocs().size === l.lessonDocuments.length;
+  }
+
+  toggleManualDocsViewed(): void {
+    const newVal = !this.manualDocsViewed();
+    this.manualDocsViewed.set(newVal);
+    const l = this.lesson();
+    if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedDocs: newVal }).subscribe();
+  }
+
+  downloadLessonDocument(doc: any): void {
+    this.downloadedDocs.update(set => {
+      const newSet = new Set(set);
+      newSet.add(doc.id);
+      return newSet;
+    });
+
+    if (!this.manualDocsViewed()) {
+      this.manualDocsViewed.set(true);
+      const l = this.lesson();
+      if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedDocs: true }).subscribe();
+    }
+
+    this.coursesService.downloadLessonDocument(doc.fileUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        alert('No se pudo descargar el documento.');
       }
     });
   }

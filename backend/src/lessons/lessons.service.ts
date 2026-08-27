@@ -25,7 +25,7 @@ export class LessonsService {
   async findOne(lessonId: string, user: User) {
     const lesson = await this.lessonRepository.findOne({
       where: { id: lessonId },
-      relations: ['course', 'technicalSheets'],
+      relations: ['course', 'technicalSheets', 'lessonDocuments'],
     });
 
     if (!lesson) {
@@ -208,8 +208,10 @@ export class LessonsService {
       attemptsCount: targetProgress?.attemptsCount ?? 0,
       hasViewedContent: targetProgress?.hasViewedContent ?? false,
       hasViewedSheets: targetProgress?.hasViewedSheets ?? false,
+      hasViewedDocs: targetProgress?.hasViewedDocs ?? false,
       quizQuestions: questions,
       technicalSheets: lesson.technicalSheets || [],
+      lessonDocuments: lesson.lessonDocuments || [],
       syllabus,
     };
   }
@@ -229,7 +231,22 @@ export class LessonsService {
     return res.sendFile(filePath);
   }
 
-  async updateProgress(lessonId: string, user: User, dto: { hasViewedContent?: boolean; hasViewedSheets?: boolean }) {
+  downloadLessonDocument(filename: string, res: any) {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Ensure filename doesn't contain path traversal
+    const safeFilename = path.basename(filename);
+    const filePath = path.join(process.cwd(), 'uploads', 'lesson-documents', safeFilename);
+
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundException('El archivo no existe o fue eliminado');
+    }
+
+    return res.sendFile(filePath);
+  }
+
+  async updateProgress(lessonId: string, user: User, dto: { hasViewedContent?: boolean; hasViewedSheets?: boolean; hasViewedDocs?: boolean }) {
     let progress = await this.userProgressRepository.findOne({
       where: { lessonId, userId: user.id }
     });
@@ -240,6 +257,7 @@ export class LessonsService {
         userId: user.id,
         hasViewedContent: dto.hasViewedContent ?? false,
         hasViewedSheets: dto.hasViewedSheets ?? false,
+        hasViewedDocs: dto.hasViewedDocs ?? false,
       });
     } else {
       if (dto.hasViewedContent !== undefined) {
@@ -247,6 +265,9 @@ export class LessonsService {
       }
       if (dto.hasViewedSheets !== undefined) {
         progress.hasViewedSheets = dto.hasViewedSheets;
+      }
+      if (dto.hasViewedDocs !== undefined) {
+        progress.hasViewedDocs = dto.hasViewedDocs;
       }
     }
 

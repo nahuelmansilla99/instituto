@@ -19,11 +19,16 @@ export class LessonsController {
     return this.lessonsService.downloadTechnicalSheet(filename, res);
   }
 
+  @Get('downloads/lesson-documents/:filename')
+  downloadLessonDocument(@Param('filename') filename: string, @Res() res) {
+    return this.lessonsService.downloadLessonDocument(filename, res);
+  }
+
   @Patch(':id/progress')
   updateProgress(
     @Param('id') id: string,
     @GetUser() user: User,
-    @Body() dto: { hasViewedContent?: boolean; hasViewedSheets?: boolean }
+    @Body() dto: { hasViewedContent?: boolean; hasViewedSheets?: boolean; hasViewedDocs?: boolean }
   ) {
     return this.lessonsService.updateProgress(id, user, dto);
   }

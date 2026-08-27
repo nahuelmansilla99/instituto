@@ -726,7 +726,7 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   // ----------------------------------------------------
-  // GESTIÓN DE FICHAS TÉCNICAS
+  // GESTIÓN DE FICHAS TÉCNICAS Y DOCUMENTACIÓN
   // ----------------------------------------------------
   onTechnicalSheetSelected(event: any, lesson: any): void {
     const file = event.target.files?.[0];
@@ -763,6 +763,45 @@ export class AdminCourseEditorComponent implements OnInit {
       },
       error: (err) => {
         alert('Error al eliminar ficha técnica: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  onLessonDocumentSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.uploadLessonDocument(lesson.id, file).subscribe({
+      next: () => {
+        this.presentationSuccessMessage.set(`Documento subido correctamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al subir documento: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+
+    event.target.value = '';
+  }
+
+  removeLessonDocument(doc: any): void {
+    if (!confirm(`¿Estás seguro de eliminar el documento "${doc.originalName}"?`)) {
+      return;
+    }
+
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.deleteLessonDocument(doc.id).subscribe({
+      next: () => {
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al eliminar documento: ' + (err.error?.message || 'Error'));
       },
     });
   }

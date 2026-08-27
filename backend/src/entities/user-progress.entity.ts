@@ -65,6 +65,9 @@ export class UserProgress {
   @Column({ name: 'has_viewed_sheets', type: 'boolean', default: false })
   hasViewedSheets: boolean;
 
+  @Column({ name: 'has_viewed_docs', type: 'boolean', default: false })
+  hasViewedDocs: boolean;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date;
 }

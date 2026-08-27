@@ -57,6 +57,63 @@
   --radius-full: 9999px;
   
   --backdrop-blur: blur(16px);
+
+  /* Lesson Page Specific Colors
+  --lesson-bg-main: #121212;
+  --lesson-text-primary: #ffffff;
+  --lesson-text-secondary: #aaaaaa;
+  --lesson-text-title: #dddddd;
+  --lesson-accent-bg: #D85A30;
+  --lesson-accent-text: #ffffff;
+  --lesson-accent-hover: rgba(216, 90, 48, 0.1);
+  --lesson-success-bg: #EAF3DE;
+  --lesson-success-text: #27500A;
+  --lesson-success-icon: #4CAF50;
+  --lesson-pending-bg: #F1EFE8;
+  --lesson-pending-text: #5F5E5A;
+  --lesson-border: rgba(255, 255, 255, 0.1);
+  --lesson-card-bg: rgba(255, 255, 255, 0.03);
+  --lesson-item-bg-hover: rgba(255, 255, 255, 0.05);
+  --lesson-item-bg-active: rgba(255, 255, 255, 0.1);
+  --lesson-btn-disabled-bg: #333333;
+  --lesson-btn-disabled-text: #777777;
+  --lesson-result-passed-bg: rgba(76, 175, 80, 0.1);
+  --lesson-result-passed-border: rgba(76, 175, 80, 0.3);
+  --lesson-result-failed-bg: rgba(244, 67, 54, 0.1);
+  --lesson-result-failed-border: rgba(244, 67, 54, 0.3);
+} */
+
+/* Lesson Page Specific Colors - Light Mode */
+  --lesson-bg-main: #EEF6F5; /* Fondo principal muy claro y limpio */
+  --lesson-text-title: #111111; /* Títulos casi negros para contraste */
+  --lesson-text-primary: #333333; /* Texto principal oscuro y legible */
+  --lesson-text-secondary: #666666; /* Gris medio para texto secundario */
+  
+  --lesson-accent-bg: #30a3d8; /* Mantenido (color de marca) */
+  --lesson-accent-text: #EEF6F5;
+  --lesson-accent-hover: rgba(48, 163, 216, 0.1); 
+  
+  --lesson-success-bg: #EAF3DE;
+  --lesson-success-text: #27500A;
+  --lesson-success-icon: #4CAF50;
+  
+  --lesson-pending-bg: #F1EFE8;
+  --lesson-pending-text: #5F5E5A;
+  
+  --lesson-border: rgba(0, 0, 0, 0.150); /* Borde muy sutil y elegante */
+  --lesson-card-bg: #fafafa; /* Blanco puro para destacar sobre el fondo */
+  
+  --lesson-item-bg-hover: rgba(0, 0, 0, 0.1); /* Hover sutil oscuro */
+  --lesson-item-bg-active: rgba(0, 0, 0, 0.1); /* Estado activo sutil oscuro */
+  
+  --lesson-btn-disabled-bg: #F0F0F0;
+  --lesson-btn-disabled-text: #999999;
+  
+  /* Los resultados con opacidad se adaptan bien en modo claro */
+  --lesson-result-passed-bg: rgba(76, 175, 80, 0.1);
+  --lesson-result-passed-border: rgba(76, 175, 80, 0.3);
+  --lesson-result-failed-bg: rgba(244, 67, 54, 0.1);
+  --lesson-result-failed-border: rgba(244, 67, 54, 0.3);
 }
 
 /* Light Theme Overrides */

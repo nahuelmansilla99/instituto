@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Course, Lesson, QuizQuestion, User, UserRole, UserProgress, CourseEnrollment, EnrollmentStatus, ProgressStatus, TechnicalSheet } from '../entities';
+import { Course, Lesson, QuizQuestion, User, UserRole, UserProgress, CourseEnrollment, EnrollmentStatus, ProgressStatus, TechnicalSheet, LessonDocument } from '../entities';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
@@ -44,7 +44,7 @@ export class AdminService {
   async getCourseAdmin(id: string): Promise<Course> {
     const course = await this.courseRepo.findOne({
       where: { id },
-      relations: ['lessons', 'lessons.quizQuestions', 'lessons.technicalSheets'],
+      relations: ['lessons', 'lessons.quizQuestions', 'lessons.technicalSheets', 'lessons.lessonDocuments'],
       order: {
         lessons: {
           orderNumber: 'ASC',
@@ -250,6 +250,50 @@ export class AdminService {
     }
 
     await this.technicalSheetRepo.remove(sheet);
+    return { success: true };
+  }
+
+  // ----------------------------------------------------
+  // DOCUMENTACIÓN DE LA CLASE (PDFs IMPORTANTES)
+  // ----------------------------------------------------
+  async uploadLessonDocument(lessonId: string, file: Express.Multer.File): Promise<LessonDocument> {
+    const lesson = await this.lessonRepo.findOne({ where: { id: lessonId } });
+    if (!lesson) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+
+    const existingDocs = await this.lessonRepo.manager.find(LessonDocument, {
+      where: { lessonId },
+      order: { orderNumber: 'DESC' },
+      take: 1,
+    });
+    const nextOrderNumber = existingDocs.length > 0 ? existingDocs[0].orderNumber + 1 : 1;
+
+    const doc = this.lessonRepo.manager.create(LessonDocument, {
+      lessonId,
+      originalName: file.originalname,
+      fileUrl: file.filename,
+      fileSize: file.size,
+      orderNumber: nextOrderNumber,
+    });
+
+    return this.lessonRepo.manager.save(doc);
+  }
+
+  async deleteLessonDocument(id: string): Promise<{ success: boolean }> {
+    const doc = await this.lessonRepo.manager.findOne(LessonDocument, { where: { id } });
+    if (!doc) {
+      throw new NotFoundException('Documento no encontrado');
+    }
+
+    const filePath = path.join(process.cwd(), 'uploads', 'lesson-documents', doc.fileUrl);
+    if (fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (_) {}
+    }
+
+    await this.lessonRepo.manager.remove(doc);
     return { success: true };
   }
 

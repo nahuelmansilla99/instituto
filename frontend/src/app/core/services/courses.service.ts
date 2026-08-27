@@ -23,7 +23,7 @@ export class CoursesService {
     return this.http.get<LessonDetail>(`${this.apiUrl}/lessons/${lessonId}`);
   }
 
-  updateLessonProgress(lessonId: string, data: { hasViewedContent?: boolean; hasViewedSheets?: boolean }): Observable<any> {
+  updateLessonProgress(lessonId: string, data: { hasViewedContent?: boolean; hasViewedSheets?: boolean; hasViewedDocs?: boolean }): Observable<any> {
     return this.http.patch(`${this.apiUrl}/lessons/${lessonId}/progress`, data);
   }
 
@@ -33,6 +33,12 @@ export class CoursesService {
 
   downloadTechnicalSheet(filename: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/lessons/downloads/technical-sheets/${filename}`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadLessonDocument(filename: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/lessons/downloads/lesson-documents/${filename}`, {
       responseType: 'blob'
     });
   }

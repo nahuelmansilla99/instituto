@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
-import { Course, Lesson, QuizQuestion, User, UserProgress, CourseEnrollment, TechnicalSheet } from '../entities';
+import { Course, Lesson, QuizQuestion, User, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument } from '../entities';
 
 @Module({
   imports: [
@@ -14,6 +14,7 @@ import { Course, Lesson, QuizQuestion, User, UserProgress, CourseEnrollment, Tec
       UserProgress,
       CourseEnrollment,
       TechnicalSheet,
+      LessonDocument,
     ]),
   ],
   controllers: [AdminController],

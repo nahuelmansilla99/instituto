@@ -2,9 +2,10 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(11, 15, 25, 0.85);
+  background: var(--app-card-bg); /* Use pure background, or if you need opacity: */
+  /* Fallback to adding opacity if supported, otherwise just use card bg */
   backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--app-border);
 }
 
 .navbar-container {
@@ -26,13 +27,13 @@
 .logo-icon {
   width: 40px;
   height: 40px;
-  background: var(--accent-gradient);
+  background: var(--app-accent-bg);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  color: var(--app-accent-text);
+  box-shadow: 0 4px 12px rgba(48, 163, 216, 0.35);
 }
 
 .brand-text {
@@ -41,23 +42,20 @@
 }
 
 .brand-title {
-  font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--app-text-title);
   line-height: 1.1;
 }
 
 .gradient-text {
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--app-accent-bg);
   margin-left: 3px;
 }
 
 .brand-subtitle {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--app-text-secondary);
   letter-spacing: 0.02em;
 }
 
@@ -73,28 +71,28 @@
   gap: 8px;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: var(--app-text-secondary);
   padding: 8px 14px;
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
 }
 
 .nav-link:hover, .active-link {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--app-text-title);
+  background: var(--app-item-bg-hover);
 }
 
 .nav-link-admin {
-  background: rgba(139, 92, 246, 0.12);
-  color: #c084fc !important;
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: var(--app-accent-hover);
+  color: var(--app-accent-bg) !important;
+  border: 1px solid rgba(48, 163, 216, 0.3);
 }
 
 .nav-link-admin:hover, .active-link-admin {
-  background: rgba(139, 92, 246, 0.25) !important;
-  border-color: #a855f7 !important;
-  color: #fff !important;
-  box-shadow: 0 0 14px rgba(139, 92, 246, 0.3);
+  background: var(--app-accent-bg) !important;
+  border-color: var(--app-accent-bg) !important;
+  color: var(--app-text-title) !important;
+  box-shadow: 0 0 14px rgba(48, 163, 216, 0.3);
 }
 
 .user-menu-container {
@@ -106,8 +104,8 @@
   align-items: center;
   gap: 10px;
   padding: 4px 12px 4px 6px;
-  background: var(--bg-hover);
-  border: 1px solid var(--border-subtle);
+  background: transparent;
+  border: 1px solid var(--app-border);
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -115,12 +113,12 @@
 }
 
 .user-chip:hover, .user-chip.active {
-  background: var(--bg-hover-strong);
-  border-color: var(--primary-light);
+  background: var(--app-item-bg-hover);
+  border-color: var(--app-accent-bg);
 }
 
 .chevron-icon {
-  color: var(--text-muted);
+  color: var(--app-text-secondary);
   transition: transform 0.2s ease;
   margin-left: 2px;
 }
@@ -134,10 +132,10 @@
   top: calc(100% + 8px);
   right: 0;
   width: 200px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -162,8 +160,7 @@
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
+  color: var(--app-text-primary);
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
@@ -172,20 +169,20 @@
 }
 
 .dropdown-item:hover {
-  background: var(--bg-hover-strong);
+  background: var(--app-item-bg-hover);
 }
 
 .dropdown-item.text-danger {
-  color: var(--status-danger);
+  color: #d32f2f;
 }
 
 .dropdown-item.text-danger:hover {
-  background: var(--status-danger-bg);
+  background: rgba(211, 47, 47, 0.1);
 }
 
 .dropdown-divider {
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--app-border);
   margin: 4px 0;
 }
 
@@ -193,9 +190,9 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--primary-light);
-  border: 1px solid var(--primary);
-  color: var(--primary);
+  background: var(--app-accent-hover);
+  border: 1px solid var(--app-accent-bg);
+  color: var(--app-accent-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -211,13 +208,13 @@
 .user-name {
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--app-text-title);
   line-height: 1.1;
 }
 
 .user-role {
   font-size: 0.7rem;
-  color: var(--text-muted);
+  color: var(--app-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

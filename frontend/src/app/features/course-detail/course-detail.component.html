@@ -231,15 +231,15 @@
             Clase #{{ lesson.orderNumber || 1 }}: {{ lesson.title }}
           </h3>
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div *ngFor="let sheet of lesson.technicalSheets" style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-hover); padding: 10px 15px; border-radius: 8px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <span style="font-size: 24px;">📄</span>
-                <div>
-                  <h4 style="margin: 0; font-size: 15px; font-weight: 500; color: var(--text-primary);">{{ sheet.originalName }}</h4>
-                  <span style="font-size: 12px; color: var(--text-muted);" *ngIf="sheet.fileSize">{{ (sheet.fileSize / 1024 / 1024) | number:'1.1-2' }} MB</span>
+            <div *ngFor="let sheet of lesson.technicalSheets" class="material-card">
+              <div class="material-card-info">
+                <span class="material-card-icon">📄</span>
+                <div class="material-card-text">
+                  <h4>{{ sheet.originalName }}</h4>
+                  <span *ngIf="sheet.fileSize">{{ (sheet.fileSize / 1024 / 1024) | number:'1.1-2' }} MB</span>
                 </div>
               </div>
-              <button (click)="downloadTechnicalSheet(sheet)" class="btn btn-secondary btn-sm" title="Descargar material">
+              <button (click)="downloadTechnicalSheet(sheet)" class="btn btn-secondary btn-sm material-download-btn" title="Descargar material">
                 ⬇️ Descargar
               </button>
             </div>

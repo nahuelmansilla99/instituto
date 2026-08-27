@@ -455,3 +455,37 @@
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 768px) {
+  .lesson-page {
+    padding-top: 20px;
+  }
+  
+  .lesson-container {
+    padding: 10px;
+  }
+
+  .content-card, .sheet-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .content-card button, .sheet-item button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .exam-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .exam-header-row button {
+    width: 100%;
+  }
+
+  .progress-checklist {
+    flex-direction: column;
+  }
+}

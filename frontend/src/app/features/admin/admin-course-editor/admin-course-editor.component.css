@@ -1138,3 +1138,25 @@
 .lesson-doc-size { font-size: 11px; color: var(--text-muted); }
 .q-edit-title { color: var(--primary); }
 .btn-danger-outline { color: var(--status-danger); border-color: var(--status-danger); }
+
+@media (max-width: 768px) {
+  .editor-page { padding: 16px 0 40px; }
+  .course-header-card { padding: 20px; }
+  .header-badge-row { flex-direction: column; align-items: flex-start; }
+  .header-action-buttons { width: 100%; flex-direction: column; }
+  .header-action-buttons button { width: 100%; }
+  .course-header-card h1 { font-size: 1.5rem; }
+  .admin-tabs-nav { flex-direction: column; gap: 8px; }
+  .tab-btn { width: 100%; justify-content: center; }
+  .students-stats-grid { grid-template-columns: 1fr; }
+  .students-header-row { flex-direction: column; align-items: flex-start; }
+  .table-responsive { width: 100%; overflow-x: auto; }
+  .section-title-row { flex-direction: column; align-items: flex-start; }
+  .section-title-row button { width: 100%; }
+  .lesson-card { padding: 16px; }
+  .lesson-top-row { flex-direction: column; align-items: flex-start; }
+  .lesson-actions-group { width: 100%; flex-direction: column; align-items: stretch; }
+  .lesson-actions-group button, .lesson-actions-group label { width: 100%; text-align: center; justify-content: center; }
+  .questions-manager-body { grid-template-columns: 1fr; }
+  .modal-content { padding: 20px; }
+}

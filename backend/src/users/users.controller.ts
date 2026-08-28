@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Post, Body, UseGuards, Query, Param } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Body, UseGuards, Query, Param, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -7,11 +7,22 @@ import { GetUser } from '../auth/get-user.decorator';
 import { User, UserRole } from '../entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('avatar')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }
+  }))
+  uploadAvatar(@GetUser() user: User, @UploadedFile() file: Express.Multer.File) {
+    return this.usersService.updateAvatar(user.id, file);
+  }
 
   @Get('me')
   getMe(@GetUser() user: User) {

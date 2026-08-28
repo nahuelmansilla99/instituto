@@ -37,6 +37,9 @@ export class Lesson {
   @Column({ name: 'presentation_url', length: 500, nullable: true })
   presentationUrl: string;
 
+  @Column({ name: 'presentation_public_id', type: 'varchar', nullable: true })
+  presentationPublicId: string;
+
   @Column({ name: 'presentation_filename', length: 255, nullable: true })
   presentationFilename: string;
 

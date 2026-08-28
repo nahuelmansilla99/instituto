@@ -22,6 +22,9 @@ export class Course {
   @Column({ name: 'thumbnail_url', length: 500, nullable: true })
   thumbnailUrl: string;
 
+  @Column({ name: 'thumbnail_public_id', type: 'varchar', nullable: true })
+  thumbnailPublicId: string;
+
   @Column({ name: 'meet_url', length: 500, nullable: true })
   meetUrl: string;
 

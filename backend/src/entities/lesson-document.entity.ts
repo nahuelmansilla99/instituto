@@ -22,6 +22,9 @@ export class LessonDocument {
   @Column({ length: 500 })
   fileUrl: string;
 
+  @Column({ name: 'file_public_id', type: 'varchar', nullable: true })
+  filePublicId: string;
+
   @Column({ name: 'file_size', type: 'int', nullable: true })
   fileSize: number;
 

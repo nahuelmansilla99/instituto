@@ -32,14 +32,16 @@ export class CoursesService {
   }
 
   downloadTechnicalSheet(filename: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/lessons/downloads/technical-sheets/${filename}`, {
-      responseType: 'blob'
-    });
+    const url = filename.startsWith('http') 
+      ? filename 
+      : `${this.apiUrl}/lessons/downloads/technical-sheets/${filename}`;
+    return this.http.get(url, { responseType: 'blob' });
   }
 
   downloadLessonDocument(filename: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/lessons/downloads/lesson-documents/${filename}`, {
-      responseType: 'blob'
-    });
+    const url = filename.startsWith('http') 
+      ? filename 
+      : `${this.apiUrl}/lessons/downloads/lesson-documents/${filename}`;
+    return this.http.get(url, { responseType: 'blob' });
   }
 }

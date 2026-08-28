@@ -5,13 +5,33 @@ import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private cloudinaryService: CloudinaryService,
   ) {}
+
+  async updateAvatar(userId: string, file: Express.Multer.File): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    if (user.avatarPublicId) {
+      await this.cloudinaryService.deleteFile(user.avatarPublicId);
+    }
+
+    const result = await this.cloudinaryService.uploadFile(file, 'avatars');
+
+    user.avatarUrl = result.secure_url;
+    user.avatarPublicId = result.public_id;
+    
+    await this.userRepository.save(user);
+    const { passwordHash, ...userResult } = user;
+    return userResult as User;
+  }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id: userId } });

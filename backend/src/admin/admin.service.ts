@@ -11,6 +11,7 @@ import { Course, Lesson, QuizQuestion, User, UserRole, UserProgress, CourseEnrol
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
 export class AdminService {
@@ -29,6 +30,7 @@ export class AdminService {
     private readonly enrollmentRepo: Repository<CourseEnrollment>,
     @InjectRepository(TechnicalSheet)
     private readonly technicalSheetRepo: Repository<TechnicalSheet>,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   // ----------------------------------------------------
@@ -151,17 +153,18 @@ export class AdminService {
       throw new NotFoundException('Clase no encontrada');
     }
 
-    if (lesson.presentationUrl && lesson.presentationUrl.startsWith('/api/uploads/presentations/')) {
-      const oldFilename = lesson.presentationUrl.replace('/api/uploads/presentations/', '');
-      const oldPath = path.join(process.cwd(), 'uploads', 'presentations', oldFilename);
-      if (fs.existsSync(oldPath)) {
-        try {
-          fs.unlinkSync(oldPath);
-        } catch (_) {}
-      }
+    if (lesson.presentationPublicId) {
+      try {
+        await this.cloudinaryService.deleteFile(lesson.presentationPublicId);
+      } catch (_) {}
     }
 
-    lesson.presentationUrl = `/api/uploads/presentations/${file.filename}`;
+    const folder = 'presentations';
+
+    const result = await this.cloudinaryService.uploadFile(file, folder, 'raw');
+
+    lesson.presentationUrl = result.secure_url;
+    lesson.presentationPublicId = result.public_id;
     lesson.presentationFilename = file.originalname;
 
     return this.lessonRepo.save(lesson);
@@ -173,17 +176,14 @@ export class AdminService {
       throw new NotFoundException('Clase no encontrada');
     }
 
-    if (lesson.presentationUrl && lesson.presentationUrl.startsWith('/api/uploads/presentations/')) {
-      const oldFilename = lesson.presentationUrl.replace('/api/uploads/presentations/', '');
-      const oldPath = path.join(process.cwd(), 'uploads', 'presentations', oldFilename);
-      if (fs.existsSync(oldPath)) {
-        try {
-          fs.unlinkSync(oldPath);
-        } catch (_) {}
-      }
+    if (lesson.presentationPublicId) {
+      try {
+        await this.cloudinaryService.deleteFile(lesson.presentationPublicId);
+      } catch (_) {}
     }
 
     lesson.presentationUrl = null;
+    lesson.presentationPublicId = null;
     lesson.presentationFilename = null;
 
     return this.lessonRepo.save(lesson);
@@ -195,14 +195,10 @@ export class AdminService {
       throw new NotFoundException('Lección no encontrada');
     }
 
-    if (lesson.presentationUrl && lesson.presentationUrl.startsWith('/api/uploads/presentations/')) {
-      const oldFilename = lesson.presentationUrl.replace('/api/uploads/presentations/', '');
-      const oldPath = path.join(process.cwd(), 'uploads', 'presentations', oldFilename);
-      if (fs.existsSync(oldPath)) {
-        try {
-          fs.unlinkSync(oldPath);
-        } catch (_) {}
-      }
+    if (lesson.presentationPublicId) {
+      try {
+        await this.cloudinaryService.deleteFile(lesson.presentationPublicId);
+      } catch (_) {}
     }
 
     await this.lessonRepo.softRemove(lesson);
@@ -225,10 +221,15 @@ export class AdminService {
     });
     const nextOrderNumber = existingSheets.length > 0 ? existingSheets[0].orderNumber + 1 : 1;
 
+    const folder = 'technical-sheets';
+
+    const result = await this.cloudinaryService.uploadFile(file, folder, 'raw');
+
     const sheet = this.technicalSheetRepo.create({
       lessonId,
       originalName: file.originalname,
-      fileUrl: file.filename, // We will just store filename since we use a secure endpoint to download
+      fileUrl: result.secure_url,
+      filePublicId: result.public_id,
       fileSize: file.size,
       orderNumber: nextOrderNumber,
     });
@@ -242,10 +243,9 @@ export class AdminService {
       throw new NotFoundException('Ficha técnica no encontrada');
     }
 
-    const filePath = path.join(process.cwd(), 'uploads', 'technical-sheets', sheet.fileUrl);
-    if (fs.existsSync(filePath)) {
+    if (sheet.filePublicId) {
       try {
-        fs.unlinkSync(filePath);
+        await this.cloudinaryService.deleteFile(sheet.filePublicId);
       } catch (_) {}
     }
 
@@ -269,10 +269,15 @@ export class AdminService {
     });
     const nextOrderNumber = existingDocs.length > 0 ? existingDocs[0].orderNumber + 1 : 1;
 
+    const folder = 'lesson-documents';
+
+    const result = await this.cloudinaryService.uploadFile(file, folder, 'raw');
+
     const doc = this.lessonRepo.manager.create(LessonDocument, {
       lessonId,
       originalName: file.originalname,
-      fileUrl: file.filename,
+      fileUrl: result.secure_url,
+      filePublicId: result.public_id,
       fileSize: file.size,
       orderNumber: nextOrderNumber,
     });
@@ -286,10 +291,9 @@ export class AdminService {
       throw new NotFoundException('Documento no encontrado');
     }
 
-    const filePath = path.join(process.cwd(), 'uploads', 'lesson-documents', doc.fileUrl);
-    if (fs.existsSync(filePath)) {
+    if (doc.filePublicId) {
       try {
-        fs.unlinkSync(filePath);
+        await this.cloudinaryService.deleteFile(doc.filePublicId);
       } catch (_) {}
     }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -8,15 +8,17 @@ import { CoursesService } from '../../core/services/courses.service';
 import { QuizService } from '../../core/services/quiz.service';
 import { AuthService } from '../../core/services/auth.service';
 import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
+import * as pdfjsLib from 'pdfjs-dist';
+import { PdfViewerModalComponent } from '../../shared/components/pdf-viewer-modal/pdf-viewer-modal.component';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent],
+  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent, PdfViewerModalComponent],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.css',
 })
-export class LessonComponent implements OnInit {
+export class LessonComponent implements OnInit, OnDestroy {
   readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -42,6 +44,14 @@ export class LessonComponent implements OnInit {
 
   // New UI states
   readonly isPresentationOpen = signal(false);
+  readonly pdfPreviews = signal<Record<string, SafeResourceUrl>>({});
+  private generatedBlobUrls: string[] = [];
+  readonly pdfBlobUrls = signal<Record<string, SafeResourceUrl>>({});
+  readonly activeModalPdfUrl = signal<SafeResourceUrl | null>(null);
+  readonly activeModalPdfTitle = signal<string>('');
+  readonly activeModalItem = signal<any | null>(null);
+  readonly activeModalType = signal<'sheet' | 'doc' | null>(null);
+  readonly isPdfModalOpen = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -59,6 +69,12 @@ export class LessonComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    for (const url of this.generatedBlobUrls) {
+      window.URL.revokeObjectURL(url);
+    }
+  }
+
   loadLesson(lessonId: string): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -69,6 +85,17 @@ export class LessonComponent implements OnInit {
     this.downloadedSheets.set(new Set());
     this.manualSheetsViewed.set(false);
     this.isPresentationOpen.set(false);
+    this.pdfPreviews.set({});
+    for (const url of this.generatedBlobUrls) {
+      window.URL.revokeObjectURL(url);
+    }
+    this.generatedBlobUrls = [];
+    this.pdfBlobUrls.set({});
+    this.activeModalPdfUrl.set(null);
+    this.activeModalPdfTitle.set('');
+    this.activeModalItem.set(null);
+    this.activeModalType.set(null);
+    this.isPdfModalOpen.set(false);
 
     this.coursesService.getLessonById(lessonId).subscribe({
       next: (data) => {
@@ -91,6 +118,19 @@ export class LessonComponent implements OnInit {
         }
         
         this.isLoading.set(false);
+
+        // Load PDF previews in the background
+        if (data.technicalSheets) {
+          for (const sheet of data.technicalSheets) {
+            this.generatePdfPreview(data.id, sheet.id, sheet.fileUrl, 'sheet');
+          }
+        }
+        if (data.lessonDocuments) {
+          for (const doc of data.lessonDocuments) {
+            this.generatePdfPreview(data.id, doc.id, doc.fileUrl, 'doc');
+          }
+        }
+
         const requestedAction = this.route.snapshot.queryParams['action'];
         
         if (requestedAction === 'start-quiz' && data.quizQuestions?.length > 0) {
@@ -373,5 +413,124 @@ export class LessonComponent implements OnInit {
         alert('No se pudo descargar el documento.');
       }
     });
+  }
+
+  private async generatePdfPreview(lessonId: string, id: string, fileUrl: string, type: 'sheet' | 'doc'): Promise<void> {
+    if (!id || !fileUrl) return;
+    try {
+      const obs = type === 'sheet'
+        ? this.coursesService.downloadTechnicalSheet(fileUrl)
+        : this.coursesService.downloadLessonDocument(fileUrl);
+
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        obs.subscribe({
+          next: (b) => resolve(b),
+          error: (e) => reject(e)
+        });
+      });
+
+      // Explicitly set MIME type to application/pdf to prevent browser from downloading the Blob URL
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const arrayBuffer = await pdfBlob.arrayBuffer();
+
+      // Set worker to match our package version 6.2.108 unconditionally
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/build/pdf.worker.min.mjs';
+
+      const loadingTask = pdfjsLib.getDocument({
+        data: new Uint8Array(arrayBuffer),
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.2.108/cmaps/',
+        cMapPacked: true,
+      });
+
+      const pdf = await loadingTask.promise;
+      const page = await pdf.getPage(1);
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Set target width to 300px for high-definition scaling in the 44px card preview container
+      const targetWidth = 300;
+      const unscaledViewport = page.getViewport({ scale: 1.0 });
+      const scale = targetWidth / unscaledViewport.width;
+      const viewport = page.getViewport({ scale });
+
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+
+      const renderContext = {
+        canvasContext: ctx,
+        viewport: viewport,
+        canvas: canvas,
+      };
+
+      await page.render(renderContext).promise;
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(dataUrl);
+
+      const blobUrl = window.URL.createObjectURL(pdfBlob);
+      const safeBlobUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl + '#view=FitH');
+
+      // Verify we are still on the same lesson before updating signal state
+      if (this.lesson()?.id !== lessonId) {
+        window.URL.revokeObjectURL(blobUrl);
+        return;
+      }
+
+      this.generatedBlobUrls.push(blobUrl);
+
+      this.pdfPreviews.update((prev) => ({
+        ...prev,
+        [id]: safeUrl,
+      }));
+
+      this.pdfBlobUrls.update((prev) => ({
+        ...prev,
+        [id]: safeBlobUrl,
+      }));
+
+      // If this item is the currently open modal item, set the active URL immediately
+      if (this.isPdfModalOpen() && this.activeModalItem()?.id === id) {
+        this.activeModalPdfUrl.set(safeBlobUrl);
+      }
+    } catch (error) {
+      console.warn(`Could not generate PDF preview for ${id}:`, error);
+    }
+  }
+
+  openPdfModal(item: any, type: 'sheet' | 'doc'): void {
+    this.activeModalItem.set(item);
+    this.activeModalType.set(type);
+    this.activeModalPdfTitle.set(item.originalName || 'Visualizador de PDF');
+    this.isPdfModalOpen.set(true);
+
+    const safeUrl = this.pdfBlobUrls()[item.id];
+    if (safeUrl) {
+      this.activeModalPdfUrl.set(safeUrl);
+    } else {
+      this.activeModalPdfUrl.set(null);
+    }
+  }
+
+  closePdfModal(): void {
+    this.isPdfModalOpen.set(false);
+    this.activeModalPdfUrl.set(null);
+    this.activeModalPdfTitle.set('');
+    this.activeModalItem.set(null);
+    this.activeModalType.set(null);
+  }
+
+  downloadPdfFromModal(): void {
+    const item = this.activeModalItem();
+    const type = this.activeModalType();
+    if (item && type) {
+      if (type === 'sheet') {
+        this.downloadTechnicalSheet(item);
+      } else {
+        this.downloadLessonDocument(item);
+      }
+    }
   }
 }

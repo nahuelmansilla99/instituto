@@ -18,6 +18,11 @@ export interface LessonDetail {
   completedAt: string | null;
   savedAnswers?: Record<string, number>;
   attemptsCount: number;
+  hasViewedContent?: boolean;
+  hasViewedSheets?: boolean;
+  hasViewedDocs?: boolean;
   quizQuestions: QuizQuestion[];
+  technicalSheets?: any[];
+  lessonDocuments?: any[];
   syllabus: CourseLessonItem[];
 }

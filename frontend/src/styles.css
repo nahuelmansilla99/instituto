@@ -1,7 +1,8 @@
 /* ==========================================================================
    DESIGN SYSTEM & THEME TOKENS
    ========================================================================== */
-:root {
+
+[data-theme="dark"] {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Outfit', 'Inter', sans-serif;
 
@@ -25,6 +26,7 @@
 
   /* Brand Accents */
   --primary: #6366f1;
+  --text-on-primary: #ffffff;
   --primary-hover: #4f46e5;
   --primary-light: rgba(99, 102, 241, 0.15);
   --secondary: #8b5cf6;
@@ -42,7 +44,12 @@
   --status-locked-bg: rgba(100, 116, 139, 0.15);
   --status-danger: #ef4444;
   --status-danger-bg: rgba(239, 68, 68, 0.15);
+  --status-danger-hover: #dc2626;
   --status-warning: #f59e0b;
+
+  /* States */
+  --bg-disabled: #333333;
+  --text-disabled: #777777;
 
   /* Shadows & Glass */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -57,34 +64,105 @@
   --radius-full: 9999px;
   
   --backdrop-blur: blur(16px);
+
+  /* Lesson Page Specific Colors - Dark Mode (Commented for now, as light mode is requested)
+  --app-bg-main: #121212;
+  --app-text-primary: #ffffff;
+  --app-text-secondary: #aaaaaa;
+  --app-text-title: #dddddd;
+  --app-accent-bg: #D85A30;
+  --app-accent-text: #ffffff;
+  --app-accent-hover: rgba(216, 90, 48, 0.1);
+  --app-success-bg: #EAF3DE;
+  --app-success-text: #27500A;
+  --app-success-icon: #4CAF50;
+  --app-pending-bg: #F1EFE8;
+  --app-pending-text: #5F5E5A;
+  --app-border: rgba(255, 255, 255, 0.1);
+  --app-card-bg: rgba(255, 255, 255, 0.03);
+  --app-item-bg-hover: rgba(255, 255, 255, 0.05);
+  --app-item-bg-active: rgba(255, 255, 255, 0.1);
+  --app-btn-disabled-bg: #333333;
+  --app-btn-disabled-text: #777777;
+  --app-result-passed-bg: rgba(76, 175, 80, 0.1);
+  --app-result-passed-border: rgba(76, 175, 80, 0.3);
+  --app-result-failed-bg: rgba(244, 67, 54, 0.1);
+  */
 }
 
 /* Light Theme Overrides */
-[data-theme="light"] {
-  --bg-main: #f3f6fa;
-  --bg-card: rgba(255, 255, 255, 0.7);
-  --bg-card-hover: rgba(255, 255, 255, 0.95);
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Outfit', 'Inter', sans-serif;
+  
+  /* Fondos y superficies */
+  --bg-main: #EEF6F5; /* Fondo principal muy claro y limpio */
+  --bg-card: #fafafa; /* Blanco puro para destacar sobre el fondo */
+  --bg-card-hover: rgba(250, 250, 250, 0.95);
   --bg-surface: #ffffff;
   --bg-surface-elevated: #ffffff;
+  
+  /* Inputs y Hover */
   --bg-input: rgba(255, 255, 255, 0.6);
   --bg-input-focus: rgba(255, 255, 255, 1);
-  --bg-hover: rgba(0, 0, 0, 0.04);
-  --bg-hover-strong: rgba(0, 0, 0, 0.08);
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-active: rgba(99, 102, 241, 0.5);
+  --bg-hover: rgba(0, 0, 0, 0.1); /* Efecto hover para items */
+  --bg-hover-strong: rgba(0, 0, 0, 0.15); /* Efecto cuando un item está activo */
+  
+  /* Bordes */
+  --border-subtle: rgba(0, 0, 0, 0.150); /* Borde muy sutil y elegante */
+  --border-active: rgba(48, 163, 216, 0.5);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  /* Textos */
+  --text-primary: #111111; /* Títulos casi negros para contraste */
+  --text-secondary: #333333; /* Texto principal oscuro y legible */
+  --text-muted: #666666; /* Gris medio para texto secundario */
 
-  --badge-completed-text: #059669;
-  --badge-available-text: #4338ca;
-
+  /* Marca y Estados */
+  --primary: #30a3d8; /* Mantenido (color de marca) */
+  --text-on-primary: #EEF6F5; /* Color del texto/icono sobre fondo primario */
+  --primary-hover: #258cb9;
+  --primary-light: rgba(48, 163, 216, 0.1);
+  --secondary: #8b5cf6; /* Puede usarse para acentos secundarios */
+  --accent-gradient: linear-gradient(135deg, #30a3d8 0%, #258cb9 100%);
   --card-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%);
+  
+  /* Status Colors */
+  --status-completed: #4CAF50;
+  --status-completed-bg: #EAF3DE;
+  --badge-completed-text: #27500A;
+  
+  --status-available: #30a3d8;
+  --status-available-bg: rgba(48, 163, 216, 0.15);
+  --badge-available-text: #30a3d8;
+  
+  --status-locked: #5F5E5A;
+  --status-locked-bg: #F1EFE8;
+  
+  --status-danger: #d32f2f;
+  --status-danger-bg: rgba(211, 47, 47, 0.1);
+  --status-danger-hover: #b71c1c;
+  
+  --status-warning: #ed6c02;
+  --status-alert: #e7c41f;
+  --status-alert-bg: rgba(231, 196, 31, 0.1);
+
+  /* States */
+  --bg-disabled: #F0F0F0;
+  --text-disabled: #999999;
+
+  /* Shadows & Glass */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 20px 40px -8px rgba(0, 0, 0, 0.12);
-  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.15);
+  --shadow-glow: 0 0 25px rgba(48, 163, 216, 0.15);
+  --shadow-glow-success: 0 0 25px rgba(76, 175, 80, 0.35);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
   --backdrop-blur: blur(24px);
 }
 

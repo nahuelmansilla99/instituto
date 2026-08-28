@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 import { AdminService } from './admin.service';
@@ -85,20 +85,7 @@ export class AdminController {
   @Post('lessons/:lessonId/presentation')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const uploadPath = path.join(process.cwd(), 'uploads', 'presentations');
-          if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-          }
-          cb(null, uploadPath);
-        },
-        filename: (req, file, cb) => {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = path.extname(file.originalname);
-          cb(null, `${uniqueSuffix}${ext}`);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         const allowed = ['.ppt', '.pptx', '.pdf', '.odp'];
         const ext = path.extname(file.originalname).toLowerCase();
@@ -128,6 +115,80 @@ export class AdminController {
   @Delete('lessons/:lessonId/presentation')
   deletePresentation(@Param('lessonId') lessonId: string) {
     return this.adminService.deleteLessonPresentation(lessonId);
+  }
+
+  // ----------------------------------------------------
+  // FICHAS TÉCNICAS (PDFs COMPLEMENTARIOS)
+  // ----------------------------------------------------
+  @Post('lessons/:lessonId/technical-sheets')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (ext !== '.pdf') {
+          return cb(
+            new BadRequestException(
+              'Formato no permitido. Solo se admiten archivos PDF (.pdf)',
+            ),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+    }),
+  )
+  uploadTechnicalSheet(
+    @Param('lessonId') lessonId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Debes seleccionar un archivo PDF');
+    }
+    return this.adminService.uploadTechnicalSheet(lessonId, file);
+  }
+
+  @Delete('technical-sheets/:id')
+  deleteTechnicalSheet(@Param('id') id: string) {
+    return this.adminService.deleteTechnicalSheet(id);
+  }
+
+  // ----------------------------------------------------
+  // DOCUMENTACIÓN DE LA CLASE (PDFs IMPORTANTES)
+  // ----------------------------------------------------
+  @Post('lessons/:lessonId/lesson-documents')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (ext !== '.pdf') {
+          return cb(
+            new BadRequestException(
+              'Formato no permitido. Solo se admiten archivos PDF (.pdf)',
+            ),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
+    }),
+  )
+  uploadLessonDocument(
+    @Param('lessonId') lessonId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('Debes seleccionar un archivo PDF');
+    }
+    return this.adminService.uploadLessonDocument(lessonId, file);
+  }
+
+  @Delete('lesson-documents/:id')
+  deleteLessonDocument(@Param('id') id: string) {
+    return this.adminService.deleteLessonDocument(id);
   }
 
   // ----------------------------------------------------

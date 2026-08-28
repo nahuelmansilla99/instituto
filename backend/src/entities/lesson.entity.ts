@@ -11,6 +11,8 @@ import {
 import { Course } from './course.entity';
 import { QuizQuestion } from './quiz-question.entity';
 import { UserProgress } from './user-progress.entity';
+import { TechnicalSheet } from './technical-sheet.entity';
+import { LessonDocument } from './lesson-document.entity';
 
 @Entity('lessons')
 export class Lesson {
@@ -35,6 +37,9 @@ export class Lesson {
   @Column({ name: 'presentation_url', length: 500, nullable: true })
   presentationUrl: string;
 
+  @Column({ name: 'presentation_public_id', type: 'varchar', nullable: true })
+  presentationPublicId: string;
+
   @Column({ name: 'presentation_filename', length: 255, nullable: true })
   presentationFilename: string;
 
@@ -53,6 +58,12 @@ export class Lesson {
 
   @OneToMany(() => UserProgress, (progress) => progress.lesson)
   userProgresses: UserProgress[];
+
+  @OneToMany(() => TechnicalSheet, (ts) => ts.lesson)
+  technicalSheets: TechnicalSheet[];
+
+  @OneToMany(() => LessonDocument, (ld) => ld.lesson)
+  lessonDocuments: LessonDocument[];
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date;

@@ -59,6 +59,15 @@ export class UserProgress {
   @JoinColumn({ name: 'lesson_id' })
   lesson: Lesson;
 
+  @Column({ name: 'has_viewed_content', type: 'boolean', default: false })
+  hasViewedContent: boolean;
+
+  @Column({ name: 'has_viewed_sheets', type: 'boolean', default: false })
+  hasViewedSheets: boolean;
+
+  @Column({ name: 'has_viewed_docs', type: 'boolean', default: false })
+  hasViewedDocs: boolean;
+
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date;
 }

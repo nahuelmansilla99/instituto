@@ -24,14 +24,17 @@ services:
       dockerfile: Dockerfile
     container_name: elearning_backend
     restart: always
+    env_file:
+      - ./backend/.env
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3000
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-elearning_db}
+      DB_SYNCHRONIZE: 'true'
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_development_only_12345}
       JWT_EXPIRES_IN: 7d
     ports:

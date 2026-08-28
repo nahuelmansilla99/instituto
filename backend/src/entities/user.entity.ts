@@ -53,4 +53,10 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt: Date;
+
+  @Column({ name: 'avatar_url', type: 'varchar', nullable: true })
+  avatarUrl: string;
+
+  @Column({ name: 'avatar_public_id', type: 'varchar', nullable: true })
+  avatarPublicId: string;
 }

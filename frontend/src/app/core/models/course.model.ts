@@ -25,4 +25,5 @@ export interface CourseLessonItem {
   hasQuiz?: boolean;
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;
+  technicalSheets?: any[];
 }

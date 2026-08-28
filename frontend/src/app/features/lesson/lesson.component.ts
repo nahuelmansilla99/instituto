@@ -29,14 +29,19 @@ export class LessonComponent implements OnInit {
   readonly isSubmitting = signal(false);
   readonly isSavingProgress = signal(false);
 
-  // View Mode: 'content' | 'presentation'
-  readonly activeLessonView = signal<'content' | 'presentation'>('content');
+  // Interaction tracking for unlocking exam
+  readonly hasViewedContent = signal(false);
+  readonly downloadedSheets = signal<Set<string>>(new Set());
+  readonly manualSheetsViewed = signal(false); // Fallback for manual checkbox
 
   // Selected answers: { [questionId: string]: optionIndex }
   readonly selectedAnswers = signal<Record<string, number>>({});
   readonly quizResult = signal<QuizEvaluationResponse | null>(null);
   readonly errorMessage = signal<string | null>(null);
   readonly isQuizStarted = signal(false);
+
+  // New UI states
+  readonly isPresentationOpen = signal(false);
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -47,11 +52,9 @@ export class LessonComponent implements OnInit {
     });
 
     this.route.queryParamMap.subscribe((queryParams) => {
-      const view = queryParams.get('view');
-      if (view === 'presentation') {
-        this.activeLessonView.set('presentation');
-      } else if (view === 'content') {
-        this.activeLessonView.set('content');
+      const action = queryParams.get('action');
+      if (action === 'start-quiz') {
+        this.isQuizStarted.set(true);
       }
     });
   }
@@ -61,8 +64,11 @@ export class LessonComponent implements OnInit {
     this.errorMessage.set(null);
     this.quizResult.set(null);
     this.isQuizStarted.set(false);
-    this.activeLessonView.set('content');
     this.selectedAnswers.set({});
+    this.hasViewedContent.set(false);
+    this.downloadedSheets.set(new Set());
+    this.manualSheetsViewed.set(false);
+    this.isPresentationOpen.set(false);
 
     this.coursesService.getLessonById(lessonId).subscribe({
       next: (data) => {
@@ -72,23 +78,27 @@ export class LessonComponent implements OnInit {
         } else {
           this.selectedAnswers.set({});
         }
+        
+        // Restore progress from DB
+        this.hasViewedContent.set(data.hasViewedContent ?? false);
+        this.manualSheetsViewed.set(data.hasViewedSheets ?? false);
+        this.manualDocsViewed.set(data.hasViewedDocs ?? false);
+
+        // Auto-complete content if none exists
+        if (!data.presentationUrl && !data.content && !this.hasViewedContent()) {
+          this.hasViewedContent.set(true);
+          this.coursesService.updateLessonProgress(data.id, { hasViewedContent: true }).subscribe();
+        }
+        
         this.isLoading.set(false);
-        const requestedView = this.route.snapshot.queryParams['view'];
         const requestedAction = this.route.snapshot.queryParams['action'];
         
         if (requestedAction === 'start-quiz' && data.quizQuestions?.length > 0) {
           this.isQuizStarted.set(true);
-          this.activeLessonView.set('content');
           setTimeout(() => {
             document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' });
           }, 100);
-        } else if (requestedView === 'presentation' || (data.presentationUrl && requestedView !== 'content')) {
-          this.activeLessonView.set('presentation');
         } else {
-          this.activeLessonView.set('content');
-        }
-        
-        if (requestedAction !== 'start-quiz') {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       },
@@ -100,6 +110,44 @@ export class LessonComponent implements OnInit {
         this.errorMessage.set(Array.isArray(msg) ? msg[0] : msg);
       },
     });
+  }
+
+  get isSheetsViewed(): boolean {
+    const l = this.lesson();
+    if (!l) return false;
+    if (!l.technicalSheets || l.technicalSheets.length === 0) return true;
+    if (this.manualSheetsViewed()) return true;
+    return this.downloadedSheets().size === l.technicalSheets.length;
+  }
+
+  get isExamUnlocked(): boolean {
+    // Admins always bypass locks
+    if (this.authService.isAdmin()) return true;
+    
+    // If lesson is completed, exam is unlocked
+    if (this.lesson()?.status === 'COMPLETED') return true;
+    
+    return this.hasViewedContent() && this.isSheetsViewed && this.isDocsViewed;
+  }
+
+  openPresentation(): void {
+    this.isPresentationOpen.set(true);
+    if (!this.hasViewedContent()) {
+      this.hasViewedContent.set(true);
+      const l = this.lesson();
+      if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedContent: true }).subscribe();
+    }
+  }
+
+  closePresentation(): void {
+    this.isPresentationOpen.set(false);
+  }
+
+  toggleManualSheetsViewed(): void {
+    const newVal = !this.manualSheetsViewed();
+    this.manualSheetsViewed.set(newVal);
+    const l = this.lesson();
+    if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedSheets: newVal }).subscribe();
   }
 
   onSelectOption(questionId: string, optionIndex: number): void {
@@ -123,7 +171,6 @@ export class LessonComponent implements OnInit {
     this.quizService.saveProgress(currentLesson.id, answersPayload).subscribe({
       next: () => {
         this.isSavingProgress.set(false);
-        // Optionally show a toast or success message here
       },
       error: (err) => {
         console.error('Failed to save progress', err);
@@ -137,10 +184,11 @@ export class LessonComponent implements OnInit {
   }
 
   startQuizSection(): void {
+    if (!this.isExamUnlocked) return;
     this.isQuizStarted.set(true);
     setTimeout(() => {
-      document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' });
-    }, 60);
+      document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
   }
 
   isAllAnswered(): boolean {
@@ -166,15 +214,13 @@ export class LessonComponent implements OnInit {
         this.isSubmitting.set(false);
         this.quizResult.set(res);
 
-        // Update local lesson state
         this.lesson.update(l => {
           if (l) {
-            return { ...l, attemptsCount: l.attemptsCount + 1 };
+            return { ...l, attemptsCount: l.attemptsCount + 1, status: res.passed ? 'COMPLETED' : l.status };
           }
           return l;
         });
 
-        // If passed, refresh lesson syllabus to show updated status immediately
         if (res.passed) {
           this.coursesService.getLessonById(currentLesson.id).subscribe((updated) => {
             this.lesson.set(updated);
@@ -247,5 +293,85 @@ export class LessonComponent implements OnInit {
         document.exitFullscreen().catch(() => {});
       }
     }
+  }
+
+  downloadTechnicalSheet(sheet: any): void {
+    // Register the sheet as viewed
+    this.downloadedSheets.update(set => {
+      const newSet = new Set(set);
+      newSet.add(sheet.id);
+      return newSet;
+    });
+
+    if (!this.manualSheetsViewed()) {
+      this.manualSheetsViewed.set(true);
+      const l = this.lesson();
+      if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedSheets: true }).subscribe();
+    }
+
+    this.coursesService.downloadTechnicalSheet(sheet.fileUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = sheet.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        alert('No se pudo descargar el archivo.');
+      }
+    });
+  }
+
+  // --- Documentation Documents ---
+  readonly downloadedDocs = signal<Set<string>>(new Set());
+  readonly manualDocsViewed = signal(false);
+
+  get isDocsViewed(): boolean {
+    const l = this.lesson();
+    if (!l) return false;
+    if (!l.lessonDocuments || l.lessonDocuments.length === 0) return true;
+    if (this.manualDocsViewed()) return true;
+    return this.downloadedDocs().size === l.lessonDocuments.length;
+  }
+
+  toggleManualDocsViewed(): void {
+    const newVal = !this.manualDocsViewed();
+    this.manualDocsViewed.set(newVal);
+    const l = this.lesson();
+    if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedDocs: newVal }).subscribe();
+  }
+
+  downloadLessonDocument(doc: any): void {
+    this.downloadedDocs.update(set => {
+      const newSet = new Set(set);
+      newSet.add(doc.id);
+      return newSet;
+    });
+
+    if (!this.manualDocsViewed()) {
+      this.manualDocsViewed.set(true);
+      const l = this.lesson();
+      if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedDocs: true }).subscribe();
+    }
+
+    this.coursesService.downloadLessonDocument(doc.fileUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        alert('No se pudo descargar el documento.');
+      }
+    });
   }
 }

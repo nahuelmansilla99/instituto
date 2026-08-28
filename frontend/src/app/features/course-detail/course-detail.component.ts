@@ -21,6 +21,7 @@ export class CourseDetailComponent implements OnInit {
 
   readonly course = signal<CourseDetail | null>(null);
   readonly isLoading = signal(true);
+  readonly activeTab = signal<'temario' | 'materiales'>('temario');
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -69,5 +70,29 @@ export class CourseDetailComponent implements OnInit {
   isFutureDate(dateStr?: string | null): boolean {
     if (!dateStr) return false;
     return new Date() < new Date(dateStr);
+  }
+
+  downloadTechnicalSheet(sheet: any): void {
+    this.coursesService.downloadTechnicalSheet(sheet.fileUrl).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = sheet.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => {
+        alert('No se pudo descargar el archivo.');
+      }
+    });
+  }
+
+  hasAnyTechnicalSheets(): boolean {
+    const c = this.course();
+    if (!c || !c.lessons) return false;
+    return c.lessons.some(l => l.technicalSheets && l.technicalSheets.length > 0);
   }
 }

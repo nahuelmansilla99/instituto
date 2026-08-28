@@ -2,12 +2,16 @@
   padding-top: 80px; /* Leave space for navbar */
   min-height: 100vh;
   background-color: var(--bg-main);
+  overflow-x: hidden;
+  width: 100%;
 }
 
 .profile-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Hero Header */
@@ -17,17 +21,20 @@
   border-radius: 20px;
   background: var(--card-gradient);
   border: 1px solid var(--border-subtle);
+  overflow: hidden;
 }
 
 .profile-hero-content {
   display: flex;
   align-items: center;
   gap: 2rem;
+  min-width: 0;
 }
 
 .profile-avatar {
   width: 100px;
   height: 100px;
+  min-width: 100px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   display: flex;
@@ -37,13 +44,22 @@
   font-weight: 700;
   color: var(--text-on-primary);
   box-shadow: 0 8px 16px var(--primary-light);
+  flex-shrink: 0;
+}
+
+.profile-hero-info {
+  min-width: 0;
+  flex: 1;
 }
 
 .profile-hero-info h1 {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 800;
   margin: 0 0 0.5rem 0;
   color: var(--text-primary);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
 }
 
 .role-badge {
@@ -56,12 +72,15 @@
   font-weight: 600;
   margin: 0 0 0.5rem 0;
   border: 1px solid var(--primary-light);
+  max-width: 100%;
 }
 
 .profile-email {
   color: var(--text-secondary);
   font-size: 1rem;
   margin: 0;
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 /* Cards Layout */
@@ -69,6 +88,7 @@
   display: grid;
   gap: 2rem;
   grid-template-columns: 1fr;
+  min-width: 0;
 }
 
 @media (min-width: 768px) {
@@ -84,6 +104,8 @@
   border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .card-header h2 {
@@ -91,12 +113,14 @@
   font-weight: 700;
   margin: 0 0 0.5rem 0;
   color: var(--text-primary);
+  word-break: break-word;
 }
 
 .card-header p {
   color: var(--text-secondary);
   font-size: 0.95rem;
   margin: 0 0 1.5rem 0;
+  word-break: break-word;
 }
 
 /* Forms */
@@ -105,12 +129,14 @@
   flex-direction: column;
   gap: 1.5rem;
   flex: 1;
+  min-width: 0;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .form-group label {
@@ -127,6 +153,9 @@
   color: var(--text-primary);
   font-size: 1rem;
   transition: all 0.3s ease;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .form-group input:focus {
@@ -140,10 +169,45 @@
   border-color: var(--status-danger);
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.password-input-wrapper input {
+  padding-right: 2.75rem;
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-toggle-password:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-hover);
+}
+
 .error-message {
   color: var(--status-danger);
   font-size: 0.85rem;
   margin-top: 0.25rem;
+  word-break: break-word;
 }
 
 /* Alerts */
@@ -154,10 +218,13 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .alert-icon {
   font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .alert-success {
@@ -187,6 +254,11 @@
   transition: all 0.3s ease;
   border: none;
   width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .btn-primary {
@@ -238,3 +310,98 @@
     transform: translateY(0);
   }
 }
+
+/* Mobile Responsive Adaptations */
+@media (max-width: 640px) {
+  .profile-page {
+    padding-top: 65px;
+  }
+
+  .profile-container {
+    padding: 1.25rem 1rem;
+  }
+
+  .profile-header {
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: 16px;
+  }
+
+  .profile-hero-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    min-width: 80px;
+    font-size: 2rem;
+    box-shadow: 0 6px 12px var(--primary-light);
+  }
+
+  .profile-hero-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .profile-hero-info h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .role-badge {
+    margin-bottom: 0.4rem;
+  }
+
+  .profile-email {
+    font-size: 0.9rem;
+  }
+
+  .profile-content {
+    gap: 1.25rem;
+  }
+
+  .card {
+    padding: 1.25rem 1rem;
+    border-radius: 16px;
+  }
+
+  .card-header h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .card-header p {
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .profile-form {
+    gap: 1.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+  }
+
+  .form-group input {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.95rem;
+  }
+
+  .alert {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+  }
+}
+

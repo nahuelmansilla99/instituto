@@ -277,48 +277,93 @@
   overflow: hidden;
 }
 
-/* 4. Fichas Técnicas */
 .sheets-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .sheet-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 16px 20px;
   border: 1px solid var(--border-subtle);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sheet-item:hover {
+  border-color: var(--primary);
+  background: rgba(255,255,255,0.05); /* or var(--bg-hover) depending on theme */
+  transform: translateY(-2px);
 }
 
 .sheet-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
 }
 
-.sheet-name {
-  font-size: 14px;
-}
-
-.btn-icon {
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  cursor: pointer;
+.sheet-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px;
-  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 60, 60, 0.1);
+  color: #ff4d4f; /* PDF red color */
+  flex-shrink: 0;
 }
 
-.btn-icon:hover {
-  background: var(--bg-hover-strong);
+.sheet-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+  max-width: 100%;
+}
+
+.sheet-name {
+  font-size: 15px;
+  font-weight: 500;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.sheet-type {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sheet-download-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sheet-item:hover .sheet-download-btn {
+  background: var(--primary);
+  color: var(--text-on-primary);
 }
 
 .manual-check-label {
@@ -469,11 +514,19 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .sheet-info {
+    width: 100%;
+    max-width: 100%;
   }
 
   .content-card button, .sheet-item button {
     width: 100%;
     justify-content: center;
+    box-sizing: border-box;
   }
 
   .exam-header-row {

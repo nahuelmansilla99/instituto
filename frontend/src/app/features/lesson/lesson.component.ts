@@ -471,7 +471,7 @@ export class LessonComponent implements OnInit, OnDestroy {
       const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(dataUrl);
 
       const blobUrl = window.URL.createObjectURL(pdfBlob);
-      const safeBlobUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl + '#view=Fit');
+      const safeBlobUrl = this.sanitizer.bypassSecurityTrustResourceUrl(blobUrl + '#toolbar=0&navpanes=0&view=Fit');
 
       // Verify we are still on the same lesson before updating signal state
       if (this.lesson()?.id !== lessonId) {

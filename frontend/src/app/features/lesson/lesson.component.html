@@ -104,7 +104,7 @@
         <h4 class="section-title">Fichas técnicas</h4>
         
         <div class="sheets-list">
-          <div class="sheet-item" *ngFor="let sheet of l.technicalSheets">
+          <div class="sheet-item" *ngFor="let sheet of l.technicalSheets" [class.has-preview]="pdfPreviews()[sheet.id]">
             <div class="sheet-info">
               <div class="sheet-icon" (click)="openPdfModal(sheet, 'sheet')" style="cursor: zoom-in;" title="Ampliar documento">
                 <img *ngIf="pdfPreviews()[sheet.id]" [src]="pdfPreviews()[sheet.id]" class="pdf-preview-img" alt="Vista previa del PDF">
@@ -133,7 +133,7 @@
         <h4 class="section-title">Documentación de la clase</h4>
         
         <div class="sheets-list">
-          <div class="sheet-item" *ngFor="let doc of l.lessonDocuments">
+          <div class="sheet-item" *ngFor="let doc of l.lessonDocuments" [class.has-preview]="pdfPreviews()[doc.id]">
             <div class="sheet-info">
               <div class="sheet-icon" (click)="openPdfModal(doc, 'doc')" style="cursor: zoom-in;" title="Ampliar documento">
                 <img *ngIf="pdfPreviews()[doc.id]" [src]="pdfPreviews()[doc.id]" class="pdf-preview-img" alt="Vista previa del PDF">

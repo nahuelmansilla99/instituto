@@ -26,4 +26,5 @@ export interface CourseLessonItem {
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;
   technicalSheets?: any[];
+  lessonDocuments?: any[];
 }

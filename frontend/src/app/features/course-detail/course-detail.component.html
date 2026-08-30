@@ -83,18 +83,8 @@
       </div>
     </div>
 
-    <!-- TAB NAVIGATION -->
-    <div class="course-tabs" style="display: flex; gap: 20px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 30px;">
-      <button (click)="activeTab.set('temario')" style="background: none; border: none; color: var(--text-primary); padding: 10px 15px; font-size: 16px; cursor: pointer; border-bottom: 3px solid transparent;" [style.border-bottom-color]="activeTab() === 'temario' ? 'var(--primary)' : 'transparent'">
-        📖 Temario de Clases
-      </button>
-      <button (click)="activeTab.set('materiales')" style="background: none; border: none; color: var(--text-primary); padding: 10px 15px; font-size: 16px; cursor: pointer; border-bottom: 3px solid transparent;" [style.border-bottom-color]="activeTab() === 'materiales' ? 'var(--primary)' : 'transparent'">
-        📚 Materiales
-      </button>
-    </div>
-
     <!-- Lessons Syllabus Section -->
-    <section *ngIf="activeTab() === 'temario' && course() as c" class="syllabus-section animate-fade-in">
+    <section *ngIf="course() as c" class="syllabus-section animate-fade-in">
       <div class="syllabus-header">
         <div>
           <h2>Clases y Módulos del Curso ({{ c.lessons.length }})</h2>
@@ -210,45 +200,6 @@
             </div>
           </div>
         </article>
-      </div>
-    </section>
-
-    <!-- Materials Section -->
-    <section *ngIf="activeTab() === 'materiales' && course() as c" class="materials-section animate-fade-in">
-      <div class="syllabus-header" style="margin-bottom: 20px;">
-        <div>
-          <h2>Materiales de Estudio</h2>
-          <p class="syllabus-subtitle">Descarga todas las fichas técnicas complementarias agrupadas por clase.</p>
-        </div>
-      </div>
-
-      <div *ngFor="let lesson of c.lessons">
-        <div *ngIf="lesson.technicalSheets && lesson.technicalSheets.length > 0" class="glass-card" style="margin-bottom: 20px; padding: 20px;">
-          <h3 style="margin-top: 0; margin-bottom: 15px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 10px; color: var(--text-primary);">
-            Clase #{{ lesson.orderNumber || 1 }}: {{ lesson.title }}
-          </h3>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div *ngFor="let sheet of lesson.technicalSheets" class="material-card">
-              <div class="material-card-info">
-                <span class="material-card-icon">📄</span>
-                <div class="material-card-text">
-                  <h4>{{ sheet.originalName }}</h4>
-                  <span *ngIf="sheet.fileSize">{{ (sheet.fileSize / 1024 / 1024) | number:'1.1-2' }} MB</span>
-                </div>
-              </div>
-              <button (click)="downloadTechnicalSheet(sheet)" class="btn btn-secondary btn-sm material-download-btn" title="Descargar material">
-                ⬇️ Descargar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Empty state if no materials at all -->
-      <div *ngIf="!hasAnyTechnicalSheets()" class="empty-syllabus glass-card">
-        <div class="empty-icon">📂</div>
-        <h3>No hay materiales complementarios aún</h3>
-        <p>El docente todavía no ha subido fichas técnicas para este curso.</p>
       </div>
     </section>
   </div>

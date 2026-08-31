@@ -289,12 +289,19 @@ export class LessonComponent implements OnInit, OnDestroy {
     this.router.navigate(['/lessons', nextLessonId]);
   }
 
+  getVisibleSyllabus(syllabus?: any[]): any[] {
+    if (!syllabus) return [];
+    if (this.authService.isAdmin()) return syllabus;
+    return syllabus.filter((item) => item.isPublished !== false);
+  }
+
   getNextLesson(): any {
     const l = this.lesson();
     if (!l || !l.syllabus) return null;
-    const currentIndex = l.syllabus.findIndex((item) => item.id === l.id);
-    if (currentIndex >= 0 && currentIndex < l.syllabus.length - 1) {
-      return l.syllabus[currentIndex + 1];
+    const visibleList = this.getVisibleSyllabus(l.syllabus);
+    const currentIndex = visibleList.findIndex((item) => item.id === l.id);
+    if (currentIndex >= 0 && currentIndex < visibleList.length - 1) {
+      return visibleList[currentIndex + 1];
     }
     return null;
   }

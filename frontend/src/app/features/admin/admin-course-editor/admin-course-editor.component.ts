@@ -313,13 +313,15 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly isEditingLesson = signal(false);
   readonly currentEditingLessonId = signal<string | null>(null);
   readonly selectedModalPresentationFile = signal<File | null>(null);
+  readonly isTogglingPublish = signal<string | null>(null);
   readonly lessonForm = this.fb.group({
     title: ['', [Validators.required]],
-    content: ['', [Validators.required]],
+    content: [''],
     orderNumber: [null],
     meetUrl: [''],
     presentationUrl: [''],
     availableAt: [''],
+    isPublished: [true],
   });
 
   // Dedicated Prezi / Presentation Link Modal
@@ -553,7 +555,12 @@ export class AdminCourseEditorComponent implements OnInit {
     this.lessonForm.reset();
     const c = this.course();
     if (c) {
-      this.lessonForm.patchValue({ orderNumber: c.lessons.length + 1 as any });
+      this.lessonForm.patchValue({
+        orderNumber: c.lessons.length + 1 as any,
+        isPublished: true,
+      });
+    } else {
+      this.lessonForm.patchValue({ isPublished: true });
     }
     this.showLessonModal.set(true);
   }
@@ -572,11 +579,12 @@ export class AdminCourseEditorComponent implements OnInit {
 
     this.lessonForm.patchValue({
       title: lesson.title,
-      content: lesson.content,
+      content: lesson.content || '',
       orderNumber: lesson.orderNumber,
       meetUrl: lesson.meetUrl || '',
       presentationUrl: lesson.presentationUrl || '',
       availableAt: formattedDate,
+      isPublished: lesson.isPublished !== undefined ? lesson.isPublished : true,
     });
     this.showLessonModal.set(true);
   }
@@ -587,6 +595,23 @@ export class AdminCourseEditorComponent implements OnInit {
     this.lessonForm.reset();
   }
 
+  toggleLessonPublish(lesson: any): void {
+    const c = this.course();
+    if (!c || this.isTogglingPublish()) return;
+
+    this.isTogglingPublish.set(lesson.id);
+    this.adminService.toggleLessonPublish(lesson.id).subscribe({
+      next: (updatedLesson) => {
+        this.isTogglingPublish.set(null);
+        lesson.isPublished = updatedLesson.isPublished;
+      },
+      error: (err) => {
+        this.isTogglingPublish.set(null);
+        alert('Error al cambiar la visibilidad de la clase: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+  }
+
   saveLesson(): void {
     const c = this.course();
     if (!c || this.lessonForm.invalid) return;
@@ -595,7 +620,7 @@ export class AdminCourseEditorComponent implements OnInit {
     const formVal = this.lessonForm.value;
     const payload = {
       title: formVal.title!,
-      content: formVal.content!,
+      content: formVal.content?.trim() || '',
       orderNumber: formVal.orderNumber ? Number(formVal.orderNumber) : undefined,
       meetUrl: formVal.meetUrl || undefined,
       presentationUrl: formVal.presentationUrl?.trim() || undefined,
@@ -603,6 +628,7 @@ export class AdminCourseEditorComponent implements OnInit {
         ? (formVal.presentationUrl.includes('prezi.com') ? 'Presentación Prezi' : 'Presentación Online')
         : undefined,
       availableAt: formVal.availableAt ? new Date(formVal.availableAt).toISOString() : null,
+      isPublished: formVal.isPublished !== null && formVal.isPublished !== undefined ? Boolean(formVal.isPublished) : true,
     };
 
     const pptFile = this.selectedModalPresentationFile();

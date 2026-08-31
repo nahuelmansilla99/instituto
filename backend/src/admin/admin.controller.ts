@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Param,
   Body,
@@ -72,6 +73,11 @@ export class AdminController {
     @Body() dto: Partial<CreateLessonDto>,
   ) {
     return this.adminService.updateLesson(id, dto);
+  }
+
+  @Patch('lessons/:id/toggle-publish')
+  toggleLessonPublish(@Param('id') id: string) {
+    return this.adminService.toggleLessonPublish(id);
   }
 
   @Delete('lessons/:id')

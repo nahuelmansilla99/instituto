@@ -87,22 +87,22 @@
     <section *ngIf="course() as c" class="syllabus-section animate-fade-in">
       <div class="syllabus-header">
         <div>
-          <h2>Clases y Módulos del Curso ({{ c.lessons.length }})</h2>
+          <h2>Clases y Módulos del Curso ({{ visibleLessons().length }})</h2>
           <p class="syllabus-subtitle">Selecciona la clase que deseas cursar. Al terminar cada lección podrás rendir su examen de aprobación.</p>
         </div>
       </div>
 
       <!-- Empty Lessons State -->
-      <div *ngIf="c.lessons.length === 0" class="empty-syllabus glass-card">
+      <div *ngIf="visibleLessons().length === 0" class="empty-syllabus glass-card">
         <div class="empty-icon">📂</div>
         <h3>Este curso aún no tiene clases disponibles</h3>
         <p>El profesor está preparando el temario y las diapositivas. Vuelve a consultar pronto.</p>
       </div>
 
       <!-- Lessons Grid / List -->
-      <div class="lessons-syllabus-list" *ngIf="c.lessons.length > 0">
+      <div class="lessons-syllabus-list" *ngIf="visibleLessons().length > 0">
         <article
-          *ngFor="let lesson of c.lessons; let idx = index"
+          *ngFor="let lesson of visibleLessons(); let idx = index"
           class="lesson-syllabus-card glass-card animate-fade-in"
           [class.card-completed]="lesson.status === 'COMPLETED'"
           [class.card-available]="lesson.status === 'AVAILABLE'"
@@ -146,6 +146,9 @@
                   </span>
                 </ng-container>
 
+                <span *ngIf="lesson.isPublished === false" class="meta-badge minimal-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">
+                  🔒 Oculta para alumnos
+                </span>
                 <span *ngIf="lesson.availableAt" class="meta-badge minimal-badge meta-schedule">
                   🗓️ {{ isFutureDate(lesson.availableAt) ? 'Estreno: ' : '' }}{{ lesson.availableAt | date:'dd/MM/yy HH:mm' }}
                 </span>

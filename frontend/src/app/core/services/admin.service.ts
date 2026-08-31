@@ -55,12 +55,13 @@ export class AdminService {
     courseId: string,
     data: {
       title: string;
-      content: string;
+      content?: string;
       orderNumber?: number;
       meetUrl?: string;
       presentationUrl?: string;
       presentationFilename?: string;
       availableAt?: string | null;
+      isPublished?: boolean;
     },
   ): Observable<any> {
     return this.http.post(`${this.apiUrl}/admin/courses/${courseId}/lessons`, data);
@@ -70,15 +71,20 @@ export class AdminService {
     lessonId: string,
     data: Partial<{
       title: string;
-      content: string;
+      content?: string;
       orderNumber?: number;
       meetUrl?: string;
       presentationUrl?: string;
       presentationFilename?: string;
       availableAt?: string | null;
+      isPublished?: boolean;
     }>,
   ): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/lessons/${lessonId}`, data);
+  }
+
+  toggleLessonPublish(lessonId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/admin/lessons/${lessonId}/toggle-publish`, {});
   }
 
   deleteLesson(lessonId: string): Observable<{ success: boolean }> {

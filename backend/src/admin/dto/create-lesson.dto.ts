@@ -1,13 +1,13 @@
-import { IsNotEmpty, IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
 
 export class CreateLessonDto {
   @IsNotEmpty({ message: 'El título de la clase es obligatorio' })
   @IsString()
   title: string;
 
-  @IsNotEmpty({ message: 'El contenido de la clase es obligatorio' })
+  @IsOptional()
   @IsString()
-  content: string;
+  content?: string;
 
   @IsOptional()
   @IsInt()
@@ -29,4 +29,8 @@ export class CreateLessonDto {
   @IsOptional()
   @IsString()
   availableAt?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
 }

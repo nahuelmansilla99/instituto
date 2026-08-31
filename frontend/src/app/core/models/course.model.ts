@@ -22,6 +22,7 @@ export interface CourseLessonItem {
   presentationUrl?: string | null;
   presentationFilename?: string | null;
   availableAt?: string | null;
+  isPublished?: boolean;
   hasQuiz?: boolean;
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;

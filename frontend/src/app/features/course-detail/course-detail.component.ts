@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
@@ -21,6 +21,13 @@ export class CourseDetailComponent implements OnInit {
 
   readonly course = signal<CourseDetail | null>(null);
   readonly isLoading = signal(true);
+
+  readonly visibleLessons = computed(() => {
+    const c = this.course();
+    if (!c || !c.lessons) return [];
+    if (this.authService.isAdmin()) return c.lessons;
+    return c.lessons.filter((l) => l.isPublished !== false);
+  });
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {

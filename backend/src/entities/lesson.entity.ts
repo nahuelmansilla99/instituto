@@ -25,8 +25,11 @@ export class Lesson {
   @Column({ length: 255 })
   title: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true, default: '' })
   content: string;
+
+  @Column({ name: 'is_published', type: 'boolean', default: true })
+  isPublished: boolean;
 
   @Column({ name: 'order_number', type: 'int' })
   orderNumber: number;

@@ -125,6 +125,12 @@
               <div class="lesson-info">
                 <h3 class="lesson-title">{{ lesson.title }}</h3>
                 <div class="lesson-meta-badges">
+                  <span *ngIf="lesson.isPublished !== false" class="badge-published-pill">
+                    🟢 Publicada
+                  </span>
+                  <span *ngIf="lesson.isPublished === false" class="badge-draft-pill">
+                    🔒 Oculta (Borrador)
+                  </span>
                   <span *ngIf="lesson.availableAt" class="badge-schedule-pill">
                     🗓️ Habilita: {{ lesson.availableAt | date:'dd/MM/yyyy HH:mm' }}
                   </span>
@@ -206,6 +212,17 @@
                   class="btn btn-secondary btn-sm btn-quiz-manage"
                 >
                   <span>📝 Cuestionario ({{ lesson.questions?.length || 0 }})</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="toggleLessonPublish(lesson)"
+                  class="btn btn-sm btn-publish-toggle"
+                  [ngClass]="lesson.isPublished !== false ? 'btn-toggle-unpublish' : 'btn-toggle-publish'"
+                  [title]="lesson.isPublished !== false ? 'Ocultar esta clase para que no le aparezca a los alumnos' : 'Publicar esta clase para que sea visible a los alumnos'"
+                  [disabled]="isTogglingPublish() === lesson.id"
+                >
+                  <span *ngIf="isTogglingPublish() === lesson.id">⏳</span>
+                  <span *ngIf="isTogglingPublish() !== lesson.id">{{ lesson.isPublished !== false ? '🙈 Ocultar' : '👁️ Publicar' }}</span>
                 </button>
                 <button (click)="openEditLessonModal(lesson)" class="btn-icon" title="Editar Clase">
                   ✏️
@@ -959,12 +976,12 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="lContent">Contenido de la Clase (HTML / Texto / Guía Teórica) *</label>
+        <label class="form-label" for="lContent">Contenido de la Clase (HTML / Texto / Guía Teórica) <span class="label-optional">(Opcional)</span></label>
         <textarea
           id="lContent"
           rows="5"
           class="form-control font-mono"
-          placeholder="<h2>Título</h2><p>Explicación teórica de la clase...</p>"
+          placeholder="<h2>Título</h2><p>Explicación teórica de la clase... (Opcional)</p>"
           formControlName="content"
         ></textarea>
       </div>
@@ -1017,6 +1034,36 @@
             formControlName="presentationUrl"
           />
           <span class="form-hint">Si pegas un enlace de Prezi, se integrará con animaciones interactivas directamente en la clase.</span>
+        </div>
+      </div>
+
+      <!-- SECTION: VISIBILITY & PUBLISHING -->
+      <div class="form-section-card glass-card">
+        <h4 class="section-card-title">👁️ Visibilidad y Publicación para Alumnos</h4>
+        <p class="section-card-desc">Controla si los alumnos pueden ver esta clase en el curso o si permanece oculta como borrador.</p>
+
+        <div class="publish-toggle-container">
+          <label class="publish-switch-label" for="lIsPublished">
+            <div class="publish-switch-wrapper">
+              <input
+                id="lIsPublished"
+                type="checkbox"
+                class="publish-switch-input"
+                formControlName="isPublished"
+              />
+              <span class="publish-switch-slider"></span>
+            </div>
+            <div class="publish-switch-text">
+              <span class="publish-status-title" [class.text-published-state]="lessonForm.get('isPublished')?.value" [class.text-draft-state]="!lessonForm.get('isPublished')?.value">
+                {{ lessonForm.get('isPublished')?.value ? '🟢 Clase Publicada (Visible para alumnos)' : '🔒 Clase Oculta / Borrador (Invisible para alumnos)' }}
+              </span>
+              <span class="publish-status-desc">
+                {{ lessonForm.get('isPublished')?.value
+                  ? 'Los alumnos podrán ver esta clase en el temario del curso (respetando la fecha de estreno si se programó).'
+                  : 'Los alumnos NO podrán ver esta clase en el temario ni acceder a ella, incluso si tiene fecha de estreno programada.' }}
+              </span>
+            </div>
+          </label>
         </div>
       </div>
 

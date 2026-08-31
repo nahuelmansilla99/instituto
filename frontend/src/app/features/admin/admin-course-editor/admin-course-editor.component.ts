@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AdminService, AdminCourseDetail } from '../../../core/services/admin.service';
@@ -15,7 +15,11 @@ export interface MergedStudentRow {
   studentId: string;
   name: string;
   email: string;
+  createdAt?: string;
+  role?: string;
   isEnrolled: boolean;
+  isDropped?: boolean;
+  droppedAt?: string | null;
   enrollmentId?: string;
   enrolledAt?: string;
   totalLessons?: number;
@@ -27,7 +31,7 @@ export interface MergedStudentRow {
 @Component({
   selector: 'app-admin-course-editor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, RouterLink],
   templateUrl: './admin-course-editor.component.html',
   styleUrl: './admin-course-editor.component.css',
 })
@@ -49,36 +53,241 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly enrolledStudents = signal<EnrolledStudentReport[]>([]);
   readonly allPlatformStudents = signal<StudentSummary[]>([]);
   readonly isLoadingStudents = signal(false);
-  
-  readonly mergedStudentsList = computed<MergedStudentRow[]>(() => {
+
+  // Filter & Search Signals for Students Tab
+  readonly studentSearchText = signal<string>('');
+  readonly filterEnrollmentStatus = signal<'all' | 'enrolled' | 'not_enrolled' | 'dropped'>('all');
+  readonly filterProgressStatus = signal<'all' | 'not_started' | 'in_progress' | 'completed'>('all');
+  readonly filterScoreStatus = signal<'all' | 'evaluated' | 'high' | 'risk' | 'none'>('all');
+  readonly studentSortBy = signal<'name' | 'registeredAt' | 'enrolledAt' | 'progress' | 'score'>('name');
+  readonly studentSortDirection = signal<'asc' | 'desc'>('asc');
+
+  // Overlay Popover Filter State
+  readonly activeFilterOverlay = signal<'student' | 'status' | 'progress' | 'score' | null>(null);
+
+  readonly isStudentFiltered = computed(() => this.studentSearchText().trim().length > 0);
+  readonly isStatusFiltered = computed(() => this.filterEnrollmentStatus() !== 'all');
+  readonly isProgressFiltered = computed(() => this.filterProgressStatus() !== 'all');
+  readonly isScoreFiltered = computed(() => this.filterScoreStatus() !== 'all');
+
+  toggleFilterOverlay(col: 'student' | 'status' | 'progress' | 'score', event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.activeFilterOverlay() === col) {
+      this.activeFilterOverlay.set(null);
+    } else {
+      this.activeFilterOverlay.set(col);
+    }
+  }
+
+  closeFilterOverlay(): void {
+    this.activeFilterOverlay.set(null);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.filter-overlay-popover') && !target.closest('.btn-th-filter')) {
+      this.closeFilterOverlay();
+    }
+  }
+
+  readonly activeEnrolledStudents = computed(() => {
+    return this.enrolledStudents().filter((e) => !e.deletedAt);
+  });
+
+  readonly allMergedStudents = computed<MergedStudentRow[]>(() => {
     const all = this.allPlatformStudents();
     const enrolled = this.enrolledStudents();
-    
-    return all.map(student => {
-      const enrolledData = enrolled.find(e => e.studentId === student.id);
+
+    return all.map((student) => {
+      const enrolledData = enrolled.find((e) => e.studentId === student.id);
       if (enrolledData) {
+        const isDropped = Boolean(enrolledData.deletedAt);
         return {
           studentId: enrolledData.studentId,
           name: enrolledData.name,
           email: enrolledData.email,
-          isEnrolled: true,
+          createdAt: student.createdAt,
+          role: student.role,
+          isEnrolled: !isDropped,
+          isDropped: isDropped,
+          droppedAt: enrolledData.deletedAt,
           enrollmentId: enrolledData.enrollmentId,
           enrolledAt: enrolledData.enrolledAt,
           totalLessons: enrolledData.totalLessons,
           completedLessons: enrolledData.completedLessons,
           progressPercentage: enrolledData.progressPercentage,
-          averageScore: enrolledData.averageScore
+          averageScore: enrolledData.averageScore,
         };
       } else {
         return {
           studentId: student.id,
           name: student.name,
           email: student.email,
-          isEnrolled: false
+          createdAt: student.createdAt,
+          role: student.role,
+          isEnrolled: false,
+          isDropped: false,
         };
       }
     });
   });
+
+  readonly filteredStudentsList = computed<MergedStudentRow[]>(() => {
+    let list = [...this.allMergedStudents()];
+
+    // 1. Buscador por texto
+    const query = this.studentSearchText().trim().toLowerCase();
+    if (query) {
+      list = list.filter(
+        (s) =>
+          s.name.toLowerCase().includes(query) ||
+          s.email.toLowerCase().includes(query),
+      );
+    }
+
+    // 2. Filtro por Estado de Matrícula
+    const enrollFilter = this.filterEnrollmentStatus();
+    if (enrollFilter === 'enrolled') {
+      list = list.filter((s) => s.isEnrolled);
+    } else if (enrollFilter === 'not_enrolled') {
+      list = list.filter((s) => !s.isEnrolled && !s.isDropped);
+    } else if (enrollFilter === 'dropped') {
+      list = list.filter((s) => s.isDropped);
+    }
+
+    // 3. Filtro por Progreso
+    const progFilter = this.filterProgressStatus();
+    if (progFilter === 'not_started') {
+      list = list.filter(
+        (s) => s.isEnrolled && (s.progressPercentage === 0 || !s.progressPercentage),
+      );
+    } else if (progFilter === 'in_progress') {
+      list = list.filter(
+        (s) =>
+          s.isEnrolled &&
+          (s.progressPercentage || 0) > 0 &&
+          (s.progressPercentage || 0) < 100,
+      );
+    } else if (progFilter === 'completed') {
+      list = list.filter((s) => s.isEnrolled && s.progressPercentage === 100);
+    }
+
+    // 4. Filtro por Calificaciones
+    const scoreFilter = this.filterScoreStatus();
+    if (scoreFilter === 'evaluated') {
+      list = list.filter((s) => s.isEnrolled && s.averageScore !== null && s.averageScore !== undefined);
+    } else if (scoreFilter === 'high') {
+      list = list.filter((s) => s.isEnrolled && (s.averageScore ?? 0) >= 80);
+    } else if (scoreFilter === 'risk') {
+      list = list.filter((s) => s.isEnrolled && s.averageScore !== null && s.averageScore !== undefined && s.averageScore < 60);
+    } else if (scoreFilter === 'none') {
+      list = list.filter((s) => s.isEnrolled && (s.averageScore === null || s.averageScore === undefined));
+    }
+
+    // 5. Ordenamiento
+    const sortBy = this.studentSortBy();
+    const isAsc = this.studentSortDirection() === 'asc';
+    const mult = isAsc ? 1 : -1;
+
+    list.sort((a, b) => {
+      if (sortBy === 'name') {
+        return mult * a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      }
+
+      if (sortBy === 'registeredAt') {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return mult * (timeA - timeB);
+      }
+
+      if (sortBy === 'enrolledAt') {
+        const timeA = a.enrolledAt ? new Date(a.enrolledAt).getTime() : 0;
+        const timeB = b.enrolledAt ? new Date(b.enrolledAt).getTime() : 0;
+        if (!timeA && timeB) return 1;
+        if (timeA && !timeB) return -1;
+        return mult * (timeA - timeB);
+      }
+
+      if (sortBy === 'progress') {
+        const progA = a.progressPercentage ?? -1;
+        const progB = b.progressPercentage ?? -1;
+        return mult * (progA - progB);
+      }
+
+      if (sortBy === 'score') {
+        const scoreA = a.averageScore ?? -1;
+        const scoreB = b.averageScore ?? -1;
+        return mult * (scoreA - scoreB);
+      }
+
+      return 0;
+    });
+
+    return list;
+  });
+
+  // Alias para mantener compatibilidad con el resto del componente
+  readonly mergedStudentsList = computed<MergedStudentRow[]>(() => this.filteredStudentsList());
+
+  readonly totalStudentsCount = computed(() => this.allMergedStudents().length);
+  readonly filteredStudentsCount = computed(() => this.filteredStudentsList().length);
+  readonly activeEnrolledCount = computed(() => this.activeEnrolledStudents().length);
+  readonly droppedStudentsCount = computed(() => this.allMergedStudents().filter(s => s.isDropped).length);
+  readonly notEnrolledCount = computed(() => this.allMergedStudents().filter(s => !s.isEnrolled && !s.isDropped).length);
+
+  readonly hasActiveFilters = computed<boolean>(() => {
+    return (
+      this.studentSearchText().trim().length > 0 ||
+      this.filterEnrollmentStatus() !== 'all' ||
+      this.filterProgressStatus() !== 'all' ||
+      this.filterScoreStatus() !== 'all' ||
+      this.studentSortBy() !== 'name' ||
+      this.studentSortDirection() !== 'asc'
+    );
+  });
+
+  setSearchText(val: string): void {
+    this.studentSearchText.set(val);
+  }
+
+  setEnrollmentFilter(status: 'all' | 'enrolled' | 'not_enrolled' | 'dropped'): void {
+    this.filterEnrollmentStatus.set(status);
+  }
+
+  setProgressFilter(status: 'all' | 'not_started' | 'in_progress' | 'completed'): void {
+    this.filterProgressStatus.set(status);
+  }
+
+  setScoreFilter(status: 'all' | 'evaluated' | 'high' | 'risk' | 'none'): void {
+    this.filterScoreStatus.set(status);
+  }
+
+  sortByColumn(val: 'name' | 'registeredAt' | 'enrolledAt' | 'progress' | 'score'): void {
+    if (this.studentSortBy() === val) {
+      this.studentSortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      this.studentSortBy.set(val);
+      if (val === 'registeredAt' || val === 'enrolledAt' || val === 'score' || val === 'progress') {
+        this.studentSortDirection.set('desc');
+      } else {
+        this.studentSortDirection.set('asc');
+      }
+    }
+  }
+
+  toggleSortDirection(): void {
+    this.studentSortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+  }
+
+  resetStudentFilters(): void {
+    this.studentSearchText.set('');
+    this.filterEnrollmentStatus.set('all');
+    this.filterProgressStatus.set('all');
+    this.filterScoreStatus.set('all');
+    this.studentSortBy.set('name');
+    this.studentSortDirection.set('asc');
+  }
 
   readonly showStudentProgressModal = signal(false);
   readonly selectedStudentReport = signal<StudentCourseProgressReport | null>(null);
@@ -219,14 +428,14 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   getAverageCourseProgress(): number {
-    const list = this.enrolledStudents();
+    const list = this.activeEnrolledStudents();
     if (list.length === 0) return 0;
     const sum = list.reduce((acc, s) => acc + (s.progressPercentage || 0), 0);
     return Math.round(sum / list.length);
   }
 
   getOverallAverageScore(): number {
-    const list = this.enrolledStudents().filter((s) => s.averageScore !== null);
+    const list = this.activeEnrolledStudents().filter((s) => s.averageScore !== null);
     if (list.length === 0) return 0;
     const sum = list.reduce((acc, s) => acc + (s.averageScore || 0), 0);
     return Math.round(sum / list.length);

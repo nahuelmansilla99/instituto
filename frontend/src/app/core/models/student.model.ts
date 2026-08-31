@@ -3,6 +3,7 @@ export interface StudentSummary {
   name: string;
   email: string;
   createdAt: string;
+  role?: string;
 }
 
 export interface EnrolledStudentReport {
@@ -12,6 +13,7 @@ export interface EnrolledStudentReport {
   email: string;
   status: 'ACTIVE' | 'SUSPENDED' | 'COMPLETED';
   enrolledAt: string;
+  deletedAt?: string | null;
   totalLessons: number;
   completedLessons: number;
   progressPercentage: number;

@@ -375,7 +375,7 @@ export class AdminService {
         { role: UserRole.SYSADMIN },
       ],
       order: { name: 'ASC' },
-      select: ['id', 'name', 'email', 'createdAt'],
+      select: ['id', 'name', 'email', 'createdAt', 'role'],
     });
     return students;
   }
@@ -397,6 +397,7 @@ export class AdminService {
       where: { courseId },
       relations: ['user'],
       order: { enrolledAt: 'DESC' },
+      withDeleted: true,
     });
 
     const studentReports = await Promise.all(
@@ -435,6 +436,7 @@ export class AdminService {
           email: student.email,
           status: enr.status,
           enrolledAt: enr.enrolledAt,
+          deletedAt: enr.deletedAt,
           totalLessons,
           completedLessons,
           progressPercentage,

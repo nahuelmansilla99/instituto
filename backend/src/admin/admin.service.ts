@@ -369,7 +369,11 @@ export class AdminService {
   // ----------------------------------------------------
   async getAllStudents() {
     const students = await this.userRepo.find({
-      where: { role: UserRole.STUDENT },
+      where: [
+        { role: UserRole.STUDENT },
+        { role: UserRole.ADMIN },
+        { role: UserRole.SYSADMIN },
+      ],
       order: { name: 'ASC' },
       select: ['id', 'name', 'email', 'createdAt'],
     });

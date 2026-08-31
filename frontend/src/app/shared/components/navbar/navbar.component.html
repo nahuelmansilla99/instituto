@@ -48,6 +48,52 @@
             </svg>
             <span>Gestión de Usuarios</span>
           </a>
+
+          <!-- Selector de roles simulados (solo visible si el rol real es SYSADMIN o ADMIN) -->
+          <ng-container *ngIf="authService.isRealSysadmin() || authService.isRealAdmin()">
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-header">Vista Simulada</div>
+
+            <!-- Opciones para SYSADMIN -->
+            <ng-container *ngIf="authService.isRealSysadmin()">
+              <button class="dropdown-item simulated-role-btn"
+                      [class.active]="authService.simulatedRole() === null"
+                      (click)="selectRole(null)">
+                <span class="role-dot sysadmin"></span>
+                <span>Sysadmin (Real)</span>
+              </button>
+              <button class="dropdown-item simulated-role-btn"
+                      [class.active]="authService.simulatedRole() === 'ADMIN'"
+                      (click)="selectRole('ADMIN')">
+                <span class="role-dot admin"></span>
+                <span>Profesor</span>
+              </button>
+              <button class="dropdown-item simulated-role-btn"
+                      [class.active]="authService.simulatedRole() === 'STUDENT'"
+                      (click)="selectRole('STUDENT')">
+                <span class="role-dot student"></span>
+                <span>Alumno</span>
+              </button>
+            </ng-container>
+
+            <!-- Opciones para ADMIN -->
+            <ng-container *ngIf="authService.isRealAdmin()">
+              <button class="dropdown-item simulated-role-btn"
+                      [class.active]="authService.simulatedRole() === null"
+                      (click)="selectRole(null)">
+                <span class="role-dot admin"></span>
+                <span>Profesor (Real)</span>
+              </button>
+              <button class="dropdown-item simulated-role-btn"
+                      [class.active]="authService.simulatedRole() === 'STUDENT'"
+                      (click)="selectRole('STUDENT')">
+                <span class="role-dot student"></span>
+                <span>Alumno</span>
+              </button>
+            </ng-container>
+          </ng-container>
+
+          <div class="dropdown-divider"></div>
           <button (click)="confirmLogout()" class="dropdown-item text-danger">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

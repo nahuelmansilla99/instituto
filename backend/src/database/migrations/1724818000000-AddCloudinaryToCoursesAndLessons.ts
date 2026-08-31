@@ -4,10 +4,10 @@ export class AddCloudinaryToCoursesAndLessons1724818000000 implements MigrationI
     name = 'AddCloudinaryToCoursesAndLessons1724818000000'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "courses" ADD "thumbnail_public_id" character varying`);
-        await queryRunner.query(`ALTER TABLE "lessons" ADD "presentation_public_id" character varying`);
-        await queryRunner.query(`ALTER TABLE "lesson_documents" ADD "file_public_id" character varying`);
-        await queryRunner.query(`ALTER TABLE "technical_sheets" ADD "file_public_id" character varying`);
+        await queryRunner.query(`ALTER TABLE "courses" ADD COLUMN IF NOT EXISTS "thumbnail_public_id" character varying`);
+        await queryRunner.query(`ALTER TABLE "lessons" ADD COLUMN IF NOT EXISTS "presentation_public_id" character varying`);
+        await queryRunner.query(`ALTER TABLE "lesson_documents" ADD COLUMN IF NOT EXISTS "file_public_id" character varying`);
+        await queryRunner.query(`ALTER TABLE "technical_sheets" ADD COLUMN IF NOT EXISTS "file_public_id" character varying`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {

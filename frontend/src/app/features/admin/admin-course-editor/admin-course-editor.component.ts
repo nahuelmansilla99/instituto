@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AdminService, AdminCourseDetail } from '../../../core/services/admin.service';
+import { CoursesService } from '../../../core/services/courses.service';
 import {
   AdminQuizQuestion,
   EnrolledStudentReport,
@@ -39,12 +40,19 @@ export class AdminCourseEditorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly adminService = inject(AdminService);
+  private readonly coursesService = inject(CoursesService);
   private readonly fb = inject(FormBuilder);
 
   readonly course = signal<AdminCourseDetail | null>(null);
   readonly isLoading = signal(true);
   readonly isSaving = signal(false);
   readonly presentationSuccessMessage = signal<string | null>(null);
+
+  // Upload & Drag-and-drop UX signals
+  readonly uploadingTarget = signal<{ lessonId: string; type: 'presentation' | 'doc' | 'sheet' } | null>(null);
+  readonly dragOverTarget = signal<{ lessonId: string; type: 'presentation' | 'doc' | 'sheet' } | null>(null);
+  readonly modalPptDragOver = signal<boolean>(false);
+  readonly expandedLessons = signal<Set<string>>(new Set());
 
   // Tab: 'content' | 'students'
   readonly activeTab = signal<'content' | 'students'>('content');
@@ -314,6 +322,8 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly currentEditingLessonId = signal<string | null>(null);
   readonly selectedModalPresentationFile = signal<File | null>(null);
   readonly isTogglingPublish = signal<string | null>(null);
+  readonly showPublishConfirmModal = signal<boolean>(false);
+  readonly lessonToTogglePublish = signal<any | null>(null);
   readonly lessonForm = this.fb.group({
     title: ['', [Validators.required]],
     content: [''],
@@ -595,21 +605,42 @@ export class AdminCourseEditorComponent implements OnInit {
     this.lessonForm.reset();
   }
 
-  toggleLessonPublish(lesson: any): void {
-    const c = this.course();
-    if (!c || this.isTogglingPublish()) return;
+  requestToggleLessonPublish(lesson: any): void {
+    if (this.isTogglingPublish()) return;
+    this.lessonToTogglePublish.set(lesson);
+    this.showPublishConfirmModal.set(true);
+  }
 
-    this.isTogglingPublish.set(lesson.id);
-    this.adminService.toggleLessonPublish(lesson.id).subscribe({
+  cancelToggleLessonPublish(): void {
+    this.showPublishConfirmModal.set(false);
+    this.lessonToTogglePublish.set(null);
+  }
+
+  confirmToggleLessonPublish(): void {
+    const lesson = this.lessonToTogglePublish();
+    const c = this.course();
+    if (!c || !lesson || this.isTogglingPublish()) return;
+
+    const lessonId = lesson.id;
+    this.isTogglingPublish.set(lessonId);
+    this.showPublishConfirmModal.set(false);
+
+    this.adminService.toggleLessonPublish(lessonId).subscribe({
       next: (updatedLesson) => {
         this.isTogglingPublish.set(null);
         lesson.isPublished = updatedLesson.isPublished;
+        this.lessonToTogglePublish.set(null);
       },
       error: (err) => {
         this.isTogglingPublish.set(null);
+        this.lessonToTogglePublish.set(null);
         alert('Error al cambiar la visibilidad de la clase: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
+
+  toggleLessonPublish(lesson: any): void {
+    this.requestToggleLessonPublish(lesson);
   }
 
   saveLesson(): void {
@@ -920,25 +951,29 @@ export class AdminCourseEditorComponent implements OnInit {
   // ----------------------------------------------------
   // GESTIÓN DE PRESENTACIONES POWERPOINT / PREZI
   // ----------------------------------------------------
-  onPresentationFileSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  uploadPresentationFile(file: File, lesson: any): void {
     const c = this.course();
     if (!c) return;
 
+    this.uploadingTarget.set({ lessonId: lesson.id, type: 'presentation' });
     this.adminService.uploadLessonPresentation(lesson.id, file).subscribe({
       next: () => {
+        this.uploadingTarget.set(null);
         this.presentationSuccessMessage.set(`Presentación subida correctamente a "${lesson.title}"`);
         setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {
+        this.uploadingTarget.set(null);
         alert('Error al subir presentación: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
 
-    // Reset input
+  onPresentationFileSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    this.uploadPresentationFile(file, lesson);
     event.target.value = '';
   }
 
@@ -963,24 +998,29 @@ export class AdminCourseEditorComponent implements OnInit {
   // ----------------------------------------------------
   // GESTIÓN DE FICHAS TÉCNICAS Y DOCUMENTACIÓN
   // ----------------------------------------------------
-  onTechnicalSheetSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  uploadTechnicalSheetFile(file: File, lesson: any): void {
     const c = this.course();
     if (!c) return;
 
+    this.uploadingTarget.set({ lessonId: lesson.id, type: 'sheet' });
     this.adminService.uploadTechnicalSheet(lesson.id, file).subscribe({
       next: () => {
+        this.uploadingTarget.set(null);
         this.presentationSuccessMessage.set(`Ficha técnica subida correctamente a "${lesson.title}"`);
         setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {
+        this.uploadingTarget.set(null);
         alert('Error al subir ficha técnica: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
 
+  onTechnicalSheetSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    this.uploadTechnicalSheetFile(file, lesson);
     event.target.value = '';
   }
 
@@ -1002,24 +1042,29 @@ export class AdminCourseEditorComponent implements OnInit {
     });
   }
 
-  onLessonDocumentSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  uploadLessonDocumentFile(file: File, lesson: any): void {
     const c = this.course();
     if (!c) return;
 
+    this.uploadingTarget.set({ lessonId: lesson.id, type: 'doc' });
     this.adminService.uploadLessonDocument(lesson.id, file).subscribe({
       next: () => {
+        this.uploadingTarget.set(null);
         this.presentationSuccessMessage.set(`Documento subido correctamente a "${lesson.title}"`);
         setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {
+        this.uploadingTarget.set(null);
         alert('Error al subir documento: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
 
+  onLessonDocumentSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    this.uploadLessonDocumentFile(file, lesson);
     event.target.value = '';
   }
 
@@ -1039,6 +1084,133 @@ export class AdminCourseEditorComponent implements OnInit {
         alert('Error al eliminar documento: ' + (err.error?.message || 'Error'));
       },
     });
+  }
+
+  // ----------------------------------------------------
+  // VISUALIZACIÓN Y DESCARGA DIRECTA DE DOCUMENTOS PDF
+  // ----------------------------------------------------
+  openPdf(fileUrl: string, type: 'doc' | 'sheet'): void {
+    if (!fileUrl) return;
+    const obs = type === 'sheet'
+      ? this.coursesService.downloadTechnicalSheet(fileUrl)
+      : this.coursesService.downloadLessonDocument(fileUrl);
+
+    obs.subscribe({
+      next: (blob) => {
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(pdfBlob);
+        window.open(url, '_blank');
+      },
+      error: () => alert('No se pudo abrir el documento para visualización.')
+    });
+  }
+
+  downloadPdf(fileUrl: string, originalName: string, type: 'doc' | 'sheet'): void {
+    if (!fileUrl) return;
+    const obs = type === 'sheet'
+      ? this.coursesService.downloadTechnicalSheet(fileUrl)
+      : this.coursesService.downloadLessonDocument(fileUrl);
+
+    obs.subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = originalName || 'documento.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => alert('No se pudo descargar el documento.')
+    });
+  }
+
+  // ----------------------------------------------------
+  // DRAG & DROP SOPORTE
+  // ----------------------------------------------------
+  onDragOver(event: DragEvent, lessonId: string, type: 'presentation' | 'doc' | 'sheet'): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOverTarget.set({ lessonId, type });
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOverTarget.set(null);
+  }
+
+  onDropFile(event: DragEvent, lesson: any, type: 'presentation' | 'doc' | 'sheet'): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOverTarget.set(null);
+
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+
+    if (type === 'presentation') {
+      this.uploadPresentationFile(file, lesson);
+    } else if (type === 'doc') {
+      this.uploadLessonDocumentFile(file, lesson);
+    } else if (type === 'sheet') {
+      this.uploadTechnicalSheetFile(file, lesson);
+    }
+  }
+
+  onModalPptDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.modalPptDragOver.set(true);
+  }
+
+  onModalPptDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.modalPptDragOver.set(false);
+  }
+
+  onModalPptDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.modalPptDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      this.selectedModalPresentationFile.set(file);
+    }
+  }
+
+  // ----------------------------------------------------
+  // HELPERS DE INTERFAZ
+  // ----------------------------------------------------
+  formatLessonOrder(order?: number | null): string {
+    if (order === null || order === undefined) return '00';
+    return order < 10 ? `0${order}` : `${order}`;
+  }
+
+  formatFileSize(bytes?: number): string {
+    if (!bytes || bytes === 0) return '0 KB';
+    const k = 1024;
+    if (bytes < k * k) {
+      return (bytes / k).toFixed(1) + ' KB';
+    }
+    return (bytes / (k * k)).toFixed(1) + ' MB';
+  }
+
+  toggleLessonExpand(lessonId: string): void {
+    this.expandedLessons.update(set => {
+      const next = new Set(set);
+      if (next.has(lessonId)) {
+        next.delete(lessonId);
+      } else {
+        next.add(lessonId);
+      }
+      return next;
+    });
+  }
+
+  isLessonExpanded(lessonId: string): boolean {
+    return this.expandedLessons().has(lessonId);
   }
 
   // ----------------------------------------------------

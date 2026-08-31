@@ -74,18 +74,36 @@
 }
 
 .course-header-card {
-  padding: 32px 36px;
-  margin-bottom: 28px;
-  border: 1px solid var(--border-active);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
 }
 
 .header-badge-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.badge-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .header-action-buttons {
@@ -94,61 +112,40 @@
   gap: 10px;
 }
 
-.btn-delete-course-top {
-  border-color: var(--status-danger) !important;
-  color: var(--status-danger) !important;
-}
-
-.btn-delete-course-top:hover {
-  background: var(--status-danger-bg) !important;
-  color: var(--text-on-primary) !important;
-  border-color: var(--status-danger) !important;
-}
-
-.btn-preview-class {
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.badge-role {
-  display: inline-block;
-  font-size: 0.75rem;
+.course-main-title {
+  font-size: 1.85rem;
   font-weight: 700;
-  color: var(--primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.course-header-card h1 {
-  font-size: 2rem;
+  color: var(--text-primary);
   margin-bottom: 8px;
+  line-height: 1.25;
 }
 
 .course-desc-full {
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  margin-bottom: 24px;
-  max-width: 800px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin-bottom: 20px;
+  max-width: 850px;
 }
 
+/* Google Meet Box - Modern Video Conference Card */
 .meet-config-box {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-active);
-  padding: 14px 20px;
+  background: rgba(48, 163, 216, 0.06);
+  border: 1px solid rgba(48, 163, 216, 0.25);
+  padding: 12px 18px;
   border-radius: var(--radius-md);
+  flex-wrap: wrap;
 }
 
 .meet-icon-badge {
-  width: 40px;
-  height: 40px;
-  background: var(--status-danger-bg);
-  border: 1px solid var(--status-danger);
-  color: var(--status-danger);
+  width: 38px;
+  height: 38px;
+  background: rgba(48, 163, 216, 0.15);
+  border: 1px solid rgba(48, 163, 216, 0.35);
+  color: var(--primary);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
@@ -160,67 +157,118 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  min-width: 220px;
+  gap: 2px;
 }
 
 .meet-label {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .meet-url-text {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 600;
-  color: var(--status-completed);
+  color: var(--primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   word-break: break-all;
+  transition: color 0.15s ease;
+}
+
+.meet-url-text:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
 }
 
 .meet-url-none {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  font-style: italic;
 }
 
-.btn-sm {
-  padding: 8px 16px;
-  font-size: 0.85rem;
+.btn-meet-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-/* Tabs Navigation */
+.btn-delete-course-top {
+  border-color: rgba(211, 47, 47, 0.4) !important;
+  color: var(--status-danger) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-delete-course-top:hover {
+  background: var(--status-danger-bg) !important;
+  border-color: var(--status-danger) !important;
+  color: var(--status-danger-hover) !important;
+}
+
+/* Tabs Navigation - Refined Segmented Control */
 .admin-tabs-nav {
   display: flex;
-  gap: 12px;
-  margin-bottom: 28px;
+  gap: 8px;
+  margin-bottom: 24px;
   border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 12px;
+  padding-bottom: 4px;
 }
 
 .tab-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  font-size: 0.95rem;
+  padding: 10px 18px;
+  font-size: 0.92rem;
   font-weight: 600;
-  color: var(--text-secondary);
-  background: var(--bg-hover);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   cursor: pointer;
   transition: all 0.2s ease;
+  position: relative;
+  top: 1px;
 }
 
 .tab-btn:hover {
   color: var(--text-primary);
-  background: var(--bg-hover-strong);
+  background: var(--bg-hover);
 }
 
 .tab-btn-active {
-  background: var(--shadow-glow) !important;
-  border-color: var(--primary) !important;
   color: var(--primary) !important;
-  box-shadow: 0 0 16px var(--border-active);
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-bottom: 2px solid var(--primary) !important;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.03) !important;
+}
+
+.tab-badge-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.tab-btn-active .tab-badge-count {
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 /* Students Stats Grid */
@@ -1014,15 +1062,34 @@
   margin-bottom: 4px;
 }
 
-.empty-state {
-  padding: 48px;
-  text-align: center;
-  color: var(--text-secondary);
+.btn-add-lesson {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 10px 20px;
+  box-shadow: 0 4px 14px rgba(48, 163, 216, 0.25);
 }
 
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 12px;
+.empty-state {
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.empty-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  background: var(--bg-hover);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
 }
 
 .lessons-list {
@@ -1031,163 +1098,116 @@
   gap: 20px;
 }
 
+/* ==========================================================================
+   MODERN LESSON CARD
+   ========================================================================== */
 .lesson-card {
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.lesson-top-row {
+.lesson-card:hover {
+  border-color: rgba(48, 163, 216, 0.35);
+  box-shadow: var(--shadow-md);
+}
+
+.lesson-card-draft {
+  border-left: 4px solid var(--status-warning);
+  background: rgba(254, 243, 199, 0.05);
+}
+
+/* Lesson Header Layout */
+.lesson-header-layout {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
+.lesson-identity-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 280px;
+}
+
 .lesson-order-badge {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   background: var(--primary-light);
-  border: 1px solid var(--primary);
+  border: 1px solid rgba(48, 163, 216, 0.3);
   color: var(--primary);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.1rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
   flex-shrink: 0;
 }
 
-.lesson-info {
-  flex-grow: 1;
-}
-
-.lesson-title {
-  font-size: 1.15rem;
-  margin-bottom: 6px;
-}
-
-.lesson-meta-badges {
+.lesson-title-area {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.lesson-title-line {
+  display: flex;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.badge-meet-pill {
-  font-size: 0.72rem;
-  background: var(--status-danger-bg);
-  border: 1px solid var(--status-danger);
-  color: var(--status-danger);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+.lesson-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.35;
 }
 
-.badge-ppt-pill {
-  font-size: 0.72rem;
-  background: var(--status-warning);
-  border: 1px solid var(--status-warning);
-  color: var(--status-warning);
-  padding: 2px 8px;
+/* Status Pills */
+.badge-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
   border-radius: var(--radius-full);
+  font-size: 0.74rem;
   font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
-.badge-questions-count {
-  font-size: 0.72rem;
-  background: var(--shadow-sm);
-  border: 1px solid var(--border-active);
-  color: var(--primary);
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
+.badge-published {
+  background: var(--status-completed-bg);
+  color: var(--badge-completed-text);
+  border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
-.lesson-actions-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+.status-indicator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-completed);
+  display: inline-block;
 }
 
-.btn-ppt-upload-btn {
-  background: var(--status-available-bg) !important;
-  border-color: var(--status-warning) !important;
-  color: var(--status-warning) !important;
-  cursor: pointer;
-}
-
-.btn-ppt-upload-btn:hover {
-  background: var(--status-warning) !important;
-  color: var(--text-on-primary) !important;
-}
-
-.ppt-attached-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--status-warning);
-  border: 1px solid var(--status-warning);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-}
-
-.btn-ppt-change {
-  cursor: pointer;
-  padding: 6px 10px;
-}
-
-.btn-quiz-manage {
-  background: var(--primary-light);
-  border-color: var(--border-active);
-  color: var(--primary);
-}
-
-.btn-quiz-manage:hover {
-  background: var(--border-active);
-  color: var(--text-on-primary);
-}
-
-.btn-icon {
-  background: var(--bg-hover);
-  border: 1px solid var(--border-subtle);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-size: 0.95rem;
-}
-
-.btn-icon:hover {
-  background: var(--border-subtle);
-}
-
-.btn-icon-delete:hover {
-  background: var(--status-danger-bg);
-  border-color: var(--status-danger);
-}
-
-.lesson-content-preview {
-  background: var(--bg-disabled);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-}
-
-.preview-label {
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  display: block;
-  margin-bottom: 6px;
-}
-
-.preview-box {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  max-height: 80px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.badge-draft {
+  background: rgba(237, 108, 2, 0.1);
+  color: var(--status-warning);
+  border: 1px solid rgba(237, 108, 2, 0.3);
 }
 
 /* Modals */
@@ -1640,6 +1660,75 @@
   box-shadow: 0 4px 12px var(--shadow-glow);
 }
 
+/* Publish / Unpublish Confirmation Modal Customizations */
+.publish-confirm-modal {
+  max-width: 460px;
+}
+
+.icon-warning-pill {
+  background: rgba(237, 108, 2, 0.12) !important;
+  color: var(--status-warning) !important;
+  border: 1px solid rgba(237, 108, 2, 0.3);
+}
+
+.icon-success-pill {
+  background: var(--status-completed-bg) !important;
+  color: var(--badge-completed-text) !important;
+  border: 1px solid rgba(76, 175, 80, 0.35);
+}
+
+.publish-confirm-body {
+  margin-bottom: 20px;
+}
+
+.publish-target-lesson-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.publish-order-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.publish-lesson-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-confirm-hide {
+  background: var(--status-warning) !important;
+}
+
+.btn-confirm-hide:hover {
+  background: #d97706 !important;
+  box-shadow: 0 4px 12px rgba(237, 108, 2, 0.3) !important;
+}
+
+.btn-confirm-publish {
+  background: var(--status-completed) !important;
+}
+
+.btn-confirm-publish:hover {
+  background: #388e3c !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+}
+
 
 @media (max-width: 768px) {
   .editor-page { padding: 16px 0 40px; }
@@ -1827,3 +1916,715 @@
   line-height: 1.4;
 }
 
+/* Metadata Badges */
+.lesson-meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+}
+
+.meta-schedule {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.meta-meet {
+  color: #0369a1;
+  background: #e0f2fe;
+  border-color: #bae6fd;
+  font-weight: 600;
+}
+
+.meta-presentation {
+  color: #b45309;
+  background: #fef3c7;
+  border-color: #fde68a;
+  font-weight: 600;
+}
+
+.meta-presentation.meta-prezi {
+  color: #4f46e5;
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+}
+
+.meta-quiz {
+  color: #047857;
+  background: #d1fae5;
+  border-color: #a7f3d0;
+  font-weight: 600;
+}
+
+/* Action Toolbar */
+.lesson-actions-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.btn-preview-class {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+}
+
+.btn-quiz-manage,
+.btn-lesson-students {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  padding: 6px 12px;
+  font-size: 0.84rem;
+}
+
+.btn-publish-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-toggle-unpublish {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.btn-toggle-unpublish:hover {
+  background: rgba(237, 108, 2, 0.1);
+  border-color: var(--status-warning);
+  color: var(--status-warning);
+}
+
+.btn-toggle-publish {
+  background: var(--status-completed-bg);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: var(--badge-completed-text);
+}
+
+.btn-toggle-publish:hover {
+  background: var(--status-completed);
+  color: #ffffff;
+}
+
+.btn-action-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-action-icon:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+}
+
+.btn-action-delete:hover {
+  background: var(--status-danger-bg);
+  border-color: var(--status-danger);
+  color: var(--status-danger);
+}
+
+/* Content Section (Collapsible) */
+.lesson-content-section {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.lesson-content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  background: rgba(0, 0, 0, 0.02);
+  transition: background 0.15s ease;
+}
+
+.lesson-content-header:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.content-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.btn-toggle-content-preview {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.lesson-content-expanded-body {
+  padding: 16px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.preview-rich-box {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+/* ==========================================================================
+   RESOURCES & PDF MANAGEMENT
+   ========================================================================== */
+.lesson-resources-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.resource-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.015);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.resource-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.resource-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.resource-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.ppt-badge {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.doc-badge {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.sheet-badge {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.resource-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.resource-subtitle {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.resource-counter-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.resource-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Presentation Attached Card */
+.presentation-attached-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(237, 108, 2, 0.25);
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+
+.presentation-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.ppt-file-icon {
+  width: 36px;
+  height: 36px;
+  background: rgba(237, 108, 2, 0.1);
+  color: #ed6c02;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ppt-file-icon.prezi-theme {
+  background: rgba(99, 102, 241, 0.1);
+  color: #4f46e5;
+}
+
+.presentation-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.presentation-type-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.presentation-link {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.presentation-link:hover {
+  text-decoration: underline;
+}
+
+.presentation-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* PDF Cards Grid */
+.pdf-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+
+.pdf-file-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
+}
+
+.pdf-file-card:hover {
+  border-color: rgba(220, 38, 38, 0.3);
+  box-shadow: var(--shadow-sm);
+}
+
+.pdf-file-card.sheet-theme:hover {
+  border-color: rgba(2, 132, 199, 0.3);
+}
+
+.pdf-card-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pdf-icon-box {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sheet-icon-box {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.pdf-extension-tag {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  background: #dc2626;
+  color: #ffffff;
+  padding: 0 3px;
+  border-radius: 2px;
+  line-height: 1.1;
+}
+
+.sheet-icon-box .pdf-extension-tag {
+  background: #0284c7;
+}
+
+.pdf-meta-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 2px;
+}
+
+.pdf-file-name {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdf-file-size {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.pdf-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.btn-pdf-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.btn-pdf-view {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.btn-pdf-view:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--border-active);
+}
+
+.btn-pdf-download {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.btn-pdf-download:hover {
+  background: var(--status-completed-bg);
+  color: var(--badge-completed-text);
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.btn-pdf-delete {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 5px;
+}
+
+.btn-pdf-delete:hover {
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+}
+
+/* ==========================================================================
+   DROPZONES & FILE UPLOADS
+   ========================================================================== */
+.file-dropzone {
+  border: 1.5px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  padding: 20px 16px;
+  text-align: center;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: default;
+}
+
+.file-dropzone:hover {
+  border-color: var(--border-active);
+  background: rgba(48, 163, 216, 0.02);
+}
+
+.file-dropzone.dropzone-active {
+  border-color: var(--primary) !important;
+  background: var(--primary-light) !important;
+  transform: scale(1.005);
+}
+
+.dropzone-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+}
+
+.dropzone-text {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.dropzone-btn-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.dropzone-separator {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.dropzone-compact {
+  padding: 10px 14px;
+}
+
+.dropzone-body-compact {
+  flex-direction: row;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dropzone-text-compact {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.btn-dropzone-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  border: 1px solid rgba(48, 163, 216, 0.3);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-dropzone-action:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.btn-file-picker-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-xs {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.dropzone-uploading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(48, 163, 216, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* Modal Drag & Drop Dropzone */
+.modal-file-dropzone {
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  background: var(--bg-hover);
+  transition: all 0.2s ease;
+}
+
+.modal-file-dropzone.modal-dropzone-active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.modal-dropzone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.modal-dropzone-text {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.modal-dropzone-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.modal-selected-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-file-icon {
+  color: var(--primary);
+}
+
+.modal-file-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.modal-file-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.modal-file-size {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-remove-modal-file {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-remove-modal-file:hover {
+  background: var(--status-danger-bg);
+  color: var(--status-danger);
+}

@@ -10,8 +10,9 @@ export interface LessonDetail {
   presentationUrl?: string | null;
   presentationFilename?: string | null;
   availableAt?: string | null;
+  isPublished?: boolean;
   title: string;
-  content: string;
+  content?: string;
   orderNumber: number;
   status: 'LOCKED' | 'AVAILABLE' | 'COMPLETED';
   score: number | null;

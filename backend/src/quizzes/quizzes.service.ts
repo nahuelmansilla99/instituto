@@ -107,6 +107,7 @@ export class QuizzesService {
         where: {
           courseId: lesson.courseId,
           orderNumber: MoreThan(lesson.orderNumber),
+          isPublished: true,
         },
         order: { orderNumber: 'ASC' },
       });

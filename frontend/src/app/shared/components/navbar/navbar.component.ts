@@ -1,7 +1,8 @@
 import { Component, inject, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { UserRole } from '../../../core/models';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class NavbarComponent {
   readonly authService = inject(AuthService);
   private eRef = inject(ElementRef);
+  private router = inject(Router);
 
   isDropdownOpen = false;
   showLogoutModal = false;
@@ -49,5 +51,12 @@ export class NavbarComponent {
   executeLogout(): void {
     this.showLogoutModal = false;
     this.authService.logout();
+  }
+
+  selectRole(role: string | null): void {
+    const enumRole = role as UserRole | null;
+    this.authService.setSimulatedRole(enumRole);
+    this.isDropdownOpen = false;
+    this.router.navigate(['/dashboard']);
   }
 }

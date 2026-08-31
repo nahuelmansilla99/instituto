@@ -9,10 +9,17 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   if (token) {
     const isExternal = req.url.startsWith('http') && !req.url.includes(window.location.host);
     if (!isExternal) {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      const simulatedRole = authService.simulatedRole();
+      if (simulatedRole) {
+        headers['x-simulated-role'] = simulatedRole;
+      }
+
       req = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`,
-        },
+        setHeaders: headers,
       });
     }
   }

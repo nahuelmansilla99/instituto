@@ -43,8 +43,14 @@ export class CoursesService {
     const progressMap = new Map<string, ProgressStatus>();
     userProgressList.forEach((p) => progressMap.set(p.lessonId, p.status));
 
+    const isTeacher = user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN;
+
     return courses.map((course) => {
-      const courseLessons = allLessons.filter((l) => l.courseId === course.id);
+      const courseLessons = allLessons.filter((l) => {
+        if (l.courseId !== course.id) return false;
+        if (!isTeacher && l.isPublished === false) return false;
+        return true;
+      });
       const totalLessons = courseLessons.length;
       const completedLessons = courseLessons.filter(
         (lesson) => progressMap.get(lesson.id) === ProgressStatus.COMPLETED,
@@ -88,12 +94,18 @@ export class CoursesService {
       }
     }
 
+    const isTeacher = user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN;
+
     // Fetch lessons directly from repository with quiz questions
-    const sortedLessons = await this.lessonRepository.find({
+    const allCourseLessons = await this.lessonRepository.find({
       where: { courseId },
       relations: ['quizQuestions', 'technicalSheets', 'lessonDocuments'],
       order: { orderNumber: 'ASC' },
     });
+
+    const sortedLessons = isTeacher
+      ? allCourseLessons
+      : allCourseLessons.filter((l) => l.isPublished !== false);
 
     // Fetch user progress for all lessons
     const userProgressList = await this.userProgressRepository.find({
@@ -143,6 +155,7 @@ export class CoursesService {
         id: lesson.id,
         title: lesson.title,
         orderNumber: lesson.orderNumber,
+        isPublished: lesson.isPublished,
         meetUrl: lesson.meetUrl || null,
         presentationUrl: lesson.presentationUrl || null,
         presentationFilename: lesson.presentationFilename || null,

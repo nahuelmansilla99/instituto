@@ -117,12 +117,13 @@ export class AdminService {
     const lesson = this.lessonRepo.create({
       courseId,
       title: dto.title.trim(),
-      content: dto.content.trim(),
+      content: dto.content ? dto.content.trim() : '',
       orderNumber,
       meetUrl: dto.meetUrl?.trim() || null,
       presentationUrl: dto.presentationUrl?.trim() || null,
       presentationFilename: dto.presentationFilename?.trim() || null,
       availableAt: dto.availableAt ? new Date(dto.availableAt) : null,
+      isPublished: dto.isPublished !== undefined ? Boolean(dto.isPublished) : true,
     });
 
     return this.lessonRepo.save(lesson);
@@ -135,7 +136,7 @@ export class AdminService {
     }
 
     if (dto.title !== undefined) lesson.title = dto.title.trim();
-    if (dto.content !== undefined) lesson.content = dto.content.trim();
+    if (dto.content !== undefined) lesson.content = dto.content ? dto.content.trim() : '';
     if (dto.orderNumber !== undefined) lesson.orderNumber = dto.orderNumber;
     if (dto.meetUrl !== undefined) lesson.meetUrl = dto.meetUrl?.trim() || null;
     if (dto.presentationUrl !== undefined) lesson.presentationUrl = dto.presentationUrl?.trim() || null;
@@ -143,7 +144,19 @@ export class AdminService {
     if (dto.availableAt !== undefined) {
       lesson.availableAt = dto.availableAt ? new Date(dto.availableAt) : null;
     }
+    if (dto.isPublished !== undefined) {
+      lesson.isPublished = Boolean(dto.isPublished);
+    }
 
+    return this.lessonRepo.save(lesson);
+  }
+
+  async toggleLessonPublish(id: string): Promise<Lesson> {
+    const lesson = await this.lessonRepo.findOne({ where: { id } });
+    if (!lesson) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+    lesson.isPublished = !lesson.isPublished;
     return this.lessonRepo.save(lesson);
   }
 
@@ -369,9 +382,13 @@ export class AdminService {
   // ----------------------------------------------------
   async getAllStudents() {
     const students = await this.userRepo.find({
-      where: { role: UserRole.STUDENT },
+      where: [
+        { role: UserRole.STUDENT },
+        { role: UserRole.ADMIN },
+        { role: UserRole.SYSADMIN },
+      ],
       order: { name: 'ASC' },
-      select: ['id', 'name', 'email', 'createdAt'],
+      select: ['id', 'name', 'email', 'createdAt', 'role'],
     });
     return students;
   }
@@ -383,7 +400,7 @@ export class AdminService {
     }
 
     const courseLessons = await this.lessonRepo.find({
-      where: { courseId },
+      where: { courseId, isPublished: true },
       order: { orderNumber: 'ASC' },
     });
     const totalLessons = courseLessons.length;
@@ -393,6 +410,7 @@ export class AdminService {
       where: { courseId },
       relations: ['user'],
       order: { enrolledAt: 'DESC' },
+      withDeleted: true,
     });
 
     const studentReports = await Promise.all(
@@ -431,6 +449,7 @@ export class AdminService {
           email: student.email,
           status: enr.status,
           enrolledAt: enr.enrolledAt,
+          deletedAt: enr.deletedAt,
           totalLessons,
           completedLessons,
           progressPercentage,

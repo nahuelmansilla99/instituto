@@ -47,12 +47,22 @@ export class LessonsService {
       }
     }
 
+    const isTeacher = user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN;
+
+    if (!isTeacher && !lesson.isPublished) {
+      throw new NotFoundException('Clase no encontrada');
+    }
+
     // Fetch all lessons of this course to determine syllabus & order
-    const allLessons = await this.lessonRepository.find({
+    const allCourseLessons = await this.lessonRepository.find({
       where: { courseId: lesson.courseId },
       relations: ['quizQuestions'],
       order: { orderNumber: 'ASC' },
     });
+
+    const allLessons = isTeacher
+      ? allCourseLessons
+      : allCourseLessons.filter((l) => l.isPublished !== false);
 
     // Fetch user progress for all lessons in this course
     const userProgressList = await this.userProgressRepository.find({
@@ -62,7 +72,6 @@ export class LessonsService {
     const progressMap = new Map<string, UserProgress>();
     userProgressList.forEach((p) => progressMap.set(p.lessonId, p));
 
-    const isTeacher = user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN;
     const now = new Date();
     const isScheduledFuture = lesson.availableAt && now < new Date(lesson.availableAt);
 
@@ -111,6 +120,7 @@ export class LessonsService {
         presentationUrl: l.presentationUrl || null,
         presentationFilename: l.presentationFilename || null,
         availableAt: l.availableAt || null,
+        isPublished: l.isPublished,
         hasQuiz: !hasNoQuiz,
         status: s,
         score: p?.score ?? null,
@@ -197,6 +207,7 @@ export class LessonsService {
       presentationUrl: lesson.presentationUrl || null,
       presentationFilename: lesson.presentationFilename || null,
       availableAt: lesson.availableAt || null,
+      isPublished: lesson.isPublished,
       hasQuiz: !hasNoQuiz,
       title: lesson.title,
       content: lesson.content,

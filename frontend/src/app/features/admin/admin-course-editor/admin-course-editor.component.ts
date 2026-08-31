@@ -1,9 +1,10 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AdminService, AdminCourseDetail } from '../../../core/services/admin.service';
+import { CoursesService } from '../../../core/services/courses.service';
 import {
   AdminQuizQuestion,
   EnrolledStudentReport,
@@ -15,7 +16,11 @@ export interface MergedStudentRow {
   studentId: string;
   name: string;
   email: string;
+  createdAt?: string;
+  role?: string;
   isEnrolled: boolean;
+  isDropped?: boolean;
+  droppedAt?: string | null;
   enrollmentId?: string;
   enrolledAt?: string;
   totalLessons?: number;
@@ -27,7 +32,7 @@ export interface MergedStudentRow {
 @Component({
   selector: 'app-admin-course-editor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NavbarComponent, RouterLink],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, NavbarComponent, RouterLink],
   templateUrl: './admin-course-editor.component.html',
   styleUrl: './admin-course-editor.component.css',
 })
@@ -35,12 +40,19 @@ export class AdminCourseEditorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly adminService = inject(AdminService);
+  private readonly coursesService = inject(CoursesService);
   private readonly fb = inject(FormBuilder);
 
   readonly course = signal<AdminCourseDetail | null>(null);
   readonly isLoading = signal(true);
   readonly isSaving = signal(false);
   readonly presentationSuccessMessage = signal<string | null>(null);
+
+  // Upload & Drag-and-drop UX signals
+  readonly uploadingTarget = signal<{ lessonId: string; type: 'presentation' | 'doc' | 'sheet' } | null>(null);
+  readonly dragOverTarget = signal<{ lessonId: string; type: 'presentation' | 'doc' | 'sheet' } | null>(null);
+  readonly modalPptDragOver = signal<boolean>(false);
+  readonly expandedLessons = signal<Set<string>>(new Set());
 
   // Tab: 'content' | 'students'
   readonly activeTab = signal<'content' | 'students'>('content');
@@ -49,36 +61,241 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly enrolledStudents = signal<EnrolledStudentReport[]>([]);
   readonly allPlatformStudents = signal<StudentSummary[]>([]);
   readonly isLoadingStudents = signal(false);
-  
-  readonly mergedStudentsList = computed<MergedStudentRow[]>(() => {
+
+  // Filter & Search Signals for Students Tab
+  readonly studentSearchText = signal<string>('');
+  readonly filterEnrollmentStatus = signal<'all' | 'enrolled' | 'not_enrolled' | 'dropped'>('all');
+  readonly filterProgressStatus = signal<'all' | 'not_started' | 'in_progress' | 'completed'>('all');
+  readonly filterScoreStatus = signal<'all' | 'evaluated' | 'high' | 'risk' | 'none'>('all');
+  readonly studentSortBy = signal<'name' | 'registeredAt' | 'enrolledAt' | 'progress' | 'score'>('name');
+  readonly studentSortDirection = signal<'asc' | 'desc'>('asc');
+
+  // Overlay Popover Filter State
+  readonly activeFilterOverlay = signal<'student' | 'status' | 'progress' | 'score' | null>(null);
+
+  readonly isStudentFiltered = computed(() => this.studentSearchText().trim().length > 0);
+  readonly isStatusFiltered = computed(() => this.filterEnrollmentStatus() !== 'all');
+  readonly isProgressFiltered = computed(() => this.filterProgressStatus() !== 'all');
+  readonly isScoreFiltered = computed(() => this.filterScoreStatus() !== 'all');
+
+  toggleFilterOverlay(col: 'student' | 'status' | 'progress' | 'score', event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.activeFilterOverlay() === col) {
+      this.activeFilterOverlay.set(null);
+    } else {
+      this.activeFilterOverlay.set(col);
+    }
+  }
+
+  closeFilterOverlay(): void {
+    this.activeFilterOverlay.set(null);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.filter-overlay-popover') && !target.closest('.btn-th-filter')) {
+      this.closeFilterOverlay();
+    }
+  }
+
+  readonly activeEnrolledStudents = computed(() => {
+    return this.enrolledStudents().filter((e) => !e.deletedAt);
+  });
+
+  readonly allMergedStudents = computed<MergedStudentRow[]>(() => {
     const all = this.allPlatformStudents();
     const enrolled = this.enrolledStudents();
-    
-    return all.map(student => {
-      const enrolledData = enrolled.find(e => e.studentId === student.id);
+
+    return all.map((student) => {
+      const enrolledData = enrolled.find((e) => e.studentId === student.id);
       if (enrolledData) {
+        const isDropped = Boolean(enrolledData.deletedAt);
         return {
           studentId: enrolledData.studentId,
           name: enrolledData.name,
           email: enrolledData.email,
-          isEnrolled: true,
+          createdAt: student.createdAt,
+          role: student.role,
+          isEnrolled: !isDropped,
+          isDropped: isDropped,
+          droppedAt: enrolledData.deletedAt,
           enrollmentId: enrolledData.enrollmentId,
           enrolledAt: enrolledData.enrolledAt,
           totalLessons: enrolledData.totalLessons,
           completedLessons: enrolledData.completedLessons,
           progressPercentage: enrolledData.progressPercentage,
-          averageScore: enrolledData.averageScore
+          averageScore: enrolledData.averageScore,
         };
       } else {
         return {
           studentId: student.id,
           name: student.name,
           email: student.email,
-          isEnrolled: false
+          createdAt: student.createdAt,
+          role: student.role,
+          isEnrolled: false,
+          isDropped: false,
         };
       }
     });
   });
+
+  readonly filteredStudentsList = computed<MergedStudentRow[]>(() => {
+    let list = [...this.allMergedStudents()];
+
+    // 1. Buscador por texto
+    const query = this.studentSearchText().trim().toLowerCase();
+    if (query) {
+      list = list.filter(
+        (s) =>
+          s.name.toLowerCase().includes(query) ||
+          s.email.toLowerCase().includes(query),
+      );
+    }
+
+    // 2. Filtro por Estado de Matrícula
+    const enrollFilter = this.filterEnrollmentStatus();
+    if (enrollFilter === 'enrolled') {
+      list = list.filter((s) => s.isEnrolled);
+    } else if (enrollFilter === 'not_enrolled') {
+      list = list.filter((s) => !s.isEnrolled && !s.isDropped);
+    } else if (enrollFilter === 'dropped') {
+      list = list.filter((s) => s.isDropped);
+    }
+
+    // 3. Filtro por Progreso
+    const progFilter = this.filterProgressStatus();
+    if (progFilter === 'not_started') {
+      list = list.filter(
+        (s) => s.isEnrolled && (s.progressPercentage === 0 || !s.progressPercentage),
+      );
+    } else if (progFilter === 'in_progress') {
+      list = list.filter(
+        (s) =>
+          s.isEnrolled &&
+          (s.progressPercentage || 0) > 0 &&
+          (s.progressPercentage || 0) < 100,
+      );
+    } else if (progFilter === 'completed') {
+      list = list.filter((s) => s.isEnrolled && s.progressPercentage === 100);
+    }
+
+    // 4. Filtro por Calificaciones
+    const scoreFilter = this.filterScoreStatus();
+    if (scoreFilter === 'evaluated') {
+      list = list.filter((s) => s.isEnrolled && s.averageScore !== null && s.averageScore !== undefined);
+    } else if (scoreFilter === 'high') {
+      list = list.filter((s) => s.isEnrolled && (s.averageScore ?? 0) >= 80);
+    } else if (scoreFilter === 'risk') {
+      list = list.filter((s) => s.isEnrolled && s.averageScore !== null && s.averageScore !== undefined && s.averageScore < 60);
+    } else if (scoreFilter === 'none') {
+      list = list.filter((s) => s.isEnrolled && (s.averageScore === null || s.averageScore === undefined));
+    }
+
+    // 5. Ordenamiento
+    const sortBy = this.studentSortBy();
+    const isAsc = this.studentSortDirection() === 'asc';
+    const mult = isAsc ? 1 : -1;
+
+    list.sort((a, b) => {
+      if (sortBy === 'name') {
+        return mult * a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      }
+
+      if (sortBy === 'registeredAt') {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return mult * (timeA - timeB);
+      }
+
+      if (sortBy === 'enrolledAt') {
+        const timeA = a.enrolledAt ? new Date(a.enrolledAt).getTime() : 0;
+        const timeB = b.enrolledAt ? new Date(b.enrolledAt).getTime() : 0;
+        if (!timeA && timeB) return 1;
+        if (timeA && !timeB) return -1;
+        return mult * (timeA - timeB);
+      }
+
+      if (sortBy === 'progress') {
+        const progA = a.progressPercentage ?? -1;
+        const progB = b.progressPercentage ?? -1;
+        return mult * (progA - progB);
+      }
+
+      if (sortBy === 'score') {
+        const scoreA = a.averageScore ?? -1;
+        const scoreB = b.averageScore ?? -1;
+        return mult * (scoreA - scoreB);
+      }
+
+      return 0;
+    });
+
+    return list;
+  });
+
+  // Alias para mantener compatibilidad con el resto del componente
+  readonly mergedStudentsList = computed<MergedStudentRow[]>(() => this.filteredStudentsList());
+
+  readonly totalStudentsCount = computed(() => this.allMergedStudents().length);
+  readonly filteredStudentsCount = computed(() => this.filteredStudentsList().length);
+  readonly activeEnrolledCount = computed(() => this.activeEnrolledStudents().length);
+  readonly droppedStudentsCount = computed(() => this.allMergedStudents().filter(s => s.isDropped).length);
+  readonly notEnrolledCount = computed(() => this.allMergedStudents().filter(s => !s.isEnrolled && !s.isDropped).length);
+
+  readonly hasActiveFilters = computed<boolean>(() => {
+    return (
+      this.studentSearchText().trim().length > 0 ||
+      this.filterEnrollmentStatus() !== 'all' ||
+      this.filterProgressStatus() !== 'all' ||
+      this.filterScoreStatus() !== 'all' ||
+      this.studentSortBy() !== 'name' ||
+      this.studentSortDirection() !== 'asc'
+    );
+  });
+
+  setSearchText(val: string): void {
+    this.studentSearchText.set(val);
+  }
+
+  setEnrollmentFilter(status: 'all' | 'enrolled' | 'not_enrolled' | 'dropped'): void {
+    this.filterEnrollmentStatus.set(status);
+  }
+
+  setProgressFilter(status: 'all' | 'not_started' | 'in_progress' | 'completed'): void {
+    this.filterProgressStatus.set(status);
+  }
+
+  setScoreFilter(status: 'all' | 'evaluated' | 'high' | 'risk' | 'none'): void {
+    this.filterScoreStatus.set(status);
+  }
+
+  sortByColumn(val: 'name' | 'registeredAt' | 'enrolledAt' | 'progress' | 'score'): void {
+    if (this.studentSortBy() === val) {
+      this.studentSortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      this.studentSortBy.set(val);
+      if (val === 'registeredAt' || val === 'enrolledAt' || val === 'score' || val === 'progress') {
+        this.studentSortDirection.set('desc');
+      } else {
+        this.studentSortDirection.set('asc');
+      }
+    }
+  }
+
+  toggleSortDirection(): void {
+    this.studentSortDirection.update((d) => (d === 'asc' ? 'desc' : 'asc'));
+  }
+
+  resetStudentFilters(): void {
+    this.studentSearchText.set('');
+    this.filterEnrollmentStatus.set('all');
+    this.filterProgressStatus.set('all');
+    this.filterScoreStatus.set('all');
+    this.studentSortBy.set('name');
+    this.studentSortDirection.set('asc');
+  }
 
   readonly showStudentProgressModal = signal(false);
   readonly selectedStudentReport = signal<StudentCourseProgressReport | null>(null);
@@ -104,13 +321,17 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly isEditingLesson = signal(false);
   readonly currentEditingLessonId = signal<string | null>(null);
   readonly selectedModalPresentationFile = signal<File | null>(null);
+  readonly isTogglingPublish = signal<string | null>(null);
+  readonly showPublishConfirmModal = signal<boolean>(false);
+  readonly lessonToTogglePublish = signal<any | null>(null);
   readonly lessonForm = this.fb.group({
     title: ['', [Validators.required]],
-    content: ['', [Validators.required]],
+    content: [''],
     orderNumber: [null],
     meetUrl: [''],
     presentationUrl: [''],
     availableAt: [''],
+    isPublished: [true],
   });
 
   // Dedicated Prezi / Presentation Link Modal
@@ -219,14 +440,14 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   getAverageCourseProgress(): number {
-    const list = this.enrolledStudents();
+    const list = this.activeEnrolledStudents();
     if (list.length === 0) return 0;
     const sum = list.reduce((acc, s) => acc + (s.progressPercentage || 0), 0);
     return Math.round(sum / list.length);
   }
 
   getOverallAverageScore(): number {
-    const list = this.enrolledStudents().filter((s) => s.averageScore !== null);
+    const list = this.activeEnrolledStudents().filter((s) => s.averageScore !== null);
     if (list.length === 0) return 0;
     const sum = list.reduce((acc, s) => acc + (s.averageScore || 0), 0);
     return Math.round(sum / list.length);
@@ -344,7 +565,12 @@ export class AdminCourseEditorComponent implements OnInit {
     this.lessonForm.reset();
     const c = this.course();
     if (c) {
-      this.lessonForm.patchValue({ orderNumber: c.lessons.length + 1 as any });
+      this.lessonForm.patchValue({
+        orderNumber: c.lessons.length + 1 as any,
+        isPublished: true,
+      });
+    } else {
+      this.lessonForm.patchValue({ isPublished: true });
     }
     this.showLessonModal.set(true);
   }
@@ -363,11 +589,12 @@ export class AdminCourseEditorComponent implements OnInit {
 
     this.lessonForm.patchValue({
       title: lesson.title,
-      content: lesson.content,
+      content: lesson.content || '',
       orderNumber: lesson.orderNumber,
       meetUrl: lesson.meetUrl || '',
       presentationUrl: lesson.presentationUrl || '',
       availableAt: formattedDate,
+      isPublished: lesson.isPublished !== undefined ? lesson.isPublished : true,
     });
     this.showLessonModal.set(true);
   }
@@ -378,6 +605,44 @@ export class AdminCourseEditorComponent implements OnInit {
     this.lessonForm.reset();
   }
 
+  requestToggleLessonPublish(lesson: any): void {
+    if (this.isTogglingPublish()) return;
+    this.lessonToTogglePublish.set(lesson);
+    this.showPublishConfirmModal.set(true);
+  }
+
+  cancelToggleLessonPublish(): void {
+    this.showPublishConfirmModal.set(false);
+    this.lessonToTogglePublish.set(null);
+  }
+
+  confirmToggleLessonPublish(): void {
+    const lesson = this.lessonToTogglePublish();
+    const c = this.course();
+    if (!c || !lesson || this.isTogglingPublish()) return;
+
+    const lessonId = lesson.id;
+    this.isTogglingPublish.set(lessonId);
+    this.showPublishConfirmModal.set(false);
+
+    this.adminService.toggleLessonPublish(lessonId).subscribe({
+      next: (updatedLesson) => {
+        this.isTogglingPublish.set(null);
+        lesson.isPublished = updatedLesson.isPublished;
+        this.lessonToTogglePublish.set(null);
+      },
+      error: (err) => {
+        this.isTogglingPublish.set(null);
+        this.lessonToTogglePublish.set(null);
+        alert('Error al cambiar la visibilidad de la clase: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+  }
+
+  toggleLessonPublish(lesson: any): void {
+    this.requestToggleLessonPublish(lesson);
+  }
+
   saveLesson(): void {
     const c = this.course();
     if (!c || this.lessonForm.invalid) return;
@@ -386,7 +651,7 @@ export class AdminCourseEditorComponent implements OnInit {
     const formVal = this.lessonForm.value;
     const payload = {
       title: formVal.title!,
-      content: formVal.content!,
+      content: formVal.content?.trim() || '',
       orderNumber: formVal.orderNumber ? Number(formVal.orderNumber) : undefined,
       meetUrl: formVal.meetUrl || undefined,
       presentationUrl: formVal.presentationUrl?.trim() || undefined,
@@ -394,6 +659,7 @@ export class AdminCourseEditorComponent implements OnInit {
         ? (formVal.presentationUrl.includes('prezi.com') ? 'Presentación Prezi' : 'Presentación Online')
         : undefined,
       availableAt: formVal.availableAt ? new Date(formVal.availableAt).toISOString() : null,
+      isPublished: formVal.isPublished !== null && formVal.isPublished !== undefined ? Boolean(formVal.isPublished) : true,
     };
 
     const pptFile = this.selectedModalPresentationFile();
@@ -685,25 +951,29 @@ export class AdminCourseEditorComponent implements OnInit {
   // ----------------------------------------------------
   // GESTIÓN DE PRESENTACIONES POWERPOINT / PREZI
   // ----------------------------------------------------
-  onPresentationFileSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  uploadPresentationFile(file: File, lesson: any): void {
     const c = this.course();
     if (!c) return;
 
+    this.uploadingTarget.set({ lessonId: lesson.id, type: 'presentation' });
     this.adminService.uploadLessonPresentation(lesson.id, file).subscribe({
       next: () => {
+        this.uploadingTarget.set(null);
         this.presentationSuccessMessage.set(`Presentación subida correctamente a "${lesson.title}"`);
         setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {
+        this.uploadingTarget.set(null);
         alert('Error al subir presentación: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
 
-    // Reset input
+  onPresentationFileSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    this.uploadPresentationFile(file, lesson);
     event.target.value = '';
   }
 
@@ -728,24 +998,29 @@ export class AdminCourseEditorComponent implements OnInit {
   // ----------------------------------------------------
   // GESTIÓN DE FICHAS TÉCNICAS Y DOCUMENTACIÓN
   // ----------------------------------------------------
-  onTechnicalSheetSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  uploadTechnicalSheetFile(file: File, lesson: any): void {
     const c = this.course();
     if (!c) return;
 
+    this.uploadingTarget.set({ lessonId: lesson.id, type: 'sheet' });
     this.adminService.uploadTechnicalSheet(lesson.id, file).subscribe({
       next: () => {
+        this.uploadingTarget.set(null);
         this.presentationSuccessMessage.set(`Ficha técnica subida correctamente a "${lesson.title}"`);
         setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {
+        this.uploadingTarget.set(null);
         alert('Error al subir ficha técnica: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
 
+  onTechnicalSheetSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    this.uploadTechnicalSheetFile(file, lesson);
     event.target.value = '';
   }
 
@@ -767,24 +1042,29 @@ export class AdminCourseEditorComponent implements OnInit {
     });
   }
 
-  onLessonDocumentSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  uploadLessonDocumentFile(file: File, lesson: any): void {
     const c = this.course();
     if (!c) return;
 
+    this.uploadingTarget.set({ lessonId: lesson.id, type: 'doc' });
     this.adminService.uploadLessonDocument(lesson.id, file).subscribe({
       next: () => {
+        this.uploadingTarget.set(null);
         this.presentationSuccessMessage.set(`Documento subido correctamente a "${lesson.title}"`);
         setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
         this.loadCourse(c.id);
       },
       error: (err) => {
+        this.uploadingTarget.set(null);
         alert('Error al subir documento: ' + (err.error?.message || 'Error desconocido'));
       },
     });
+  }
 
+  onLessonDocumentSelected(event: any, lesson: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    this.uploadLessonDocumentFile(file, lesson);
     event.target.value = '';
   }
 
@@ -804,6 +1084,133 @@ export class AdminCourseEditorComponent implements OnInit {
         alert('Error al eliminar documento: ' + (err.error?.message || 'Error'));
       },
     });
+  }
+
+  // ----------------------------------------------------
+  // VISUALIZACIÓN Y DESCARGA DIRECTA DE DOCUMENTOS PDF
+  // ----------------------------------------------------
+  openPdf(fileUrl: string, type: 'doc' | 'sheet'): void {
+    if (!fileUrl) return;
+    const obs = type === 'sheet'
+      ? this.coursesService.downloadTechnicalSheet(fileUrl)
+      : this.coursesService.downloadLessonDocument(fileUrl);
+
+    obs.subscribe({
+      next: (blob) => {
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(pdfBlob);
+        window.open(url, '_blank');
+      },
+      error: () => alert('No se pudo abrir el documento para visualización.')
+    });
+  }
+
+  downloadPdf(fileUrl: string, originalName: string, type: 'doc' | 'sheet'): void {
+    if (!fileUrl) return;
+    const obs = type === 'sheet'
+      ? this.coursesService.downloadTechnicalSheet(fileUrl)
+      : this.coursesService.downloadLessonDocument(fileUrl);
+
+    obs.subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = originalName || 'documento.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => alert('No se pudo descargar el documento.')
+    });
+  }
+
+  // ----------------------------------------------------
+  // DRAG & DROP SOPORTE
+  // ----------------------------------------------------
+  onDragOver(event: DragEvent, lessonId: string, type: 'presentation' | 'doc' | 'sheet'): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOverTarget.set({ lessonId, type });
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOverTarget.set(null);
+  }
+
+  onDropFile(event: DragEvent, lesson: any, type: 'presentation' | 'doc' | 'sheet'): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOverTarget.set(null);
+
+    const file = event.dataTransfer?.files?.[0];
+    if (!file) return;
+
+    if (type === 'presentation') {
+      this.uploadPresentationFile(file, lesson);
+    } else if (type === 'doc') {
+      this.uploadLessonDocumentFile(file, lesson);
+    } else if (type === 'sheet') {
+      this.uploadTechnicalSheetFile(file, lesson);
+    }
+  }
+
+  onModalPptDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.modalPptDragOver.set(true);
+  }
+
+  onModalPptDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.modalPptDragOver.set(false);
+  }
+
+  onModalPptDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.modalPptDragOver.set(false);
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      this.selectedModalPresentationFile.set(file);
+    }
+  }
+
+  // ----------------------------------------------------
+  // HELPERS DE INTERFAZ
+  // ----------------------------------------------------
+  formatLessonOrder(order?: number | null): string {
+    if (order === null || order === undefined) return '00';
+    return order < 10 ? `0${order}` : `${order}`;
+  }
+
+  formatFileSize(bytes?: number): string {
+    if (!bytes || bytes === 0) return '0 KB';
+    const k = 1024;
+    if (bytes < k * k) {
+      return (bytes / k).toFixed(1) + ' KB';
+    }
+    return (bytes / (k * k)).toFixed(1) + ' MB';
+  }
+
+  toggleLessonExpand(lessonId: string): void {
+    this.expandedLessons.update(set => {
+      const next = new Set(set);
+      if (next.has(lessonId)) {
+        next.delete(lessonId);
+      } else {
+        next.add(lessonId);
+      }
+      return next;
+    });
+  }
+
+  isLessonExpanded(lessonId: string): boolean {
+    return this.expandedLessons().has(lessonId);
   }
 
   // ----------------------------------------------------

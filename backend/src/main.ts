@@ -9,6 +9,10 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
+  // Trust proxy for proper IP resolution behind Docker/Nginx/Reverse Proxies (critical for Throttler)
+  const expressInstance = app.getHttpAdapter().getInstance();
+  expressInstance.set('trust proxy', true);
+
   // Ensure uploads directory exists
   const uploadsDir = join(process.cwd(), 'uploads', 'presentations');
   if (!fs.existsSync(uploadsDir)) {
@@ -19,10 +23,10 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
   app.use('/api/uploads', express.static(join(process.cwd(), 'uploads')));
 
-  // Payload body limit for large presentation files
-  const maxUploadSize = process.env.MAX_UPLOAD_SIZE || '50mb';
-  app.use(express.json({ limit: maxUploadSize }));
-  app.use(express.urlencoded({ limit: maxUploadSize, extended: true }));
+  // Secure payload body limit for JSON and urlencoded requests (protects against memory exhaustion DoS)
+  const maxBodySize = process.env.MAX_BODY_SIZE || '1mb';
+  app.use(express.json({ limit: maxBodySize }));
+  app.use(express.urlencoded({ limit: maxBodySize, extended: true }));
 
   // Enable CORS for frontend
   app.enableCors({

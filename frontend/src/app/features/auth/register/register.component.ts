@@ -51,6 +51,10 @@ export class RegisterComponent {
       },
       error: (err) => {
         this.isLoading.set(false);
+        if (err.status === 429) {
+          this.errorMessage.set('Demasiados intentos desde esta conexión. Por seguridad, por favor espera unos momentos antes de reintentar.');
+          return;
+        }
         const msg = err.error?.message || 'Error al registrar la cuenta.';
         this.errorMessage.set(Array.isArray(msg) ? msg[0] : msg);
       },

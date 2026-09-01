@@ -18,20 +18,78 @@
 
 <!-- VENTANA FLOTANTE DE CHAT -->
 <div class="tutor-chat-modal" *ngIf="isOpen()" role="dialog" aria-label="Tutor IA del Curso">
-  <!-- HEADER -->
-  <header class="chat-header">
+  
+  <!-- HEADER MODO CHAT -->
+  <header class="chat-header" *ngIf="activeView() === 'chat'">
     <div class="header-info">
       <div class="header-avatar">🎓</div>
-      <div>
-        <h3 class="header-title">Tutor Virtual del Curso</h3>
+      <div class="header-text-block">
+        <h3 class="header-title" [title]="currentConversationTitle() || 'Nueva consulta'">
+          {{ currentConversationTitle() || 'Nueva consulta' }}
+        </h3>
         <p class="header-subtitle">
-          <span class="online-indicator"></span> Responde solo con el material oficial
+          <span class="online-indicator"></span> Tutor Virtual Inteligente
         </p>
       </div>
     </div>
-    <button type="button" class="header-close-btn" (click)="toggleChat()" title="Cerrar ventana">
-      ✕
-    </button>
+    
+    <div class="header-actions">
+      <button
+        type="button"
+        class="header-btn"
+        (click)="openHistoryView()"
+        title="Ver mis conversaciones anteriores"
+      >
+        <span class="btn-emoji">💬</span>
+        <span class="btn-text">Chats</span>
+      </button>
+
+      <button
+        type="button"
+        class="header-btn primary-header-btn"
+        (click)="startNewChat()"
+        title="Iniciar nuevo chat"
+      >
+        <span>+ Nuevo</span>
+      </button>
+
+      <button type="button" class="header-close-btn" (click)="toggleChat()" title="Cerrar ventana">
+        ✕
+      </button>
+    </div>
+  </header>
+
+  <!-- HEADER MODO HISTORIAL -->
+  <header class="chat-header" *ngIf="activeView() === 'history'">
+    <div class="header-info">
+      <button
+        type="button"
+        class="header-back-btn"
+        (click)="openChatView()"
+        title="Volver a la conversación"
+      >
+        ←
+      </button>
+      <div>
+        <h3 class="header-title">Mis Conversaciones</h3>
+        <p class="header-subtitle">Historial de consultas de este curso</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="header-btn primary-header-btn"
+        (click)="startNewChat()"
+        title="Iniciar nueva conversación"
+      >
+        <span>+ Nuevo</span>
+      </button>
+
+      <button type="button" class="header-close-btn" (click)="toggleChat()" title="Cerrar ventana">
+        ✕
+      </button>
+    </div>
   </header>
 
   <!-- BARRA DE CUOTA DIARIA -->
@@ -53,109 +111,191 @@
     </div>
   </div>
 
-  <!-- CONTENEDOR DE MENSAJES -->
-  <div class="chat-messages-container" #messagesContainer>
-    <!-- BIENVENIDA SI NO HAY MENSAJES -->
-    <div class="welcome-box" *ngIf="!isLoading() && messages().length === 0">
-      <div class="welcome-icon">👋</div>
-      <h4>¡Hola! Soy tu tutor del curso</h4>
-      <p>
-        Puedes preguntarme cualquier duda sobre las clases, PDFs y diapositivas de este curso. Te responderé
-        basándome exclusivamente en el material oficial.
-      </p>
+  <!-- VISTA 1: CHAT ACTIVO -->
+  <ng-container *ngIf="activeView() === 'chat'">
+    <!-- CONTENEDOR DE MENSAJES -->
+    <div class="chat-messages-container" #messagesContainer>
+      <!-- BIENVENIDA SI NO HAY MENSAJES -->
+      <div class="welcome-box" *ngIf="!isLoading() && messages().length === 0">
+        <div class="welcome-icon">👋</div>
+        <h4>¡Hola! ¿En qué puedo ayudarte hoy?</h4>
+        <p>
+          Inicia una nueva conversación haciéndome cualquier consulta sobre el material, clases o PDFs de este curso.
+        </p>
 
-      <div class="quick-prompts-section">
-        <span class="quick-title">Preguntas sugeridas:</span>
-        <div class="quick-tags">
-          <button
-            type="button"
-            class="quick-tag-btn"
-            *ngFor="let p of quickPrompts"
-            (click)="sendQuickPrompt(p)"
-            [disabled]="isSending()"
-          >
-            💬 {{ p }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- CARGANDO HISTORIAL -->
-    <div class="loading-history" *ngIf="isLoading()">
-      <div class="spinner"></div>
-      <span>Cargando conversación...</span>
-    </div>
-
-    <!-- LISTA DE MENSAJES -->
-    <div class="messages-list" *ngIf="!isLoading()">
-      <div
-        *ngFor="let m of messages()"
-        class="message-row"
-        [class.user-row]="m.role === 'user'"
-        [class.assistant-row]="m.role === 'assistant'"
-      >
-        <div class="msg-avatar" *ngIf="m.role === 'assistant'">🤖</div>
-        <div class="msg-bubble">
-          <div class="msg-text" [innerHTML]="m.message | markdown"></div>
-          <div class="msg-time" *ngIf="m.createdAt">
-            {{ m.createdAt | date: 'shortTime' }}
+        <div class="quick-prompts-section">
+          <span class="quick-title">Preguntas sugeridas:</span>
+          <div class="quick-tags">
+            <button
+              type="button"
+              class="quick-tag-btn"
+              *ngFor="let p of quickPrompts"
+              (click)="sendQuickPrompt(p)"
+              [disabled]="isSending()"
+            >
+              💬 {{ p }}
+            </button>
           </div>
         </div>
       </div>
 
-      <!-- ANIMACIÓN PENSANDO / ESCRIBIENDO -->
-      <div class="message-row assistant-row" *ngIf="isSending()">
-        <div class="msg-avatar">🤖</div>
-        <div class="msg-bubble typing-bubble">
-          <div class="typing-indicator">
-            <span></span>
-            <span></span>
-            <span></span>
+      <!-- CARGANDO CONVERSACIÓN -->
+      <div class="loading-history" *ngIf="isLoading()">
+        <div class="spinner"></div>
+        <span>Cargando conversación...</span>
+      </div>
+
+      <!-- LISTA DE MENSAJES -->
+      <div class="messages-list" *ngIf="!isLoading()">
+        <div
+          *ngFor="let m of messages()"
+          class="message-row"
+          [class.user-row]="m.role === 'user'"
+          [class.assistant-row]="m.role === 'assistant'"
+        >
+          <div class="msg-avatar" *ngIf="m.role === 'assistant'">🤖</div>
+          <div class="msg-bubble">
+            <div class="msg-text" [innerHTML]="m.message | markdown"></div>
+            <div class="msg-time" *ngIf="m.createdAt">
+              {{ m.createdAt | date: 'shortTime' }}
+            </div>
           </div>
-          <span class="typing-label">Consultando el material del curso...</span>
+        </div>
+
+        <!-- ANIMACIÓN PENSANDO / ESCRIBIENDO -->
+        <div class="message-row assistant-row" *ngIf="isSending()">
+          <div class="msg-avatar">🤖</div>
+          <div class="msg-bubble typing-bubble">
+            <div class="typing-indicator">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span class="typing-label">Consultando el material del curso...</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ALERTA DE ERROR -->
-  <div class="error-banner" *ngIf="errorMessage()">
-    <span class="error-icon">⚠️</span>
-    <span class="error-text">{{ errorMessage() }}</span>
-  </div>
+    <!-- ALERTA DE ERROR -->
+    <div class="error-banner" *ngIf="errorMessage()">
+      <span class="error-icon">⚠️</span>
+      <span class="error-text">{{ errorMessage() }}</span>
+    </div>
 
-  <!-- FOOTER / INPUT -->
-  <footer class="chat-footer">
-    <form (ngSubmit)="sendMessage()" class="chat-form">
-      <div class="input-wrapper">
-        <textarea
-          [(ngModel)]="inputQuestion"
-          name="question"
-          rows="1"
-          maxlength="400"
-          placeholder="Escribe tu consulta sobre el curso..."
-          (keydown)="onKeyDown($event)"
-          [disabled]="isSending() || (quota()?.remaining === 0)"
-          class="chat-input"
-        ></textarea>
-        <span class="char-counter" [class.limit-near]="inputQuestion.length > 350">
-          {{ inputQuestion.length }}/400
-        </span>
+    <!-- FOOTER / INPUT -->
+    <footer class="chat-footer">
+      <form (ngSubmit)="sendMessage()" class="chat-form">
+        <div class="input-wrapper">
+          <textarea
+            [(ngModel)]="inputQuestion"
+            name="question"
+            rows="1"
+            maxlength="400"
+            placeholder="Escribe tu consulta sobre el curso..."
+            (keydown)="onKeyDown($event)"
+            [disabled]="isSending() || (quota()?.remaining === 0)"
+            class="chat-input"
+          ></textarea>
+          <span class="char-counter" [class.limit-near]="inputQuestion.length > 350">
+            {{ inputQuestion.length }}/400
+          </span>
+        </div>
+
+        <button
+          type="submit"
+          class="send-btn"
+          [disabled]="!inputQuestion.trim() || isSending() || (quota()?.remaining === 0)"
+          title="Enviar pregunta"
+        >
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+          </svg>
+        </button>
+      </form>
+      <div class="disclaimer-text">
+        IA pedagógica contextualizada con el temario oficial del curso.
       </div>
+    </footer>
+  </ng-container>
 
-      <button
-        type="submit"
-        class="send-btn"
-        [disabled]="!inputQuestion.trim() || isSending() || (quota()?.remaining === 0)"
-        title="Enviar pregunta"
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-        </svg>
+  <!-- VISTA 2: LISTA Y BÚSQUEDA DE CONVERSACIONES -->
+  <div class="conversations-view" *ngIf="activeView() === 'history'">
+    <!-- BUSCADOR -->
+    <div class="search-bar-container">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Buscar conversación por título..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="onSearchChange($event)"
+        />
+        <button
+          *ngIf="searchQuery()"
+          type="button"
+          class="clear-search-btn"
+          (click)="clearSearch()"
+          title="Limpiar búsqueda"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTÓN RÁPIDO NUEVA CONVERSACIÓN -->
+    <div class="new-conv-action">
+      <button type="button" class="start-new-conv-btn" (click)="startNewChat()">
+        <span class="new-icon">+</span>
+        <span>Comenzar nueva conversación</span>
       </button>
-    </form>
-    <div class="disclaimer-text">
-      IA contextualizada. Solo responde dudas del temario del curso.
     </div>
-  </footer>
+
+    <!-- LISTADO DE CONVERSACIONES -->
+    <div class="conversations-list-container">
+      <div class="loading-conversations" *ngIf="isLoadingConversations()">
+        <div class="spinner"></div>
+        <span>Cargando conversaciones...</span>
+      </div>
+
+      <!-- VACÍO -->
+      <div
+        class="empty-conversations"
+        *ngIf="!isLoadingConversations() && conversations().length === 0"
+      >
+        <span class="empty-icon">📂</span>
+        <p *ngIf="!searchQuery()">Aún no tienes conversaciones en este curso.</p>
+        <p *ngIf="searchQuery()">No se encontraron conversaciones que coincidan con "{{ searchQuery() }}".</p>
+      </div>
+
+      <!-- ITEMS -->
+      <div
+        class="conversation-item"
+        *ngFor="let conv of conversations()"
+        [class.active-item]="conv.id === currentConversationId()"
+        (click)="selectConversation(conv)"
+      >
+        <div class="conv-item-icon">💬</div>
+        <div class="conv-item-content">
+          <div class="conv-item-title-row">
+            <span class="conv-title" [title]="conv.title">{{ conv.title }}</span>
+            <span class="active-badge" *ngIf="conv.id === currentConversationId()">Abierto</span>
+          </div>
+          <div class="conv-item-date">
+            {{ conv.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+          </div>
+        </div>
+        <button
+          type="button"
+          class="conv-delete-btn"
+          (click)="deleteConversation(conv, $event)"
+          title="Eliminar conversación"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

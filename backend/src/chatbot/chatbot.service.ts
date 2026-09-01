@@ -19,6 +19,7 @@ import {
   EnrollmentStatus,
   AiChatMessage,
   AiChatRole,
+  AiChatConversation,
 } from '../entities';
 import { PdfExtractorService } from '../common/services/pdf-extractor.service';
 
@@ -32,6 +33,8 @@ export class ChatbotService {
   constructor(
     @InjectRepository(AiChatMessage)
     private readonly chatRepo: Repository<AiChatMessage>,
+    @InjectRepository(AiChatConversation)
+    private readonly conversationRepo: Repository<AiChatConversation>,
     @InjectRepository(Course)
     private readonly courseRepo: Repository<Course>,
     @InjectRepository(Lesson)
@@ -93,7 +96,75 @@ export class ChatbotService {
   }
 
   /**
-   * Obtiene el historial reciente de mensajes del usuario para este curso.
+   * Obtiene la lista de conversaciones del alumno para un curso determinado, con soporte de búsqueda por título.
+   */
+  async getConversations(
+    user: User,
+    courseId: string,
+    search?: string,
+  ): Promise<AiChatConversation[]> {
+    await this.validateCourseAccess(user, courseId);
+
+    const qb = this.conversationRepo
+      .createQueryBuilder('conv')
+      .where('conv.userId = :userId', { userId: user.id })
+      .andWhere('conv.courseId = :courseId', { courseId })
+      .orderBy('conv.updatedAt', 'DESC');
+
+    if (search && search.trim()) {
+      qb.andWhere('conv.title ILIKE :search', { search: `%${search.trim()}%` });
+    }
+
+    return qb.getMany();
+  }
+
+  /**
+   * Obtiene los mensajes de una conversación puntual.
+   */
+  async getConversationMessages(
+    user: User,
+    courseId: string,
+    conversationId: string,
+  ): Promise<AiChatMessage[]> {
+    await this.validateCourseAccess(user, courseId);
+
+    const conversation = await this.conversationRepo.findOne({
+      where: { id: conversationId, userId: user.id, courseId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversación no encontrada');
+    }
+
+    return this.chatRepo.find({
+      where: { conversationId },
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  /**
+   * Elimina una conversación y sus mensajes asociados.
+   */
+  async deleteConversation(
+    user: User,
+    courseId: string,
+    conversationId: string,
+  ): Promise<void> {
+    await this.validateCourseAccess(user, courseId);
+
+    const conversation = await this.conversationRepo.findOne({
+      where: { id: conversationId, userId: user.id, courseId },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversación no encontrada');
+    }
+
+    await this.conversationRepo.remove(conversation);
+  }
+
+  /**
+   * Obtiene el historial reciente de mensajes del usuario para este curso (compatibilidad previa).
    */
   async getHistory(user: User, courseId: string): Promise<AiChatMessage[]> {
     await this.validateCourseAccess(user, courseId);
@@ -106,13 +177,14 @@ export class ChatbotService {
   }
 
   /**
-   * Procesa la pregunta del alumno con el contexto del curso y Gemini.
+   * Procesa la pregunta del alumno con el contexto del curso, Gemini y memoria del hilo conversacional.
    */
   async askTutor(
     user: User,
     courseId: string,
     question: string,
-  ): Promise<{ reply: string; remainingQuota: number }> {
+    conversationId?: string,
+  ): Promise<{ reply: string; remainingQuota: number; conversationId: string; conversationTitle: string }> {
     // 1. Validar clave de API
     if (!this.aiClient) {
       const currentKey = this.configService.get<string>('GEMINI_API_KEY');
@@ -138,10 +210,31 @@ export class ChatbotService {
       );
     }
 
-    // 4. Obtener el material de todas las clases del curso
+    // 4. Obtener o crear la conversación
+    let conversation: AiChatConversation | null = null;
+    if (conversationId) {
+      conversation = await this.conversationRepo.findOne({
+        where: { id: conversationId, userId: user.id, courseId },
+      });
+      if (!conversation) {
+        throw new NotFoundException('Conversación no encontrada');
+      }
+    } else {
+      const cleanTitle = question.trim().replace(/\s+/g, ' ');
+      const autoTitle = cleanTitle.length > 50 ? `${cleanTitle.slice(0, 47)}...` : cleanTitle;
+      conversation = await this.conversationRepo.save(
+        this.conversationRepo.create({
+          userId: user.id,
+          courseId,
+          title: autoTitle,
+        }),
+      );
+    }
+
+    // 5. Obtener el material de todas las clases del curso
     const courseContext = await this.buildCourseContext(course);
 
-    // 5. System Prompt pedagógico: anclado en el curso, pero con capacidad explicativa y docente
+    // 6. System Prompt pedagógico: anclado en el curso, pero con capacidad explicativa y docente
     const systemInstruction = `
 Eres el Tutor Virtual y Docente de apoyo del curso "${course.title}".
 Tu objetivo principal es enseñar, guiar y ayudar al estudiante a comprender en profundidad los temas del curso, tomando como base el material oficial provisto en <MATERIAL_DEL_CURSO>.
@@ -155,9 +248,9 @@ DIRECTRICES PEDAGÓGICAS Y DE RESPUESTA:
 6. FORMATO: Responde en español, de forma amable, empática y estructurada (utilizando viñetas o negritas cuando facilite la lectura).
 `;
 
-    // 6. Obtener últimos 6 mensajes previos para dar coherencia conversacional
+    // 7. Obtener últimos 6 mensajes previos del hilo para dar coherencia conversacional
     const recentHistory = await this.chatRepo.find({
-      where: { userId: user.id, courseId },
+      where: { conversationId: conversation.id },
       order: { createdAt: 'DESC' },
       take: 6,
     });
@@ -220,26 +313,35 @@ Pregunta del Alumno: "${question.trim()}"
       );
     }
 
-    // 7. Guardar el mensaje del alumno y la respuesta del asistente en BD
+    // 8. Guardar el mensaje del alumno y la respuesta del asistente vinculados a la conversación
     await this.chatRepo.save([
       this.chatRepo.create({
         userId: user.id,
         courseId,
+        conversationId: conversation.id,
         role: AiChatRole.USER,
         message: question.trim(),
       }),
       this.chatRepo.create({
         userId: user.id,
         courseId,
+        conversationId: conversation.id,
         role: AiChatRole.ASSISTANT,
         message: replyText,
       }),
     ]);
 
+    // 9. Actualizar fecha de modificación de la conversación
+    await this.conversationRepo.update(conversation.id, {
+      updatedAt: new Date(),
+    });
+
     const newQuota = await this.getQuota(user, courseId);
     return {
       reply: replyText,
       remainingQuota: newQuota.remaining,
+      conversationId: conversation.id,
+      conversationTitle: conversation.title,
     };
   }
 

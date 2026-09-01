@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { getTypeOrmConfig } from './database/typeorm.config';
 import { DatabaseSeedService } from './database/database-seed.service';
-import { User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument, AiChatMessage } from './entities';
+import { User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument, AiChatMessage, AiChatConversation } from './entities';
 import { AuthModule } from './auth/auth.module';
 import { CoursesModule } from './courses/courses.module';
 import { LessonsModule } from './lessons/lessons.module';
@@ -19,7 +19,7 @@ import { ChatbotModule } from './chatbot/chatbot.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../.env'] }),
     TypeOrmModule.forRootAsync({ useFactory: () => getTypeOrmConfig() }),
-    TypeOrmModule.forFeature([User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument, AiChatMessage]),
+    TypeOrmModule.forFeature([User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument, AiChatMessage, AiChatConversation]),
     ThrottlerModule.forRoot({
       errorMessage: 'Demasiadas solicitudes. Por favor, intenta de nuevo más tarde.',
       throttlers: [

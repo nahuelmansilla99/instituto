@@ -7,3 +7,4 @@ export * from './course-enrollment.entity';
 export * from './technical-sheet.entity';
 export * from './lesson-document.entity';
 export * from './ai-chat-message.entity';
+export * from './ai-chat-conversation.entity';

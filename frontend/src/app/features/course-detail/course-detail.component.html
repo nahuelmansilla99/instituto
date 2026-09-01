@@ -206,4 +206,11 @@
       </div>
     </section>
   </div>
+
+  <!-- TUTOR IA DEL CURSO -->
+  <app-course-tutor-chat
+    *ngIf="course()"
+    [courseId]="course()!.id"
+    [courseTitle]="course()!.title"
+  ></app-course-tutor-chat>
 </main>

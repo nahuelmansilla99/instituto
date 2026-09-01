@@ -1,5 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument } from '../entities';
+import { User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument, AiChatMessage } from '../entities';
 
 export const getTypeOrmConfig = (): TypeOrmModuleOptions => ({
   type: 'postgres',
@@ -9,7 +9,7 @@ export const getTypeOrmConfig = (): TypeOrmModuleOptions => ({
   username: process.env.DATABASE_URL ? undefined : process.env.DB_USER,
   password: process.env.DATABASE_URL ? undefined : process.env.DB_PASSWORD,
   database: process.env.DATABASE_URL ? undefined : process.env.DB_NAME,
-  entities: [User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument],
+  entities: [User, Course, Lesson, QuizQuestion, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument, AiChatMessage],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   migrationsRun: process.env.RUN_MIGRATIONS === 'true', // Run migrations safely in production if true
   synchronize: process.env.DB_SYNCHRONIZE === 'true', // Sync only when explicitly enabled

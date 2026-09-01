@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { CourseTutorChatComponent } from '../../shared/components/course-tutor-chat/course-tutor-chat.component';
 import { CoursesService } from '../../core/services/courses.service';
 import { AuthService } from '../../core/services/auth.service';
 import { CourseDetail } from '../../core/models';
@@ -9,7 +10,7 @@ import { CourseDetail } from '../../core/models';
 @Component({
   selector: 'app-course-detail',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink],
+  imports: [CommonModule, NavbarComponent, RouterLink, CourseTutorChatComponent],
   templateUrl: './course-detail.component.html',
   styleUrl: './course-detail.component.css',
 })

@@ -46,6 +46,9 @@ export class Lesson {
   @Column({ name: 'presentation_filename', length: 255, nullable: true })
   presentationFilename: string;
 
+  @Column({ name: 'presentation_notes', type: 'text', nullable: true })
+  presentationNotes: string | null;
+
   @Column({ name: 'available_at', type: 'timestamp', nullable: true })
   availableAt: Date | null;
 

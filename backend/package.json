@@ -16,6 +16,7 @@
     "test:security": "node test-security.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.20.0",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.3.0",
@@ -32,6 +33,7 @@
     "nodemailer": "^9.0.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.11.3",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
@@ -47,6 +49,7 @@
     "@types/node": "^20.11.0",
     "@types/nodemailer": "^8.0.1",
     "@types/passport-jwt": "^4.0.1",
+    "@types/pdf-parse": "^1.1.5",
     "@types/streamifier": "^0.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"

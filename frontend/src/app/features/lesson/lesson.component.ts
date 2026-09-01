@@ -10,11 +10,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PdfViewerModalComponent } from '../../shared/components/pdf-viewer-modal/pdf-viewer-modal.component';
+import { CourseTutorChatComponent } from '../../shared/components/course-tutor-chat/course-tutor-chat.component';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent, PdfViewerModalComponent],
+  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent, PdfViewerModalComponent, CourseTutorChatComponent],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.css',
 })

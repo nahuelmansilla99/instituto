@@ -319,4 +319,11 @@
     (close)="closePdfModal()"
     (download)="downloadPdfFromModal()">
   </app-pdf-viewer-modal>
+
+  <!-- TUTOR IA DEL CURSO -->
+  <app-course-tutor-chat
+    *ngIf="lesson() && lesson()!.courseId"
+    [courseId]="lesson()!.courseId"
+  ></app-course-tutor-chat>
 </main>
+

@@ -31,6 +31,9 @@ export class TechnicalSheet {
   @Column({ name: 'order_number', type: 'int', default: 0 })
   orderNumber: number;
 
+  @Column({ name: 'extracted_text', type: 'text', nullable: true })
+  extractedText: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

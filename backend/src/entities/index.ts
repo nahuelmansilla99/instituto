@@ -6,3 +6,4 @@ export * from './user-progress.entity';
 export * from './course-enrollment.entity';
 export * from './technical-sheet.entity';
 export * from './lesson-document.entity';
+export * from './ai-chat-message.entity';

@@ -12,6 +12,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { PdfExtractorService } from '../common/services/pdf-extractor.service';
 
 @Injectable()
 export class AdminService {
@@ -31,6 +32,7 @@ export class AdminService {
     @InjectRepository(TechnicalSheet)
     private readonly technicalSheetRepo: Repository<TechnicalSheet>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly pdfExtractorService: PdfExtractorService,
   ) {}
 
   // ----------------------------------------------------
@@ -122,6 +124,7 @@ export class AdminService {
       meetUrl: dto.meetUrl?.trim() || null,
       presentationUrl: dto.presentationUrl?.trim() || null,
       presentationFilename: dto.presentationFilename?.trim() || null,
+      presentationNotes: dto.presentationNotes?.trim() || null,
       availableAt: dto.availableAt ? new Date(dto.availableAt) : null,
       isPublished: dto.isPublished !== undefined ? Boolean(dto.isPublished) : true,
     });
@@ -141,6 +144,7 @@ export class AdminService {
     if (dto.meetUrl !== undefined) lesson.meetUrl = dto.meetUrl?.trim() || null;
     if (dto.presentationUrl !== undefined) lesson.presentationUrl = dto.presentationUrl?.trim() || null;
     if (dto.presentationFilename !== undefined) lesson.presentationFilename = dto.presentationFilename?.trim() || null;
+    if (dto.presentationNotes !== undefined) lesson.presentationNotes = dto.presentationNotes ? dto.presentationNotes.trim() : null;
     if (dto.availableAt !== undefined) {
       lesson.availableAt = dto.availableAt ? new Date(dto.availableAt) : null;
     }
@@ -179,6 +183,13 @@ export class AdminService {
     lesson.presentationUrl = result.secure_url;
     lesson.presentationPublicId = result.public_id;
     lesson.presentationFilename = file.originalname;
+
+    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+      const extracted = await this.pdfExtractorService.extractText(file.buffer);
+      if (extracted) {
+        lesson.presentationNotes = extracted;
+      }
+    }
 
     return this.lessonRepo.save(lesson);
   }
@@ -238,6 +249,11 @@ export class AdminService {
 
     const result = await this.cloudinaryService.uploadFile(file, folder, 'raw');
 
+    let extractedText: string | null = null;
+    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+      extractedText = await this.pdfExtractorService.extractText(file.buffer);
+    }
+
     const sheet = this.technicalSheetRepo.create({
       lessonId,
       originalName: file.originalname,
@@ -245,6 +261,7 @@ export class AdminService {
       filePublicId: result.public_id,
       fileSize: file.size,
       orderNumber: nextOrderNumber,
+      extractedText,
     });
 
     return this.technicalSheetRepo.save(sheet);
@@ -286,6 +303,11 @@ export class AdminService {
 
     const result = await this.cloudinaryService.uploadFile(file, folder, 'raw');
 
+    let extractedText: string | null = null;
+    if (file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+      extractedText = await this.pdfExtractorService.extractText(file.buffer);
+    }
+
     const doc = this.lessonRepo.manager.create(LessonDocument, {
       lessonId,
       originalName: file.originalname,
@@ -293,6 +315,7 @@ export class AdminService {
       filePublicId: result.public_id,
       fileSize: file.size,
       orderNumber: nextOrderNumber,
+      extractedText,
     });
 
     return this.lessonRepo.manager.save(doc);

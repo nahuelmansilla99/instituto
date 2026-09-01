@@ -1,0 +1,161 @@
+<!-- BOTÓN FLOTANTE TRIGGER -->
+<div class="tutor-trigger-container">
+  <button
+    type="button"
+    class="tutor-floating-btn"
+    (click)="toggleChat()"
+    [attr.aria-expanded]="isOpen()"
+    title="Abrir Tutor Inteligente del Curso"
+  >
+    <div class="btn-icon-wrapper">
+      <span class="sparkle-badge" *ngIf="!isOpen()">✨</span>
+      <span *ngIf="!isOpen()" class="icon-avatar">🤖</span>
+      <span *ngIf="isOpen()" class="icon-close">✕</span>
+    </div>
+    <span class="btn-label" *ngIf="!isOpen()">Tutor IA</span>
+  </button>
+</div>
+
+<!-- VENTANA FLOTANTE DE CHAT -->
+<div class="tutor-chat-modal" *ngIf="isOpen()" role="dialog" aria-label="Tutor IA del Curso">
+  <!-- HEADER -->
+  <header class="chat-header">
+    <div class="header-info">
+      <div class="header-avatar">🎓</div>
+      <div>
+        <h3 class="header-title">Tutor Virtual del Curso</h3>
+        <p class="header-subtitle">
+          <span class="online-indicator"></span> Responde solo con el material oficial
+        </p>
+      </div>
+    </div>
+    <button type="button" class="header-close-btn" (click)="toggleChat()" title="Cerrar ventana">
+      ✕
+    </button>
+  </header>
+
+  <!-- BARRA DE CUOTA DIARIA -->
+  <div class="quota-banner" *ngIf="quota() as q">
+    <div class="quota-info">
+      <span class="quota-text">
+        Consultas hoy: <strong>{{ q.remaining }}</strong> disponibles de {{ q.max }}
+      </span>
+      <span class="quota-tag" [class.quota-low]="q.remaining <= 5">
+        {{ q.remaining === 0 ? 'Agotadas' : q.remaining <= 5 ? 'Pocas consultas' : 'Activo' }}
+      </span>
+    </div>
+    <div class="quota-bar-track">
+      <div
+        class="quota-bar-fill"
+        [style.width.%]="(q.remaining / q.max) * 100"
+        [class.low-fill]="q.remaining <= 5"
+      ></div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR DE MENSAJES -->
+  <div class="chat-messages-container" #messagesContainer>
+    <!-- BIENVENIDA SI NO HAY MENSAJES -->
+    <div class="welcome-box" *ngIf="!isLoading() && messages().length === 0">
+      <div class="welcome-icon">👋</div>
+      <h4>¡Hola! Soy tu tutor del curso</h4>
+      <p>
+        Puedes preguntarme cualquier duda sobre las clases, PDFs y diapositivas de este curso. Te responderé
+        basándome exclusivamente en el material oficial.
+      </p>
+
+      <div class="quick-prompts-section">
+        <span class="quick-title">Preguntas sugeridas:</span>
+        <div class="quick-tags">
+          <button
+            type="button"
+            class="quick-tag-btn"
+            *ngFor="let p of quickPrompts"
+            (click)="sendQuickPrompt(p)"
+            [disabled]="isSending()"
+          >
+            💬 {{ p }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARGANDO HISTORIAL -->
+    <div class="loading-history" *ngIf="isLoading()">
+      <div class="spinner"></div>
+      <span>Cargando conversación...</span>
+    </div>
+
+    <!-- LISTA DE MENSAJES -->
+    <div class="messages-list" *ngIf="!isLoading()">
+      <div
+        *ngFor="let m of messages()"
+        class="message-row"
+        [class.user-row]="m.role === 'user'"
+        [class.assistant-row]="m.role === 'assistant'"
+      >
+        <div class="msg-avatar" *ngIf="m.role === 'assistant'">🤖</div>
+        <div class="msg-bubble">
+          <div class="msg-text" [innerHTML]="m.message | markdown"></div>
+          <div class="msg-time" *ngIf="m.createdAt">
+            {{ m.createdAt | date: 'shortTime' }}
+          </div>
+        </div>
+      </div>
+
+      <!-- ANIMACIÓN PENSANDO / ESCRIBIENDO -->
+      <div class="message-row assistant-row" *ngIf="isSending()">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-bubble typing-bubble">
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <span class="typing-label">Consultando el material del curso...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTA DE ERROR -->
+  <div class="error-banner" *ngIf="errorMessage()">
+    <span class="error-icon">⚠️</span>
+    <span class="error-text">{{ errorMessage() }}</span>
+  </div>
+
+  <!-- FOOTER / INPUT -->
+  <footer class="chat-footer">
+    <form (ngSubmit)="sendMessage()" class="chat-form">
+      <div class="input-wrapper">
+        <textarea
+          [(ngModel)]="inputQuestion"
+          name="question"
+          rows="1"
+          maxlength="400"
+          placeholder="Escribe tu consulta sobre el curso..."
+          (keydown)="onKeyDown($event)"
+          [disabled]="isSending() || (quota()?.remaining === 0)"
+          class="chat-input"
+        ></textarea>
+        <span class="char-counter" [class.limit-near]="inputQuestion.length > 350">
+          {{ inputQuestion.length }}/400
+        </span>
+      </div>
+
+      <button
+        type="submit"
+        class="send-btn"
+        [disabled]="!inputQuestion.trim() || isSending() || (quota()?.remaining === 0)"
+        title="Enviar pregunta"
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+        </svg>
+      </button>
+    </form>
+    <div class="disclaimer-text">
+      IA contextualizada. Solo responde dudas del temario del curso.
+    </div>
+  </footer>
+</div>

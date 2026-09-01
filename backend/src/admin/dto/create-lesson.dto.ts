@@ -28,6 +28,10 @@ export class CreateLessonDto {
 
   @IsOptional()
   @IsString()
+  presentationNotes?: string;
+
+  @IsOptional()
+  @IsString()
   availableAt?: string | null;
 
   @IsOptional()

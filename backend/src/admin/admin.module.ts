@@ -4,6 +4,7 @@ import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
 import { Course, Lesson, QuizQuestion, User, UserProgress, CourseEnrollment, TechnicalSheet, LessonDocument } from '../entities';
 import { CloudinaryModule } from '../cloudinary/cloudinary.module';
+import { PdfExtractorService } from '../common/services/pdf-extractor.service';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
     CloudinaryModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [AdminService, PdfExtractorService],
   exports: [AdminService],
 })
 export class AdminModule {}

@@ -2,7 +2,7 @@
 
 Plataforma moderna y escalable de e-learning construida con **NestJS**, **Angular (Standalone Components)**, **PostgreSQL (TypeORM)** y **Docker Compose**.
 
-Cuenta con un sistema de progresión y desbloqueo secuencial de clases condicionado a la aprobación de cuestionarios (Quiz) con un umbral del 80%.
+Cuenta con un sistema de progresión y desbloqueo secuencial de clases condicionado a la aprobación de cuestionarios (Quiz) con un umbral del 60%.
 
 ---
 
@@ -123,11 +123,11 @@ VALUES (
 2. **Lecciones Siguientes:** Comienzan en estado `LOCKED` (Bloqueadas).
 3. **Cuestionario:** Al finalizar una lección, el estudiante envía sus respuestas a `POST /lessons/:id/quiz/submit`.
 4. **Evaluación en Servidor:**
-   - Si el estudiante obtiene **$\ge 80\%$**:
+   - Si el estudiante obtiene **$\ge 60\%$**:
      - La clase actual se marca como `COMPLETED` y guarda el puntaje.
      - La siguiente lección en orden (`order_number`) pasa automáticamente a `AVAILABLE`.
      - El frontend muestra un mensaje de felicitaciones y el botón "Siguiente Lección".
-   - Si el estudiante obtiene **$< 80\%$**:
+   - Si el estudiante obtiene **$< 60\%$**:
      - La clase se mantiene en `AVAILABLE`.
      - Las clases posteriores permanecen bloqueadas.
      - El frontend muestra el botón "Reintentar Cuestionario".

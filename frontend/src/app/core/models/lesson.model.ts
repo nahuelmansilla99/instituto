@@ -1,5 +1,5 @@
 import { CourseLessonItem } from './course.model';
-import { QuizQuestion } from './quiz.model';
+import { QuizQuestion, QuizQuestionResult } from './quiz.model';
 
 export interface LessonDetail {
   id: string;
@@ -23,6 +23,7 @@ export interface LessonDetail {
   hasViewedSheets?: boolean;
   hasViewedDocs?: boolean;
   quizQuestions: QuizQuestion[];
+  questionResults?: QuizQuestionResult[];
   technicalSheets?: any[];
   lessonDocuments?: any[];
   syllabus: CourseLessonItem[];

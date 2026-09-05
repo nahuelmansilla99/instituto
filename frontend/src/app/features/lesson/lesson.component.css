@@ -944,6 +944,66 @@
   font-size: 0.92rem;
   color: var(--text-primary);
   line-height: 1.35;
+  flex: 1;
+}
+
+/* Question Feedback Styles */
+.question-card.correct-card {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.03);
+}
+
+.question-card.incorrect-card {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.03);
+}
+
+.quiz-feedback-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quiz-feedback-tag.correct {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.quiz-feedback-tag.incorrect {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.option-label.opt-correct {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+}
+
+.option-label.opt-correct .option-letter {
+  background: #10b981 !important;
+  color: #ffffff !important;
+}
+
+.option-label.opt-incorrect {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+}
+
+.option-label.opt-incorrect .option-letter {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.option-icon {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
 }
 
 .quiz-actions-bar {

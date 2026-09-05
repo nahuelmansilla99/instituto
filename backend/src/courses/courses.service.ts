@@ -124,22 +124,27 @@ export class CoursesService {
       const isFutureScheduled = lesson.availableAt && now < new Date(lesson.availableAt);
       const hasNoQuiz = !lesson.quizQuestions || lesson.quizQuestions.length === 0;
 
+      // If lesson has a quiz, but student completed lesson before quiz existed (progress.score is null),
+      // effective status is AVAILABLE (pending quiz evaluation).
+      const isQuizPending = !hasNoQuiz && progress?.status === ProgressStatus.COMPLETED && (progress.score === null || progress.score === undefined);
+      const effectiveProgressStatus = isQuizPending ? ProgressStatus.AVAILABLE : progress?.status;
+
       let status: ProgressStatus = ProgressStatus.LOCKED;
 
       if (user.role === UserRole.ADMIN || user.role === UserRole.SYSADMIN) {
-        status = progress?.status === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
+        status = effectiveProgressStatus === ProgressStatus.COMPLETED ? ProgressStatus.COMPLETED : ProgressStatus.AVAILABLE;
       } else if (isFutureScheduled) {
         // Future scheduled release
         status = ProgressStatus.LOCKED;
-      } else if (progress?.status === ProgressStatus.COMPLETED) {
+      } else if (effectiveProgressStatus === ProgressStatus.COMPLETED) {
         status = ProgressStatus.COMPLETED;
       } else if (index === 0) {
         // First lesson is always AVAILABLE if not completed and not future scheduled
-        status = progress?.status || ProgressStatus.AVAILABLE;
+        status = effectiveProgressStatus || ProgressStatus.AVAILABLE;
       } else if (previousLessonUnlockedNext) {
         // Previous lesson was passed or did not require a quiz
-        status = progress?.status || ProgressStatus.AVAILABLE;
-      } else if (progress?.status === ProgressStatus.AVAILABLE) {
+        status = effectiveProgressStatus || ProgressStatus.AVAILABLE;
+      } else if (effectiveProgressStatus === ProgressStatus.AVAILABLE) {
         status = ProgressStatus.AVAILABLE;
       }
 

@@ -42,6 +42,10 @@ export class LoginComponent implements OnInit {
           },
           error: (err) => {
             this.isLoading.set(false);
+            if (err.status === 429) {
+              this.errorMessage.set('Has superado el límite de intentos permitidos. Por seguridad, espera unos minutos antes de reintentar.');
+              return;
+            }
             const msg = err.error?.message || 'Error al iniciar sesión con Google.';
             this.errorMessage.set(Array.isArray(msg) ? msg[0] : msg);
           }
@@ -77,6 +81,10 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading.set(false);
+        if (err.status === 429) {
+          this.errorMessage.set('Has superado el límite de intentos permitidos. Por seguridad, por favor espera unos minutos antes de volver a intentarlo.');
+          return;
+        }
         const msg = err.error?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
         this.errorMessage.set(Array.isArray(msg) ? msg[0] : msg);
       },

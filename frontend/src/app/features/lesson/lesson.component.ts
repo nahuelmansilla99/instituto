@@ -133,7 +133,23 @@ export class LessonComponent implements OnInit, OnDestroy {
 
         const requestedAction = this.route.snapshot.queryParams['action'];
         
-        if (requestedAction === 'start-quiz' && data.quizQuestions?.length > 0) {
+        if (data.score !== null && data.score !== undefined && data.quizQuestions?.length > 0) {
+          const isPassed = data.status === 'COMPLETED' || data.score >= 60;
+          this.quizResult.set({
+            passed: isPassed,
+            score: data.score,
+            correctCount: data.questionResults?.filter((r) => r.isCorrect).length ?? 0,
+            totalCount: data.quizQuestions.length,
+            passingThreshold: 60,
+            message: isPassed
+              ? '¡Felicitaciones! Has aprobado el examen de esta clase.'
+              : `Has obtenido ${data.score}%. Se requiere al menos 60% para aprobar y desbloquear la siguiente lección.`,
+            nextLessonId: null,
+            nextLessonTitle: null,
+            questionResults: data.questionResults,
+          });
+          this.isQuizStarted.set(true);
+        } else if (requestedAction === 'start-quiz' && data.quizQuestions?.length > 0) {
           this.isQuizStarted.set(true);
           setTimeout(() => {
             document.getElementById('quiz-section')?.scrollIntoView({ behavior: 'smooth' });

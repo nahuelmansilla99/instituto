@@ -24,7 +24,7 @@ export interface QuizEvaluationResult {
 
 @Injectable()
 export class QuizzesService {
-  private readonly PASSING_THRESHOLD = 80; // 80% minimum score
+  private readonly PASSING_THRESHOLD = 60; // 60% minimum score
 
   constructor(
     @InjectRepository(QuizQuestion)
@@ -82,6 +82,10 @@ export class QuizzesService {
       where: { userId, lessonId },
     });
 
+    if (userProgress && userProgress.status === ProgressStatus.COMPLETED && userProgress.score !== null) {
+      throw new BadRequestException('Ya has aprobado el examen de esta clase.');
+    }
+
     if (!userProgress) {
       userProgress = this.userProgressRepository.create({
         userId,
@@ -91,6 +95,13 @@ export class QuizzesService {
     }
 
     userProgress.attemptsCount = (userProgress.attemptsCount || 0) + 1;
+
+    // Save submitted answers to progress
+    const quizAnswersObj: Record<string, number> = {};
+    submittedMap.forEach((val, key) => {
+      quizAnswersObj[key] = val;
+    });
+    userProgress.quizAnswers = quizAnswersObj;
 
     let nextLessonId: string | null = null;
     let nextLessonTitle: string | null = null;
@@ -143,14 +154,15 @@ export class QuizzesService {
         message: `¡Felicitaciones! Has aprobado el cuestionario con un ${score}% (${correctCount}/${totalCount} correctas).`,
         nextLessonId,
         nextLessonTitle,
+        questionResults,
       };
     } else {
       // If failed, keep available and save the attempt score
       if (userProgress.status !== ProgressStatus.COMPLETED) {
         userProgress.status = ProgressStatus.AVAILABLE;
         userProgress.score = score;
-        await this.userProgressRepository.save(userProgress);
       }
+      await this.userProgressRepository.save(userProgress);
 
       return {
         passed: false,

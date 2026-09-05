@@ -239,31 +239,41 @@
           <div class="exam-title-group">
             <span class="section-kicker">Evaluación</span>
             <h2 class="section-title">Examen de la clase</h2>
-            <span class="exam-subtitle">Obligatorio para desbloquear la siguiente clase</span>
+            <span class="exam-subtitle" *ngIf="l.status !== 'COMPLETED'">Obligatorio para desbloquear la siguiente clase</span>
+            <span class="exam-subtitle" *ngIf="l.status === 'COMPLETED'" style="color: #10b981; font-weight: 600;">✓ Has aprobado este examen</span>
           </div>
           
-          <button 
-            class="btn btn-primary" 
-            [class.btn-disabled]="!isExamUnlocked" 
-            [disabled]="!isExamUnlocked"
-            (click)="startQuizSection()"
-            [title]="!isExamUnlocked ? 'Completá el contenido y las fichas para habilitar el examen' : ''">
-            <svg *ngIf="!isExamUnlocked" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            <span>{{ l.status === 'COMPLETED' ? 'Reintentar examen' : 'Rendir examen' }}</span>
-          </button>
+          <ng-container *ngIf="l.status === 'COMPLETED'">
+            <button class="btn btn-primary" *ngIf="getNextLesson()" (click)="goToNextSyllabusLesson()">
+              <span>Siguiente clase</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="l.status !== 'COMPLETED'">
+            <button 
+              class="btn btn-primary" 
+              [class.btn-disabled]="!isExamUnlocked" 
+              [disabled]="!isExamUnlocked"
+              (click)="startQuizSection()"
+              [title]="!isExamUnlocked ? 'Completá el contenido y las fichas para habilitar el examen' : ''">
+              <svg *ngIf="!isExamUnlocked" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Rendir examen</span>
+            </button>
+          </ng-container>
         </div>
 
         <!-- Quiz Area -->
         <div id="quiz-section" class="quiz-area animate-fade-in" *ngIf="isQuizStarted()">
           <div *ngIf="quizResult()" class="quiz-result-card glass-card" [class.passed]="quizResult()?.passed" [class.failed]="!quizResult()?.passed">
             <div class="quiz-result-badge">
-              <span *ngIf="quizResult()?.passed">🎉 Aprobado</span>
-              <span *ngIf="!quizResult()?.passed">⚠️ No aprobado</span>
+              <span *ngIf="quizResult()?.passed">🎉 Examen Aprobado</span>
+              <span *ngIf="!quizResult()?.passed">⚠️ Examen No Aprobado</span>
             </div>
             <h3 class="score-title">{{ quizResult()?.passed ? '¡Felicitaciones! Aprobaste el examen' : 'No alcanzaste la nota mínima requerida' }}</h3>
             <p class="score-display">Calificación obtenida: <strong>{{ quizResult()?.score }}%</strong></p>
             <div class="result-actions">
-              <button class="btn btn-secondary" (click)="resetQuiz()">Reintentar examen</button>
+              <button class="btn btn-secondary" *ngIf="!quizResult()?.passed" (click)="resetQuiz()">Reintentar examen</button>
               <button class="btn btn-primary" *ngIf="quizResult()?.passed && getNextLesson()" (click)="goToNextSyllabusLesson()">
                 <span>Siguiente clase</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -271,29 +281,52 @@
             </div>
           </div>
 
-          <div *ngIf="!quizResult()">
-            <div class="quiz-questions">
-              <div *ngFor="let q of l.quizQuestions; let qIdx = index" class="question-card glass-card">
-                <div class="question-header">
+          <!-- Questions List -->
+          <div class="quiz-questions" style="margin-top: 24px;">
+            <div *ngFor="let q of l.quizQuestions; let qIdx = index" 
+                 class="question-card glass-card"
+                 [class.correct-card]="quizResult() && isQuestionCorrect(q.id) === true"
+                 [class.incorrect-card]="quizResult() && isQuestionCorrect(q.id) === false">
+              
+              <div class="question-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                <div>
                   <span class="question-number">Pregunta {{ qIdx + 1 }}</span>
                   <p class="question-text">{{ q.questionText }}</p>
                 </div>
-                <div class="options-list">
-                  <label *ngFor="let opt of q.options; let optIdx = index" 
-                         class="option-label"
-                         [class.selected]="selectedAnswers()[q.id] === optIdx">
-                    <input type="radio" 
-                           [name]="'q_' + q.id" 
-                           [value]="optIdx"
-                           [checked]="selectedAnswers()[q.id] === optIdx"
-                           (change)="onSelectOption(q.id, optIdx)">
-                    <span class="option-letter">{{ getOptionLetter(optIdx) }}</span>
-                    <span class="option-text">{{ opt }}</span>
-                  </label>
+
+                <!-- Feedback Tag -->
+                <div *ngIf="quizResult() && isQuestionCorrect(q.id) !== null">
+                  <span class="quiz-feedback-tag correct" *ngIf="isQuestionCorrect(q.id) === true">✓ Correcta</span>
+                  <span class="quiz-feedback-tag incorrect" *ngIf="isQuestionCorrect(q.id) === false">✗ Incorrecta</span>
                 </div>
               </div>
+
+              <div class="options-list">
+                <label *ngFor="let opt of q.options; let optIdx = index" 
+                       class="option-label"
+                       [class.selected]="selectedAnswers()[q.id] === optIdx"
+                       [class.opt-correct]="quizResult() && selectedAnswers()[q.id] === optIdx && isQuestionCorrect(q.id) === true"
+                       [class.opt-incorrect]="quizResult() && selectedAnswers()[q.id] === optIdx && isQuestionCorrect(q.id) === false">
+                  <input type="radio" 
+                         [name]="'q_' + q.id" 
+                         [value]="optIdx"
+                         [checked]="selectedAnswers()[q.id] === optIdx"
+                         [disabled]="!!quizResult()"
+                         (change)="onSelectOption(q.id, optIdx)">
+                  <span class="option-letter">{{ getOptionLetter(optIdx) }}</span>
+                  <span class="option-text">{{ opt }}</span>
+
+                  <span class="option-icon" *ngIf="quizResult() && selectedAnswers()[q.id] === optIdx">
+                    <svg *ngIf="isQuestionCorrect(q.id) === true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <svg *ngIf="isQuestionCorrect(q.id) === false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  </span>
+                </label>
+              </div>
             </div>
-            
+          </div>
+          
+          <!-- Actions Bar (only when answering) -->
+          <div *ngIf="!quizResult()">
             <div class="quiz-actions-bar">
               <button class="btn btn-secondary" (click)="saveQuizProgress()" [disabled]="isSavingProgress()">
                 {{ isSavingProgress() ? 'Guardando...' : 'Guardar progreso' }}

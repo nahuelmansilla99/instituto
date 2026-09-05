@@ -166,6 +166,9 @@ export class LessonsService {
         // Teacher added a quiz after the student had already completed the lesson just by viewing it
         targetProgress.status = ProgressStatus.AVAILABLE;
         targetProgress.completedAt = null;
+        targetProgress.hasViewedContent = true;
+        targetProgress.hasViewedSheets = true;
+        targetProgress.hasViewedDocs = true;
         await this.userProgressRepository.save(targetProgress);
       }
 
@@ -198,6 +201,16 @@ export class LessonsService {
       options: q.options,
     }));
 
+    const savedAnswers = targetProgress?.quizAnswers ?? {};
+    let questionResults: { questionId: string; isCorrect: boolean }[] = [];
+    if (quizQuestions.length > 0 && targetProgress?.score !== null && targetProgress?.score !== undefined) {
+      questionResults = quizQuestions.map((q) => {
+        const selectedOpt = savedAnswers[q.id];
+        const isCorrect = selectedOpt !== undefined && selectedOpt === q.correctOptionIndex;
+        return { questionId: q.id, isCorrect };
+      });
+    }
+
     return {
       id: lesson.id,
       courseId: lesson.courseId,
@@ -215,12 +228,13 @@ export class LessonsService {
       status: targetProgress ? targetProgress.status : calculatedStatus,
       score: targetProgress?.score ?? null,
       completedAt: targetProgress?.completedAt ?? null,
-      savedAnswers: targetProgress?.quizAnswers ?? {},
+      savedAnswers,
       attemptsCount: targetProgress?.attemptsCount ?? 0,
       hasViewedContent: targetProgress?.hasViewedContent ?? false,
       hasViewedSheets: targetProgress?.hasViewedSheets ?? false,
       hasViewedDocs: targetProgress?.hasViewedDocs ?? false,
       quizQuestions: questions,
+      questionResults,
       technicalSheets: lesson.technicalSheets || [],
       lessonDocuments: lesson.lessonDocuments || [],
       syllabus,

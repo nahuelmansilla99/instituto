@@ -1,6 +1,7 @@
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import { catchError, throwError } from 'rxjs';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -24,5 +25,18 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
     }
   }
 
-  return next(req);
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      // If 401 Unauthorized is returned and it is not an authentication endpoint
+      if (
+        error.status === 401 &&
+        !req.url.includes('/auth/login') &&
+        !req.url.includes('/auth/register') &&
+        !req.url.includes('/auth/google')
+      ) {
+        authService.logout();
+      }
+      return throwError(() => error);
+    })
+  );
 };

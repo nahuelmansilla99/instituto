@@ -39,7 +39,11 @@ export class AuthService {
   readonly isRealSysadmin = computed(() => this.currentUserSignal()?.role === UserRole.SYSADMIN);
   readonly isRealAdmin = computed(() => this.currentUserSignal()?.role === UserRole.ADMIN);
 
-  readonly isAuthenticated = computed(() => !!this.currentUserSignal());
+  readonly isAuthenticated = computed(() => {
+    const user = this.currentUserSignal();
+    const token = this.getToken();
+    return !!user && !!token && !this.isTokenExpired(token);
+  });
   readonly isAdmin = computed(() => {
     const user = this.currentUser();
     return user ? (user.role === 'ADMIN' || user.role === 'SYSADMIN') : false;
@@ -116,7 +120,36 @@ export class AuthService {
     this.simulatedRoleSignal.set(null);
   }
 
+  isTokenExpired(token?: string | null): boolean {
+    const t = token ?? this.getToken();
+    if (!t) return true;
+    try {
+      const parts = t.split('.');
+      if (parts.length !== 3) return true;
+      const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payloadJson = decodeURIComponent(
+        atob(payloadBase64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const payload = JSON.parse(payloadJson);
+      if (!payload.exp) return false;
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      return payload.exp < nowInSeconds;
+    } catch {
+      return true;
+    }
+  }
+
   private getUserFromStorage(): User | null {
+    const token = localStorage.getItem('auth_token');
+    if (!token || this.isTokenExpired(token)) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('simulated_role');
+      return null;
+    }
     const userJson = localStorage.getItem('auth_user');
     if (!userJson) return null;
     try {

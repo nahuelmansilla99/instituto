@@ -13,7 +13,8 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "seed": "ts-node src/database/seed.ts",
-    "test:security": "node test-security.mjs"
+    "test:security": "node test-security.mjs",
+    "test:auth": "node test-auth-expiration.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^10.3.0",

@@ -23,7 +23,7 @@ import { User } from '../entities/user.entity';
         return {
           secret,
           signOptions: {
-            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '7d',
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '24h',
           },
         };
       },

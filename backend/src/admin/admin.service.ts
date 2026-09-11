@@ -168,7 +168,7 @@ export class AdminService {
 
     if (lesson.presentationPublicId) {
       try {
-        await this.cloudinaryService.deleteFile(lesson.presentationPublicId);
+        await this.cloudinaryService.deleteFile(lesson.presentationPublicId, 'raw');
       } catch (_) {}
     }
 
@@ -191,7 +191,7 @@ export class AdminService {
 
     if (lesson.presentationPublicId) {
       try {
-        await this.cloudinaryService.deleteFile(lesson.presentationPublicId);
+        await this.cloudinaryService.deleteFile(lesson.presentationPublicId, 'raw');
       } catch (_) {}
     }
 
@@ -210,7 +210,7 @@ export class AdminService {
 
     if (lesson.presentationPublicId) {
       try {
-        await this.cloudinaryService.deleteFile(lesson.presentationPublicId);
+        await this.cloudinaryService.deleteFile(lesson.presentationPublicId, 'raw');
       } catch (_) {}
     }
 
@@ -258,7 +258,7 @@ export class AdminService {
 
     if (sheet.filePublicId) {
       try {
-        await this.cloudinaryService.deleteFile(sheet.filePublicId);
+        await this.cloudinaryService.deleteFile(sheet.filePublicId, 'raw');
       } catch (_) {}
     }
 
@@ -306,7 +306,7 @@ export class AdminService {
 
     if (doc.filePublicId) {
       try {
-        await this.cloudinaryService.deleteFile(doc.filePublicId);
+        await this.cloudinaryService.deleteFile(doc.filePublicId, 'raw');
       } catch (_) {}
     }
 

@@ -141,6 +141,7 @@
           <app-presentation-viewer 
             *ngIf="l.presentationUrl"
             [presentationUrl]="l.presentationUrl"
+            [presentationFilename]="l.presentationFilename || undefined"
             [title]="l.title">
           </app-presentation-viewer>
           <div class="html-content" *ngIf="l.content" [innerHTML]="l.content"></div>

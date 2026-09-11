@@ -55,13 +55,33 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
   readonly isNativeDeck = computed(() => this.format() === 'pptx' || this.format() === 'pdf');
 
   readonly filename = computed(() => {
-    if (this.presentationFilename) return this.presentationFilename;
-    if (!this.presentationUrl) return 'Presentación';
-    if (this.presentationUrl.includes('prezi.com')) return 'Presentación Prezi';
-    if (this.presentationUrl.includes('docs.google.com')) return 'Google Slides';
-    if (this.presentationUrl.includes('canva.com')) return 'Presentación Canva';
-    const parts = this.presentationUrl.split('/');
-    return decodeURIComponent(parts[parts.length - 1]);
+    let name = '';
+    if (this.presentationFilename) {
+      name = this.presentationFilename;
+    } else if (!this.presentationUrl) {
+      name = 'Presentación';
+    } else if (this.presentationUrl.includes('prezi.com')) {
+      name = 'Presentación Prezi';
+    } else if (this.presentationUrl.includes('docs.google.com')) {
+      name = 'Google Slides';
+    } else if (this.presentationUrl.includes('canva.com')) {
+      name = 'Presentación Canva';
+    } else {
+      const parts = this.presentationUrl.split('?')[0].split('/');
+      name = decodeURIComponent(parts[parts.length - 1] || 'presentacion');
+    }
+
+    const lower = name.toLowerCase();
+    if (this.format() === 'pptx') {
+      if (!lower.endsWith('.pptx') && !lower.endsWith('.ppt') && !lower.endsWith('.odp')) {
+        name += '.pptx';
+      }
+    } else if (this.format() === 'pdf') {
+      if (!lower.endsWith('.pdf')) {
+        name += '.pdf';
+      }
+    }
+    return name;
   });
 
   readonly formatLabel = computed(() => {
@@ -87,6 +107,8 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
   // Internal viewer handles
   private pptxViewerInstance: PptxViewer | null = null;
   private pdfDocInstance: any = null;
+  private cachedBuffer: ArrayBuffer | null = null;
+  readonly isDownloading = signal(false);
   private touchStartX = 0;
   private touchStartY = 0;
 
@@ -96,6 +118,7 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['presentationUrl'] && !changes['presentationUrl'].isFirstChange()) {
+      this.cachedBuffer = null;
       this.detectFormatAndLoad();
     }
   }
@@ -242,6 +265,55 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
     }
   }
 
+  async downloadOriginal(): Promise<void> {
+    if (!this.presentationUrl) return;
+    this.isDownloading.set(true);
+
+    try {
+      let buffer = this.cachedBuffer;
+      if (!buffer) {
+        let normalizedUrl = this.presentationUrl.trim();
+        if (!normalizedUrl.startsWith('http') && !normalizedUrl.startsWith('/')) {
+          normalizedUrl = '/' + normalizedUrl;
+        }
+        const fetchUrl = normalizedUrl.startsWith('http')
+          ? normalizedUrl
+          : `${window.location.origin}${normalizedUrl}`;
+
+        const res = await fetch(fetchUrl);
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        buffer = await res.arrayBuffer();
+        this.cachedBuffer = buffer;
+      }
+
+      const name = this.filename();
+      const mimeType =
+        this.format() === 'pptx'
+          ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+          : this.format() === 'pdf'
+          ? 'application/pdf'
+          : 'application/octet-stream';
+
+      const blob = new Blob([buffer], { type: mimeType });
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1500);
+    } catch (err) {
+      console.error('Error al descargar presentación:', err);
+      // Fallback a descarga directa en navegador
+      window.open(this.presentationUrl, '_blank');
+    } finally {
+      this.isDownloading.set(false);
+    }
+  }
+
   retryLoad(): void {
     this.detectFormatAndLoad();
   }
@@ -267,6 +339,7 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
       }
 
       const arrayBuffer = await res.arrayBuffer();
+      this.cachedBuffer = arrayBuffer;
 
       if (this.format() === 'pptx') {
         await this.loadPptx(arrayBuffer);
@@ -288,6 +361,7 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
             : `${window.location.origin}${normalizedUrl}`;
           const res = await fetch(fetchUrl);
           const arrayBuffer = await res.arrayBuffer();
+          this.cachedBuffer = arrayBuffer;
           await this.loadPdf(arrayBuffer);
           this.format.set('pdf');
           return;

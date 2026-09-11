@@ -92,21 +92,22 @@
       </button>
 
       <!-- Download (Only for local/downloadable PPTX/PDF) -->
-      <a
+      <button
         *ngIf="isNativeDeck() || format() === 'other'"
-        [href]="presentationUrl"
-        target="_blank"
-        [download]="filename()"
+        type="button"
+        (click)="downloadOriginal()"
+        [disabled]="isDownloading()"
         class="v-btn v-btn-primary"
         title="Descargar archivo original"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg *ngIf="!isDownloading()" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7 10 12 15 17 10"></polyline>
           <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
-        <span class="btn-label-desktop">Descargar</span>
-      </a>
+        <span *ngIf="isDownloading()" class="mini-spin-circle"></span>
+        <span class="btn-label-desktop">{{ isDownloading() ? 'Descargando...' : 'Descargar' }}</span>
+      </button>
     </div>
   </header>
 
@@ -198,9 +199,9 @@
       <div class="other-icon">📑</div>
       <h4>Presentación en formato {{ formatLabel() }}</h4>
       <p>Puedes descargar el archivo o abrirlo en tu navegador.</p>
-      <a [href]="presentationUrl" target="_blank" class="v-btn v-btn-primary">
-        Abrir {{ filename() }}
-      </a>
+      <button (click)="downloadOriginal()" [disabled]="isDownloading()" class="v-btn v-btn-primary">
+        {{ isDownloading() ? 'Descargando...' : 'Descargar ' + filename() }}
+      </button>
     </div>
 
     <!-- Hover Navigation Arrow Left (Previous - for PPTX & PDF) -->

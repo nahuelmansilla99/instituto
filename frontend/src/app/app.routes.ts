@@ -70,6 +70,14 @@ export const routes: Routes = [
       import('./features/profile/profile.component').then((m) => m.ProfileComponent),
   },
   {
+    path: 'calculadora',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/solar-calculator/solar-calculator.component').then(
+        (m) => m.SolarCalculatorComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

@@ -15,6 +15,12 @@
 
     <!-- Right Side Nav -->
     <div class="nav-actions" *ngIf="authService.currentUser() as user">
+      <!-- Enlace directo Calculadora Solar -->
+      <!-- <a routerLink="/calculadora" routerLinkActive="active" class="nav-tool-btn" title="Calculadora Solar Interactiva">
+        <span class="tool-icon">☀</span>
+        <span class="tool-text">Calculadora Solar</span>
+      </a> -->
+
       <!-- User Profile & Dropdown -->
       <div class="user-menu-container">
         <button class="user-chip" (click)="toggleDropdown()" [class.active]="isDropdownOpen">
@@ -38,6 +44,10 @@
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             <span>Mi Perfil</span>
+          </a>
+          <a routerLink="/calculadora" class="dropdown-item" (click)="isDropdownOpen = false">
+            <span class="dropdown-icon-solar">☀</span>
+            <span>Calculadora Solar</span>
           </a>
           <a *ngIf="user.role === 'SYSADMIN'" routerLink="/sysadmin/users" class="dropdown-item" (click)="isDropdownOpen = false">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

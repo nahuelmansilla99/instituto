@@ -3,3 +3,4 @@ export * from './course.model';
 export * from './lesson.model';
 export * from './quiz.model';
 export * from './student.model';
+export * from './solar-calculator.model';

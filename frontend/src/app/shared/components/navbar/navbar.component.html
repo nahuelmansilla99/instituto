@@ -45,10 +45,10 @@
             </svg>
             <span>Mi Perfil</span>
           </a>
-          <a routerLink="/calculadora" class="dropdown-item" (click)="isDropdownOpen = false">
+          <!-- <a routerLink="/calculadora" class="dropdown-item" (click)="isDropdownOpen = false">
             <span class="dropdown-icon-solar">☀</span>
             <span>Calculadora Solar</span>
-          </a>
+          </a> -->
           <a *ngIf="user.role === 'SYSADMIN'" routerLink="/sysadmin/users" class="dropdown-item" (click)="isDropdownOpen = false">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>

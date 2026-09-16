@@ -117,9 +117,16 @@ async function runTests() {
     logout: () => { logoutCalled = true; }
   };
 
-  function simulateInterceptor(reqUrl, errorStatus) {
+  function simulateInterceptor(reqUrl, errorStatus, apiUrl = 'http://localhost:3000') {
+    const isApiRequest =
+      reqUrl.startsWith(apiUrl) ||
+      reqUrl.startsWith('/api') ||
+      (!reqUrl.startsWith('http://') && !reqUrl.startsWith('https://') && !reqUrl.startsWith('//'));
+    const isExternal = !isApiRequest;
+
     if (
       errorStatus === 401 &&
+      !isExternal &&
       !reqUrl.includes('/auth/login') &&
       !reqUrl.includes('/auth/register') &&
       !reqUrl.includes('/auth/google')
@@ -139,7 +146,7 @@ async function runTests() {
   // -------------------------------------------------------------
   // TEST 6: El interceptor no debe disparar logout() en endpoints de login/register
   // -------------------------------------------------------------
-  console.log(`\n${colors.bold}[6/6] Verificando que 401 en /auth/login no provoque bucle de logout...${colors.reset}`);
+  console.log(`\n${colors.bold}[6/7] Verificando que 401 en /auth/login no provoque bucle de logout...${colors.reset}`);
   totalTests++;
   logoutCalled = false;
   simulateInterceptor('http://localhost:3000/auth/login', 401);
@@ -148,6 +155,20 @@ async function runTests() {
     passedTests++;
   } else {
     logFail('El interceptor disparó logout() en /auth/login provocando bucle.');
+  }
+
+  // -------------------------------------------------------------
+  // TEST 7: El interceptor no debe disparar logout() ante error 401 en servicios externos (Cloudinary, etc.)
+  // -------------------------------------------------------------
+  console.log(`\n${colors.bold}[7/7] Verificando que 401 en URLs externas (ej. Cloudinary) NO dispare logout()...${colors.reset}`);
+  totalTests++;
+  logoutCalled = false;
+  simulateInterceptor('https://res.cloudinary.com/vips17et/raw/upload/test.pdf', 401);
+  if (!logoutCalled) {
+    logPass('Error 401 en URL externa (Cloudinary) no cerró sesión del usuario.');
+    passedTests++;
+  } else {
+    logFail('El interceptor disparó logout() erróneamente en una URL externa.');
   }
 
   // -------------------------------------------------------------

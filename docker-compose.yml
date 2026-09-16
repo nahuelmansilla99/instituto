@@ -36,7 +36,7 @@ services:
       DB_NAME: ${DB_NAME:-elearning_db}
       DB_SYNCHRONIZE: 'true'
       JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key_development_only_12345}
-      JWT_EXPIRES_IN: 7d
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
     ports:
       - "3000:3000"
     volumes:

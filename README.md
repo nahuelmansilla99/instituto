@@ -148,3 +148,23 @@ VALUES (
 
 ### Evaluaciones
 - `POST /lessons/:id/quiz/submit` - Enviar respuestas del cuestionario (`{ answers: [{ questionId, selectedOptionIndex }] }`)
+
+---
+
+## 🔐 Autenticación y Duración de Sesiones
+
+- **Token JWT:** La autenticación se gestiona mediante tokens JWT con una duración de **7 días** (`JWT_EXPIRES_IN=7d`), configurable mediante variables de entorno en el Backend y `docker-compose.yml`.
+- **Manejo de Expiración en Frontend:** El cliente Angular valida la fecha de vencimiento (`exp`) embebida en el token para mantener activa la sesión sin requerir re-login diario.
+- **Interceptor HTTP Resiliente:** El interceptor de peticiones (`jwtInterceptor`) detecta expiraciones de sesión (HTTP 401) exclusivamente provenientes de la API propia. Si un servicio externo o CDN (ej. Cloudinary, Prezi) devuelve un error 401, el usuario **no** es deslogueado de la plataforma.
+
+---
+
+## ☁️ Configuración de Almacenamiento (Cloudinary)
+
+La plataforma utiliza **Cloudinary** para almacenar presentaciones, fichas técnicas y documentos complementarios de las clases:
+
+- **Variables requeridas en `backend/.env`:**
+  - `CLOUDINARY_CLOUD_NAME`
+  - `CLOUDINARY_API_KEY`
+  - `CLOUDINARY_API_SECRET`
+- **Importante (Entrega de PDFs):** En la consola de Cloudinary (**Settings ⚙️ -> Security**), la opción **PDF and ZIP files delivery** debe estar configurada en **Allow / Permitir**. De lo contrario, Cloudinary bloqueará la entrega y previsualización de archivos PDF arrojando un error 401 al intentar descargarlos o visualizarlos en el visor de la lección.

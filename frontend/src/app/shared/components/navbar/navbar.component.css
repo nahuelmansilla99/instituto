@@ -92,7 +92,56 @@
   background: var(--primary) !important;
   border-color: var(--primary) !important;
   color: var(--text-primary) !important;
-  box-shadow: 0 0 14px rgba(48, 163, 216, 0.3);
+}
+
+.nav-tool-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--text-secondary);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.nav-tool-btn:hover {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-color: rgba(48, 163, 216, 0.35);
+  transform: translateY(-1px);
+}
+
+.nav-tool-btn.active {
+  color: var(--primary);
+  background: var(--primary-light);
+  border-color: var(--primary);
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(48, 163, 216, 0.25);
+}
+
+.nav-tool-btn .tool-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  color: #f59e0b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropdown-icon-solar {
+  font-size: 1.1rem;
+  line-height: 1;
+  width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
 }
 
 .user-menu-container {
@@ -227,6 +276,12 @@
   }
   .nav-actions {
     gap: 10px;
+  }
+  .nav-tool-btn {
+    padding: 6px 10px;
+  }
+  .nav-tool-btn .tool-text {
+    display: none;
   }
 }
 

@@ -1,0 +1,927 @@
+@if (!isDrawer) {
+  <app-navbar></app-navbar>
+}
+
+@if (isDrawer) {
+  <header class="drawer-header">
+    <div class="drawer-title-group">
+      <div class="drawer-icon-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </div>
+      <div>
+        <h2 class="drawer-title">Calculadora Solar</h2>
+        <span class="drawer-subtitle">Simulación de balance energético</span>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="drawer-close-btn"
+      (click)="onCloseDrawerClick()"
+      title="Cerrar panel lateral"
+      aria-label="Cerrar panel"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </header>
+}
+
+<main class="calculator-container" [class.is-drawer-mode]="isDrawer">
+  <!-- Cabecera principal en vista completa -->
+  @if (!isDrawer) {
+    <section class="calculator-header glass-card">
+      <div class="header-content">
+        <div class="header-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <span>Herramienta Técnica Interactiva</span>
+        </div>
+        <h1 class="page-title">Calculadora Solar Fotovoltaica</h1>
+        <p class="page-subtitle">
+          Dimensioná tu instalación, estimá la generación mensual según las horas de sol pico de tu localidad,
+          analizá el autoconsumo horario simultáneo y valorizá el ahorro económico y excedente inyectado.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-secondary action-btn"
+          (click)="shareResult()"
+          title="Copiar o compartir resumen completo"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Compartir / Copiar</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary action-btn"
+          (click)="print()"
+          title="Imprimir informe técnico o guardar en PDF"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimir / PDF</span>
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Toast flotante de copiado exitoso -->
+  @if (copiedFeedback()) {
+    <div class="toast-feedback animate-fade-in" role="alert">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>¡Resumen de balance copiado al portapapeles!</span>
+    </div>
+  }
+
+  <!-- Estructura principal: Controles a la izquierda / Resultados a la derecha -->
+  <div class="calculator-grid">
+    <!-- PANEL DE CONTROLES (PASOS 1 A 4) -->
+    <aside class="controls-panel">
+      <!-- Barra de acciones compacta en Drawer mode -->
+      @if (isDrawer) {
+        <div class="drawer-actions-bar">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="shareResult()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Copiar</span>
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" (click)="print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Imprimir</span>
+          </button>
+        </div>
+      }
+
+      <!-- PASO 1: INSTALACIÓN FOTOVOLTAICA -->
+      <section class="step-card glass-card">
+        <div class="step-header">
+          <span class="step-number">1</span>
+          <div>
+            <h3 class="step-title">Instalación Fotovoltaica</h3>
+            <p class="step-desc">Módulos, potencia unitaria y rendimiento global</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <!-- Potencia del panel -->
+          <div class="form-group">
+            <div class="label-with-value">
+              <label for="panelPower" class="form-label">Potencia por módulo</label>
+              <span class="value-badge">{{ inputs().panelPowerWp }} Wp</span>
+            </div>
+            <div class="input-slider-row">
+              <input
+                id="panelPower"
+                type="range"
+                min="250"
+                max="750"
+                step="25"
+                [ngModel]="inputs().panelPowerWp"
+                (ngModelChange)="updatePanelPower($event)"
+                class="form-range"
+              />
+              <input
+                type="number"
+                min="50"
+                max="1000"
+                step="10"
+                [ngModel]="inputs().panelPowerWp"
+                (ngModelChange)="updatePanelPower($event)"
+                class="form-control number-box"
+              />
+            </div>
+            <div class="chips-row">
+              <button type="button" class="preset-chip" [class.active]="inputs().panelPowerWp === 450" (click)="updatePanelPower(450)">450 Wp</button>
+              <button type="button" class="preset-chip" [class.active]="inputs().panelPowerWp === 500" (click)="updatePanelPower(500)">500 Wp</button>
+              <button type="button" class="preset-chip" [class.active]="inputs().panelPowerWp === 550" (click)="updatePanelPower(550)">550 Wp</button>
+              <button type="button" class="preset-chip" [class.active]="inputs().panelPowerWp === 600" (click)="updatePanelPower(600)">600 Wp</button>
+            </div>
+          </div>
+
+          <!-- Cantidad de paneles -->
+          <div class="form-group">
+            <div class="label-with-value">
+              <label for="panelCount" class="form-label">Cantidad de módulos</label>
+              <span class="value-badge">{{ inputs().panelCount }} paneles</span>
+            </div>
+            <div class="input-slider-row">
+              <input
+                id="panelCount"
+                type="range"
+                min="1"
+                max="40"
+                step="1"
+                [ngModel]="inputs().panelCount"
+                (ngModelChange)="updatePanelCount($event)"
+                class="form-range"
+              />
+              <input
+                type="number"
+                min="1"
+                max="500"
+                step="1"
+                [ngModel]="inputs().panelCount"
+                (ngModelChange)="updatePanelCount($event)"
+                class="form-control number-box"
+              />
+            </div>
+          </div>
+
+          <!-- Rendimiento Global PR -->
+          <div class="form-group">
+            <div class="label-with-value">
+              <label for="perfRatio" class="form-label">Rendimiento global (PR)</label>
+              <span class="value-badge">{{ inputs().performanceRatio }}%</span>
+            </div>
+            <div class="input-slider-row">
+              <input
+                id="perfRatio"
+                type="range"
+                min="60"
+                max="95"
+                step="1"
+                [ngModel]="inputs().performanceRatio"
+                (ngModelChange)="updatePerformanceRatio($event)"
+                class="form-range"
+              />
+              <input
+                type="number"
+                min="50"
+                max="100"
+                step="1"
+                [ngModel]="inputs().performanceRatio"
+                (ngModelChange)="updatePerformanceRatio($event)"
+                class="form-control number-box"
+              />
+            </div>
+            <span class="field-hint">Considera pérdidas térmicas, cableado, inversor y suciedad (típico: 75% a 85%).</span>
+          </div>
+
+          <!-- Chip de potencia pico calculada -->
+          <div class="peak-power-card">
+            <div class="peak-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
+            <div class="peak-info">
+              <span class="peak-label">Potencia Pico Instalada</span>
+              <strong class="peak-val">{{ outputs().peakPowerKwp | number:'1.2-2' }} kWp</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 2: RECURSO SOLAR -->
+      <section class="step-card glass-card">
+        <div class="step-header">
+          <span class="step-number">2</span>
+          <div>
+            <h3 class="step-title">Recurso Solar</h3>
+            <p class="step-desc">Localidad, mes de cálculo y horas de sol pico</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <!-- Selector de Localidad -->
+          <div class="form-group">
+            <label for="locationKey" class="form-label">Localidad de referencia</label>
+            <select
+              id="locationKey"
+              class="form-control form-select"
+              [ngModel]="inputs().locationKey"
+              (ngModelChange)="onLocationChange($event)"
+            >
+              @for (loc of locations; track loc.key) {
+                <option [value]="loc.key">{{ loc.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Selector de Mes -->
+          <div class="form-group">
+            <label for="monthSelect" class="form-label">Mes de simulación</label>
+            <select
+              id="monthSelect"
+              class="form-control form-select"
+              [ngModel]="inputs().monthIndex"
+              (ngModelChange)="onMonthChange($event)"
+            >
+              @for (m of months; track m.name; let idx = $index) {
+                <option [value]="idx">{{ m.name }} ({{ m.days }} días)</option>
+              }
+            </select>
+          </div>
+
+          <!-- Input HSP con indicación de origen -->
+          <div class="form-group">
+            <div class="label-with-value">
+              <label for="hspInput" class="form-label">Horas de Sol Pico (HSP)</label>
+              @if (manualHspEdited()) {
+                <span class="tag-manual">Editado manual</span>
+              } @else {
+                <span class="tag-auto">Histórico NASA/SMN</span>
+              }
+            </div>
+            <div class="hsp-input-wrap">
+              <input
+                id="hspInput"
+                type="number"
+                min="0.5"
+                max="12"
+                step="0.05"
+                [ngModel]="inputs().hsp"
+                (ngModelChange)="onHspInput($event)"
+                class="form-control number-box"
+              />
+              <span class="hsp-unit">h/día</span>
+
+              @if (manualHspEdited()) {
+                <button
+                  type="button"
+                  class="btn-reset-hsp"
+                  (click)="resetHspToDefault()"
+                  title="Restaurar valor histórico sugerido"
+                >
+                  Restaurar ({{ hspHint() | number:'1.2-2' }})
+                </button>
+              }
+            </div>
+            <span class="field-hint">
+              Referencia para {{ solarService.getLocation(inputs().locationKey).name }} en el mes elegido: {{ hspHint() | number:'1.2-2' }} h/día.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PASO 3: CONSUMO ELÉCTRICO Y PERFIL HORARIO -->
+      <section class="step-card glass-card">
+        <div class="step-header">
+          <span class="step-number">3</span>
+          <div>
+            <h3 class="step-title">Consumo y Curva Horaria</h3>
+            <p class="step-desc">Demanda mensual y perfil de hábitos de uso</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <!-- Consumo mensual -->
+          <div class="form-group">
+            <div class="label-with-value">
+              <label for="monthlyUse" class="form-label">Consumo mensual de la factura</label>
+              <span class="value-badge">{{ inputs().monthlyConsumptionKwh }} kWh/mes</span>
+            </div>
+            <div class="input-slider-row">
+              <input
+                id="monthlyUse"
+                type="range"
+                min="50"
+                max="2500"
+                step="10"
+                [ngModel]="inputs().monthlyConsumptionKwh"
+                (ngModelChange)="updateMonthlyConsumption($event)"
+                class="form-range"
+              />
+              <input
+                type="number"
+                min="0"
+                max="10000"
+                step="10"
+                [ngModel]="inputs().monthlyConsumptionKwh"
+                (ngModelChange)="updateMonthlyConsumption($event)"
+                class="form-control number-box"
+              />
+            </div>
+          </div>
+
+          <!-- Selector de Tipo de Perfil -->
+          <div class="form-group">
+            <label class="form-label">Perfil de demanda horaria</label>
+            <div class="profile-tabs">
+              <button
+                type="button"
+                class="tab-btn"
+                [class.active]="inputs().profileType === 'home'"
+                (click)="setProfile('home')"
+              >
+                <span class="tab-icon">🏠</span>
+                <span class="tab-text">Residencial</span>
+              </button>
+
+              <button
+                type="button"
+                class="tab-btn"
+                [class.active]="inputs().profileType === 'business'"
+                (click)="setProfile('business')"
+              >
+                <span class="tab-icon">🏢</span>
+                <span class="tab-text">Comercial</span>
+              </button>
+
+              <button
+                type="button"
+                class="tab-btn"
+                [class.active]="inputs().profileType === 'custom'"
+                (click)="setProfile('custom')"
+              >
+                <span class="tab-icon">⚙️</span>
+                <span class="tab-text">Personalizado</span>
+              </button>
+            </div>
+            <span class="field-hint">{{ outputs().profileDescription }}</span>
+          </div>
+
+          <!-- Grilla 24h para perfil personalizado -->
+          @if (inputs().profileType === 'custom') {
+            <div class="custom-profile-box animate-fade-in">
+              <div class="custom-box-header">
+                <span class="custom-box-title">Pesos relativos por hora (00h - 23h)</span>
+                <div class="custom-presets-row">
+                  <button type="button" class="chip-action" (click)="loadPresetIntoCustom('home')">Copiar Hogar</button>
+                  <button type="button" class="chip-action" (click)="loadPresetIntoCustom('business')">Copiar Comercial</button>
+                  <button type="button" class="chip-action" (click)="loadPresetIntoCustom('flat')">Parejo</button>
+                </div>
+              </div>
+
+              <div class="custom-hours-grid">
+                @for (weight of customWeights(); track $index) {
+                  <div class="hour-weight-cell">
+                    <span class="cell-hour">{{ $index < 10 ? '0' + $index : $index }}h</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      [ngModel]="weight"
+                      (ngModelChange)="onCustomWeightChange($index, $event)"
+                      class="cell-input"
+                    />
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- PASO 4: VALOR ECONÓMICO -->
+      <section class="step-card glass-card">
+        <div class="step-header">
+          <span class="step-number">4</span>
+          <div>
+            <h3 class="step-title">Parámetros Económicos</h3>
+            <p class="step-desc">Tarifas eléctricas para cuantificar el ahorro</p>
+          </div>
+        </div>
+
+        <div class="step-body">
+          <div class="form-row-2col">
+            <div class="form-group">
+              <label for="buyPrice" class="form-label">Tarifa compra ($/kWh)</label>
+              <div class="currency-input-wrap">
+                <span class="curr-symbol">$</span>
+                <input
+                  id="buyPrice"
+                  type="number"
+                  min="0"
+                  max="2000"
+                  step="5"
+                  [ngModel]="inputs().buyPricePerKwh"
+                  (ngModelChange)="updateBuyPrice($event)"
+                  class="form-control number-box"
+                />
+              </div>
+              <span class="field-hint">Costo de energía evitada</span>
+            </div>
+
+            <div class="form-group">
+              <label for="exportPrice" class="form-label">Tarifa inyección ($/kWh)</label>
+              <div class="currency-input-wrap">
+                <span class="curr-symbol">$</span>
+                <input
+                  id="exportPrice"
+                  type="number"
+                  min="0"
+                  max="2000"
+                  step="5"
+                  [ngModel]="inputs().exportPricePerKwh"
+                  (ngModelChange)="updateExportPrice($event)"
+                  class="form-control number-box"
+                />
+              </div>
+              <span class="field-hint">Crédito Ley Distribuida</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- PANEL DE RESULTADOS Y VISUALIZACIONES -->
+    <section class="results-panel">
+      <!-- HERO CARD CON PRODUCCIÓN ESTIMADA -->
+      <div class="hero-card glass-card">
+        <div class="hero-top-row">
+          <div class="hero-title-badge">
+            <span class="pulse-indicator"></span>
+            <span>BALANCE ESTIMADO MENSUAL</span>
+          </div>
+          <span class="hero-period">{{ outputs().periodLabel }}</span>
+        </div>
+
+        <div class="hero-main-stat">
+          <div class="hero-value-wrap">
+            <span class="hero-number">{{ outputs().monthlyGenerationKwh | number:'1.0-0' }}</span>
+            <span class="hero-unit">kWh/mes</span>
+          </div>
+          <p class="hero-desc">Generación solar fotovoltaica estimada en sitio</p>
+        </div>
+
+        <div class="hero-subgrid">
+          <div class="hero-metric-item">
+            <span class="metric-label">Potencia Pico</span>
+            <strong class="metric-value">{{ outputs().peakPowerKwp | number:'1.2-2' }} kWp</strong>
+            <span class="metric-note">{{ inputs().panelCount }} paneles × {{ inputs().panelPowerWp }} Wp</span>
+          </div>
+
+          <div class="hero-metric-item">
+            <span class="metric-label">Consumo Mensual</span>
+            <strong class="metric-value">{{ outputs().monthlyConsumptionKwh | number:'1.0-0' }} kWh</strong>
+            <span class="metric-note">Demanda eléctrica base</span>
+          </div>
+
+          <div class="hero-metric-item highlight-green">
+            <span class="metric-label">Cobertura Directa</span>
+            <strong class="metric-value">{{ outputs().coveragePct | number:'1.1-1' }}%</strong>
+            <span class="metric-note">De tu consumo cubierto con solar</span>
+          </div>
+
+          <div class="hero-metric-item highlight-amber">
+            <span class="metric-label">Factor Autoconsumo</span>
+            <strong class="metric-value">{{ outputs().selfConsumptionPct | number:'1.1-1' }}%</strong>
+            <span class="metric-note">De la energía FV usada en sitio</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 TARJETAS DE PREGUNTAS CLAVE -->
+      <div class="questions-grid">
+        <!-- 1. ¿Cuánto genera? -->
+        <div class="question-card glass-card">
+          <div class="question-icon q1">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </div>
+          <div class="question-body">
+            <span class="question-title">1. ¿Cuánto genera?</span>
+            <strong class="question-highlight">{{ outputs().monthlyGenerationKwh | number:'1.0-0' }} kWh/mes</strong>
+            <p class="question-desc">
+              Con <strong>{{ outputs().peakPowerKwp | number:'1.2-2' }} kWp</strong> de potencia y recurso medio de <strong>{{ inputs().hsp | number:'1.2-2' }} HSP</strong> (PR {{ inputs().performanceRatio }}%).
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. ¿Cuándo consume? -->
+        <div class="question-card glass-card">
+          <div class="question-icon q2">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="question-body">
+            <span class="question-title">2. ¿Cuándo consume?</span>
+            <strong class="question-highlight">{{ outputs().monthlyConsumptionKwh | number:'1.0-0' }} kWh/mes</strong>
+            <p class="question-desc">
+              Perfil <strong>{{ outputs().profileLabel }}</strong>: {{ outputs().profileDescription }}.
+            </p>
+          </div>
+        </div>
+
+        <!-- 3. ¿Qué parte coincide? -->
+        <div class="question-card glass-card">
+          <div class="question-icon q3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="question-body">
+            <span class="question-title">3. ¿Qué parte coincide?</span>
+            <strong class="question-highlight">{{ outputs().selfConsumptionKwh | number:'1.0-0' }} kWh ({{ outputs().coveragePct | number:'1.1-1' }}%)</strong>
+            <p class="question-desc">
+              Autoconsumo simultáneo directo: energía solar consumida en el mismo instante en que se genera.
+            </p>
+          </div>
+        </div>
+
+        <!-- 4. ¿Qué ocurre con la diferencia? -->
+        <div class="question-card glass-card">
+          <div class="question-icon q4">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </div>
+          <div class="question-body">
+            <span class="question-title">4. ¿Qué pasa con el resto?</span>
+            <strong class="question-highlight">{{ outputs().differenceLabel }}</strong>
+            <p class="question-desc">
+              Excedente inyectado: <strong>{{ outputs().exportSurplusKwh | number:'1.0-0' }} kWh</strong>. Importación de red: <strong>{{ outputs().importGridKwh | number:'1.0-0' }} kWh</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICA INTERACTIVA SVG -->
+      <div class="chart-card glass-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Curva Horaria de Generación vs Consumo</h3>
+            <p class="chart-subtitle">Día promedio representativo (00:00 a 23:00 hs en kW instantáneos)</p>
+          </div>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color legend-gen"></span>
+              <span>Generación FV (kW)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color legend-use"></span>
+              <span>Consumo (kW)</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color legend-self"></span>
+              <span>Autoconsumo solar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contenedor del gráfico SVG interactivo con tooltip flotante -->
+        <div class="chart-svg-container" (mouseleave)="onLeaveChart()">
+          <svg
+            viewBox="0 0 900 330"
+            class="solar-chart-svg"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <defs>
+              <!-- Degradé cálido para el área de generación solar -->
+              <linearGradient id="solarGenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.38" />
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.02" />
+              </linearGradient>
+
+              <!-- Degradé esmeralda para el área de autoconsumo coincidente -->
+              <linearGradient id="solarSelfGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.45" />
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.10" />
+              </linearGradient>
+            </defs>
+
+            <!-- Líneas de grilla horizontales con valores de kW -->
+            @for (line of svgChart().gridLines; track line.y) {
+              <g class="grid-line-group">
+                <line
+                  [attr.x1]="svgChart().padLeft"
+                  [attr.y1]="line.y"
+                  [attr.x2]="svgChart().padLeft + svgChart().chartWidth"
+                  [attr.y2]="line.y"
+                  class="grid-line"
+                />
+                <text
+                  [attr.x]="svgChart().padLeft - 10"
+                  [attr.y]="line.y + 4"
+                  text-anchor="end"
+                  class="grid-axis-label"
+                >
+                  {{ line.label }}
+                </text>
+              </g>
+            }
+
+            <!-- Área sombreada de Generación Solar -->
+            <path
+              [attr.d]="svgChart().genAreaPath"
+              fill="url(#solarGenGrad)"
+              class="chart-area-gen"
+            />
+
+            <!-- Área sombreada de Autoconsumo simultáneo -->
+            <path
+              [attr.d]="svgChart().selfAreaPath"
+              fill="url(#solarSelfGrad)"
+              class="chart-area-self"
+            />
+
+            <!-- Líneas de curva (Curva solar amarilla/dorada y Demanda azul) -->
+            <polyline
+              [attr.points]="svgChart().genPolyline"
+              class="chart-polyline polyline-gen"
+            />
+
+            <polyline
+              [attr.points]="svgChart().usePolyline"
+              class="chart-polyline polyline-use"
+            />
+
+            <!-- Ticks del eje horizontal (Horas del día) -->
+            @for (tick of svgChart().xTicks; track tick.x) {
+              <text
+                [attr.x]="tick.x"
+                [attr.y]="svgChart().padTop + svgChart().chartHeight + 22"
+                text-anchor="middle"
+                class="grid-axis-label"
+              >
+                {{ tick.label }}
+              </text>
+            }
+
+            <!-- Indicador vertical de hora activa -->
+            @if (tooltip(); as tip) {
+              <line
+                [attr.x1]="tip.ptX"
+                [attr.y1]="svgChart().padTop"
+                [attr.x2]="tip.ptX"
+                [attr.y2]="svgChart().padTop + svgChart().chartHeight"
+                class="chart-crosshair"
+              />
+            }
+
+            <!-- Zonas interactivas y puntos por cada hora -->
+            @for (pt of svgChart().points; track pt.hour) {
+              <g
+                class="interactive-hour-group"
+                (mouseenter)="onHoverHour(pt.hour, $event)"
+              >
+                <!-- Hitbox invisible amplio para facilitar captura con el cursor -->
+                <rect
+                  [attr.x]="pt.x - 17"
+                  [attr.y]="svgChart().padTop"
+                  width="34"
+                  [attr.height]="svgChart().chartHeight"
+                  fill="transparent"
+                  class="chart-hitbox"
+                />
+
+                <!-- Círculo interactivo en curva solar -->
+                <circle
+                  [attr.cx]="pt.x"
+                  [attr.cy]="pt.yGen"
+                  r="3.5"
+                  class="chart-point point-gen"
+                  [class.active]="tooltip()?.hour === pt.hour"
+                />
+
+                <!-- Círculo interactivo en curva de consumo -->
+                <circle
+                  [attr.cx]="pt.x"
+                  [attr.cy]="pt.yUse"
+                  r="3.5"
+                  class="chart-point point-use"
+                  [class.active]="tooltip()?.hour === pt.hour"
+                />
+              </g>
+            }
+          </svg>
+
+          <!-- Tooltip flotante superpuesto -->
+          @if (tooltip(); as tip) {
+            <div
+              class="chart-tooltip-bubble glass-card"
+              [class.align-left]="tip.xPct > 65"
+              [style.left.%]="tip.xPct"
+              [style.top.%]="tip.yPct"
+            >
+              <div class="tooltip-top">
+                <span class="tooltip-badge-hour">{{ tip.label }} hs</span>
+                <span class="tooltip-hint-hour">Día promedio</span>
+              </div>
+
+              <div class="tooltip-rows">
+                <div class="tooltip-item">
+                  <span class="color-dot dot-gen"></span>
+                  <span class="item-name">Generación FV:</span>
+                  <strong class="item-val">{{ tip.genKw | number:'1.2-2' }} kW</strong>
+                </div>
+
+                <div class="tooltip-item">
+                  <span class="color-dot dot-use"></span>
+                  <span class="item-name">Consumo:</span>
+                  <strong class="item-val">{{ tip.useKw | number:'1.2-2' }} kW</strong>
+                </div>
+
+                <div class="tooltip-item">
+                  <span class="color-dot dot-self"></span>
+                  <span class="item-name">Autoconsumo:</span>
+                  <strong class="item-val text-green">{{ tip.selfKw | number:'1.2-2' }} kW</strong>
+                </div>
+
+                @if (tip.surplusKw > 0.01) {
+                  <div class="tooltip-item">
+                    <span class="color-dot dot-surplus"></span>
+                    <span class="item-name">Excedente:</span>
+                    <strong class="item-val text-amber">{{ tip.surplusKw | number:'1.2-2' }} kW</strong>
+                  </div>
+                }
+
+                @if (tip.importKw > 0.01) {
+                  <div class="tooltip-item">
+                    <span class="color-dot dot-import"></span>
+                    <span class="item-name">Importación:</span>
+                    <strong class="item-val text-blue">{{ tip.importKw | number:'1.2-2' }} kW</strong>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- 3 TARJETAS DE BALANCE ENERGÉTICO -->
+      <div class="balance-cards-grid">
+        <!-- Autoconsumo directo -->
+        <div class="balance-card card-self glass-card">
+          <div class="balance-header">
+            <span class="balance-pill pill-self">Autoconsumo</span>
+            <div class="balance-icon icon-self">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="balance-body">
+            <strong class="balance-number">{{ outputs().selfConsumptionKwh | number:'1.0-0' }} <span class="balance-unit">kWh/mes</span></strong>
+            <span class="balance-pct-tag">{{ outputs().selfConsumptionPct | number:'1.1-1' }}% de la generación solar</span>
+            <p class="balance-desc">Energía limpia aprovechada inmediatamente en las cargas del inmueble.</p>
+          </div>
+        </div>
+
+        <!-- Excedente potencial -->
+        <div class="balance-card card-surplus glass-card">
+          <div class="balance-header">
+            <span class="balance-pill pill-surplus">Excedente Potencial</span>
+            <div class="balance-icon icon-surplus">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="7" y1="17" x2="17" y2="7"></line>
+                <polyline points="7 7 17 7 17 17"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="balance-body">
+            <strong class="balance-number">{{ outputs().exportSurplusKwh | number:'1.0-0' }} <span class="balance-unit">kWh/mes</span></strong>
+            <span class="balance-pct-tag">Inyección a la red pública</span>
+            <p class="balance-desc">Energía fotovoltaica remanente lista para volcar y generar crédito tarifario.</p>
+          </div>
+        </div>
+
+        <!-- Importación de red -->
+        <div class="balance-card card-import glass-card">
+          <div class="balance-header">
+            <span class="balance-pill pill-import">Importación de Red</span>
+            <div class="balance-icon icon-import">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="17" y1="7" x2="7" y2="17"></line>
+                <polyline points="17 17 7 17 7 7"></polyline>
+              </svg>
+            </div>
+          </div>
+          <div class="balance-body">
+            <strong class="balance-number">{{ outputs().importGridKwh | number:'1.0-0' }} <span class="balance-unit">kWh/mes</span></strong>
+            <span class="balance-pct-tag">Tomado de la red distribuidora</span>
+            <p class="balance-desc">Demanda nocturna y picos no cubiertos por la generación solar instantánea.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 TARJETAS DE RESULTADO ECONÓMICO + TOTAL -->
+      <div class="economic-section glass-card">
+        <div class="economic-header">
+          <div class="econ-title-wrap">
+            <h3 class="economic-title">Estimación Económica Mensual</h3>
+            <p class="economic-subtitle">Valorización estimada del balance según tarifas ingresadas</p>
+          </div>
+          <div class="economic-total-badge">
+            <span class="econ-total-label">Beneficio Mensual Total:</span>
+            <strong class="econ-total-val">
+              {{ solarService.formatCurrency(outputs().selfConsumptionSavings + outputs().exportCreditSavings) }}/mes
+            </strong>
+          </div>
+        </div>
+
+        <div class="economic-cards-grid">
+          <!-- Ahorro por autoconsumo -->
+          <div class="econ-card econ-card-saving">
+            <div class="econ-card-top">
+              <span class="econ-tag tag-saving">Ahorro por Autoconsumo</span>
+              <span class="econ-rate">Tarifa: {{ solarService.formatCurrency(inputs().buyPricePerKwh) }}/kWh</span>
+            </div>
+            <strong class="econ-amount">{{ solarService.formatCurrency(outputs().selfConsumptionSavings) }}</strong>
+            <span class="econ-period">al mes</span>
+            <p class="econ-desc">
+              Ahorro directo evitado al no comprar <strong>{{ outputs().selfConsumptionKwh | number:'1.0-0' }} kWh</strong> de la red eléctrica.
+            </p>
+          </div>
+
+          <!-- Crédito por inyección -->
+          <div class="econ-card econ-card-export">
+            <div class="econ-card-top">
+              <span class="econ-tag tag-export">Crédito por Inyección</span>
+              <span class="econ-rate">Tarifa: {{ solarService.formatCurrency(inputs().exportPricePerKwh) }}/kWh</span>
+            </div>
+            <strong class="econ-amount">{{ solarService.formatCurrency(outputs().exportCreditSavings) }}</strong>
+            <span class="econ-period">al mes</span>
+            <p class="econ-desc">
+              Compensación monetaria por inyectar <strong>{{ outputs().exportSurplusKwh | number:'1.0-0' }} kWh</strong> de excedentes limpios a la distribuidora.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>

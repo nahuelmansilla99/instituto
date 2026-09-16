@@ -10,11 +10,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { LessonDetail, QuizEvaluationResponse } from '../../core/models';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PdfViewerModalComponent } from '../../shared/components/pdf-viewer-modal/pdf-viewer-modal.component';
+import { SolarCalculatorComponent } from '../solar-calculator/solar-calculator.component';
 
 @Component({
   selector: 'app-lesson',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent, PdfViewerModalComponent],
+  imports: [CommonModule, NavbarComponent, RouterLink, PresentationViewerComponent, PdfViewerModalComponent, SolarCalculatorComponent],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.css',
 })
@@ -44,6 +45,7 @@ export class LessonComponent implements OnInit, OnDestroy {
 
   // New UI states
   readonly isPresentationOpen = signal(false);
+  readonly isSolarCalculatorOpen = signal(false);
   readonly pdfPreviews = signal<Record<string, SafeResourceUrl>>({});
   private generatedBlobUrls: string[] = [];
   readonly pdfBlobUrls = signal<Record<string, SafeResourceUrl>>({});
@@ -85,6 +87,7 @@ export class LessonComponent implements OnInit, OnDestroy {
     this.downloadedSheets.set(new Set());
     this.manualSheetsViewed.set(false);
     this.isPresentationOpen.set(false);
+    this.isSolarCalculatorOpen.set(false);
     this.pdfPreviews.set({});
     for (const url of this.generatedBlobUrls) {
       window.URL.revokeObjectURL(url);
@@ -197,6 +200,18 @@ export class LessonComponent implements OnInit, OnDestroy {
 
   closePresentation(): void {
     this.isPresentationOpen.set(false);
+  }
+
+  openSolarCalculator(): void {
+    this.isSolarCalculatorOpen.set(true);
+  }
+
+  closeSolarCalculator(): void {
+    this.isSolarCalculatorOpen.set(false);
+  }
+
+  toggleSolarCalculator(): void {
+    this.isSolarCalculatorOpen.update((v) => !v);
   }
 
   toggleManualSheetsViewed(): void {

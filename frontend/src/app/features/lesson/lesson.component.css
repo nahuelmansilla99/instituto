@@ -1069,3 +1069,132 @@
   }
 }
 
+/* ==========================================================================
+   SOLAR CALCULATOR INTEGRATION & DRAWER
+   ========================================================================== */
+.btn-tool-solar {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.btn-tool-solar:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+.btn-tool-solar .solar-icon {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Floating Action Button */
+.fab-solar-calculator {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 990;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--radius-full, 9999px);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.fab-solar-calculator:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.5), 0 4px 10px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #fbbf24, #d97706);
+}
+
+.fab-solar-calculator:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.fab-solar-calculator .fab-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.fab-solar-calculator .fab-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Solar Calculator Drawer Overlay & Panel */
+.calculator-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1200;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.calculator-drawer-panel {
+  width: min(720px, 95vw);
+  height: 100vh;
+  position: fixed;
+  right: 0;
+  top: 0;
+  background: var(--bg-main);
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.3);
+  z-index: 1201;
+  overflow-y: auto;
+  animation: slideInDrawer 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInDrawer {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .fab-solar-calculator {
+    bottom: 20px;
+    right: 20px;
+    padding: 12px;
+    border-radius: 50%;
+  }
+  .fab-solar-calculator .fab-label {
+    display: none;
+  }
+  .btn-tool-solar {
+    margin-left: 0;
+  }
+}
+
+

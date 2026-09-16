@@ -60,6 +60,10 @@
             <ng-container *ngIf="l.status === 'LOCKED'">🔒 Bloqueada</ng-container>
             <ng-container *ngIf="l.status === 'AVAILABLE'">⏳ En progreso</ng-container>
           </span>
+          <!-- <button type="button" class="btn-tool-solar" (click)="toggleSolarCalculator()" title="Abrir Calculadora Solar">
+            <span class="solar-icon">☀</span>
+            <span>Calculadora Solar</span>
+          </button> -->
         </div>
         <h1 class="lesson-title">{{ l.title }}</h1>
       </header>
@@ -345,6 +349,12 @@
     </section>
   </div>
 
+  <!-- Floating Action Button (FAB) Calculadora Solar -->
+  <!-- <button type="button" class="fab-solar-calculator" (click)="toggleSolarCalculator()" title="Calculadora Solar">
+    <span class="fab-icon">☀</span>
+    <span class="fab-label">Calculadora</span>
+  </button> -->
+
   <!-- PDF Modal Viewer Overlay -->
   <app-pdf-viewer-modal 
     *ngIf="isPdfModalOpen()"
@@ -353,4 +363,11 @@
     (close)="closePdfModal()"
     (download)="downloadPdfFromModal()">
   </app-pdf-viewer-modal>
+
+  <!-- Solar Calculator Drawer Overlay -->
+  <!-- <div class="calculator-drawer-overlay animate-fade-in" *ngIf="isSolarCalculatorOpen()" (click)="closeSolarCalculator()">
+    <div class="calculator-drawer-panel" (click)="$event.stopPropagation()">
+      <app-solar-calculator [isDrawer]="true" (closeDrawer)="closeSolarCalculator()"></app-solar-calculator>
+    </div>
+  </div> -->
 </main>

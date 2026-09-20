@@ -162,6 +162,23 @@
   gap: 8px;
 }
 
+.btn-outline-info {
+  background: rgba(48, 163, 216, 0.08);
+  color: var(--primary, #30a3d8);
+  border: 1px solid rgba(48, 163, 216, 0.35);
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-sm, 8px);
+  transition: all 0.2s ease;
+}
+
+.btn-outline-info:hover {
+  background: var(--primary, #30a3d8);
+  color: #ffffff;
+  border-color: var(--primary, #30a3d8);
+  box-shadow: 0 4px 12px rgba(48, 163, 216, 0.25);
+}
+
 /* Toast flotante de copiado */
 .toast-feedback {
   position: fixed;
@@ -204,10 +221,85 @@
   gap: 20px;
 }
 
+/* Cabecera introductoria de parámetros para el alumno */
+.panel-intro-card {
+  padding: 16px 18px;
+  background: linear-gradient(135deg, rgba(48, 163, 216, 0.08) 0%, rgba(255, 255, 255, 0.98) 100%);
+  border: 1px solid rgba(48, 163, 216, 0.25);
+  border-radius: var(--radius-md, 14px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(48, 163, 216, 0.08);
+}
+
+.panel-intro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--primary, #30a3d8);
+}
+
+.panel-intro-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-intro-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary, #30a3d8);
+  background: rgba(48, 163, 216, 0.12);
+  padding: 3px 8px;
+  border-radius: 9999px;
+}
+
+.panel-intro-steps-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.panel-intro-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
+}
+
+.panel-intro-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Tarjetas de cada paso con realce sutil para el alumno */
 .step-card {
   padding: 20px;
   background: var(--bg-surface, #ffffff);
   border-radius: var(--radius-md, 14px);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.08));
+  border-left: 3.5px solid rgba(48, 163, 216, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.step-card:hover {
+  border-left-color: var(--primary, #30a3d8);
+  box-shadow: 0 6px 20px -3px rgba(48, 163, 216, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .step-header {
@@ -231,6 +323,25 @@
   font-size: 0.85rem;
   font-weight: 700;
   flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(48, 163, 216, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.step-card:hover .step-number {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 4px rgba(48, 163, 216, 0.28);
+}
+
+.step-header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .step-title {
@@ -238,6 +349,26 @@
   font-weight: 700;
   margin: 0;
   color: var(--text-primary, #111111);
+}
+
+.step-edit-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--primary, #30a3d8);
+  background: rgba(48, 163, 216, 0.08);
+  border: 1px solid rgba(48, 163, 216, 0.2);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  letter-spacing: 0.02em;
+  transition: all 0.2s ease;
+}
+
+.step-card:hover .step-edit-hint {
+  background: rgba(48, 163, 216, 0.16);
+  border-color: rgba(48, 163, 216, 0.4);
 }
 
 .step-desc {
@@ -1244,6 +1375,217 @@
 }
 
 /* --------------------------------------------------------------------------
+   GUÍA INTERACTIVA (ONBOARDING TOUR) Y RESALTADO DE ELEMENTOS
+   -------------------------------------------------------------------------- */
+/* Realce visual para la sección enfocada en el paso actual del tour */
+.tour-target-active {
+  position: relative;
+  z-index: 95;
+  border-color: var(--primary, #30a3d8) !important;
+  box-shadow: 0 0 0 4px rgba(48, 163, 216, 0.35), 0 12px 36px rgba(48, 163, 216, 0.18) !important;
+  animation: tourPulse 2.2s infinite ease-in-out;
+  transition: all 0.3s ease;
+}
+
+@keyframes tourPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(48, 163, 216, 0.35), 0 12px 36px rgba(48, 163, 216, 0.16);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(48, 163, 216, 0.55), 0 16px 44px rgba(48, 163, 216, 0.28);
+  }
+}
+
+/* Backdrop difuminado con baja opacidad para no tapar el contexto */
+.tour-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 90;
+}
+
+/* Diálogo flotante del tour situado abajo a la derecha */
+.tour-dialog-wrapper {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 100;
+  max-width: 440px;
+  width: calc(100% - 40px);
+}
+
+.tour-card {
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid rgba(48, 163, 216, 0.35);
+  border-radius: 18px;
+  box-shadow: 0 20px 48px -10px rgba(15, 23, 42, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tour-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tour-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.tour-step-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary, #30a3d8);
+  background: rgba(48, 163, 216, 0.12);
+  padding: 3px 10px;
+  border-radius: 9999px;
+}
+
+.tour-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.tour-close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-primary, #0f172a);
+}
+
+.tour-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tour-step-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary, #0f172a);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.tour-step-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.tour-step-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: #b45309;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.tour-step-hint svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.tour-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  gap: 12px;
+}
+
+.tour-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tour-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tour-dot.active {
+  width: 22px;
+  border-radius: 9999px;
+  background: var(--primary, #30a3d8);
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tour-btn-prev {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
+.tour-btn-skip {
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  color: var(--text-muted, #64748b);
+}
+
+.tour-btn-next {
+  padding: 7px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 640px) {
+  .tour-dialog-wrapper {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .tour-card {
+    padding: 16px;
+  }
+}
+
+/* --------------------------------------------------------------------------
    REGLAS DE IMPRESIÓN Y EXPORTACIÓN A PDF (@media print)
    -------------------------------------------------------------------------- */
 @media print {
@@ -1260,7 +1602,9 @@
   .controls-panel,
   .toast-feedback,
   .chart-tooltip-bubble,
-  .chart-hitbox {
+  .chart-hitbox,
+  .tour-backdrop,
+  .tour-dialog-wrapper {
     display: none !important;
   }
 

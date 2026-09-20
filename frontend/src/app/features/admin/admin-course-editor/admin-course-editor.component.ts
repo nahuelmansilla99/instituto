@@ -54,6 +54,69 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly modalPptDragOver = signal<boolean>(false);
   readonly expandedLessons = signal<Set<string>>(new Set());
 
+  // Lesson actions menu & resource tabs UX signals
+  readonly openMenuLessonId = signal<string | null>(null);
+  readonly activeResourceTabMap = signal<{ [lessonId: string]: 'presentation' | 'docs' | 'sheets' }>({});
+  readonly showDeleteLessonConfirmModal = signal(false);
+  readonly lessonToDelete = signal<any | null>(null);
+  readonly isDeletingLesson = signal(false);
+
+  toggleLessonMenu(lessonId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.openMenuLessonId() === lessonId) {
+      this.openMenuLessonId.set(null);
+    } else {
+      this.openMenuLessonId.set(lessonId);
+    }
+  }
+
+  closeLessonMenu(): void {
+    this.openMenuLessonId.set(null);
+  }
+
+  getResourceTab(lesson: any): 'presentation' | 'docs' | 'sheets' {
+    const current = this.activeResourceTabMap()[lesson.id];
+    if (current) return current;
+    if (lesson.presentationUrl) return 'presentation';
+    if (lesson.lessonDocuments && lesson.lessonDocuments.length > 0) return 'docs';
+    if (lesson.technicalSheets && lesson.technicalSheets.length > 0) return 'sheets';
+    return 'docs';
+  }
+
+  setResourceTab(lessonId: string, tab: 'presentation' | 'docs' | 'sheets'): void {
+    this.activeResourceTabMap.update((map) => ({ ...map, [lessonId]: tab }));
+  }
+
+  requestDeleteLesson(lesson: any): void {
+    this.closeLessonMenu();
+    this.lessonToDelete.set(lesson);
+    this.showDeleteLessonConfirmModal.set(true);
+  }
+
+  cancelDeleteLesson(): void {
+    this.showDeleteLessonConfirmModal.set(false);
+    this.lessonToDelete.set(null);
+  }
+
+  confirmDeleteLesson(): void {
+    const lesson = this.lessonToDelete();
+    if (!lesson) return;
+    this.isDeletingLesson.set(true);
+    this.adminService.deleteLesson(lesson.id).subscribe({
+      next: () => {
+        this.isDeletingLesson.set(false);
+        this.showDeleteLessonConfirmModal.set(false);
+        this.lessonToDelete.set(null);
+        const c = this.course();
+        if (c) this.loadCourse(c.id);
+      },
+      error: (err) => {
+        this.isDeletingLesson.set(false);
+        alert('Error al eliminar la clase: ' + (err.error?.message || 'Error desconocido'));
+      },
+    });
+  }
+
   // Tab: 'content' | 'students'
   readonly activeTab = signal<'content' | 'students'>('content');
 
@@ -96,6 +159,9 @@ export class AdminCourseEditorComponent implements OnInit {
     const target = event.target as HTMLElement;
     if (!target.closest('.filter-overlay-popover') && !target.closest('.btn-th-filter')) {
       this.closeFilterOverlay();
+    }
+    if (!target.closest('.lesson-actions-dropdown') && !target.closest('.btn-lesson-menu-trigger')) {
+      this.closeLessonMenu();
     }
   }
 
@@ -1018,9 +1084,12 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   onTechnicalSheetSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    this.uploadTechnicalSheetFile(file, lesson);
+    const files: FileList | null = event.target.files;
+    if (!files || files.length === 0) return;
+    const fileArray = Array.from(files);
+    fileArray.forEach((file) => {
+      this.uploadTechnicalSheetFile(file, lesson);
+    });
     event.target.value = '';
   }
 
@@ -1062,9 +1131,12 @@ export class AdminCourseEditorComponent implements OnInit {
   }
 
   onLessonDocumentSelected(event: any, lesson: any): void {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    this.uploadLessonDocumentFile(file, lesson);
+    const files: FileList | null = event.target.files;
+    if (!files || files.length === 0) return;
+    const fileArray = Array.from(files);
+    fileArray.forEach((file) => {
+      this.uploadLessonDocumentFile(file, lesson);
+    });
     event.target.value = '';
   }
 
@@ -1146,15 +1218,15 @@ export class AdminCourseEditorComponent implements OnInit {
     event.stopPropagation();
     this.dragOverTarget.set(null);
 
-    const file = event.dataTransfer?.files?.[0];
-    if (!file) return;
+    const files = event.dataTransfer?.files;
+    if (!files || files.length === 0) return;
 
     if (type === 'presentation') {
-      this.uploadPresentationFile(file, lesson);
+      this.uploadPresentationFile(files[0], lesson);
     } else if (type === 'doc') {
-      this.uploadLessonDocumentFile(file, lesson);
+      Array.from(files).forEach((file) => this.uploadLessonDocumentFile(file, lesson));
     } else if (type === 'sheet') {
-      this.uploadTechnicalSheetFile(file, lesson);
+      Array.from(files).forEach((file) => this.uploadTechnicalSheetFile(file, lesson));
     }
   }
 

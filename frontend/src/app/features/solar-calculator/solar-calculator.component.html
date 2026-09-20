@@ -41,7 +41,11 @@
 <main class="calculator-container" [class.is-drawer-mode]="isDrawer">
   <!-- Cabecera principal en vista completa -->
   @if (!isDrawer) {
-    <section class="calculator-header glass-card">
+    <section
+      id="calculator-intro"
+      class="calculator-header glass-card"
+      [class.tour-target-active]="isTourActive() && tourStep() === 0"
+    >
       <div class="header-content">
         <div class="header-badge">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -65,6 +69,20 @@
       </div>
 
       <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-outline-info action-btn tour-help-btn"
+          (click)="startTour()"
+          title="Ver guía interactiva paso a paso de uso"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Guía / Tutorial</span>
+        </button>
+
         <button
           type="button"
           class="btn btn-secondary action-btn"
@@ -113,6 +131,14 @@
       <!-- Barra de acciones compacta en Drawer mode -->
       @if (isDrawer) {
         <div class="drawer-actions-bar">
+          <button type="button" class="btn btn-outline-info btn-sm" (click)="startTour()" title="Ver tutorial interactivo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span>Guía</span>
+          </button>
           <button type="button" class="btn btn-secondary btn-sm" (click)="shareResult()">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -131,12 +157,50 @@
         </div>
       }
 
+      <!-- Cabecera de orientación: Panel de Variables del Alumno -->
+      <div class="panel-intro-card glass-card">
+        <div class="panel-intro-top">
+          <span class="panel-intro-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            Panel de Entrada
+          </span>
+          <span class="panel-intro-steps-count">Pasos 1 al 4</span>
+        </div>
+        <h2 class="panel-intro-title">Variables a Configurar</h2>
+        <p class="panel-intro-desc">
+          Modificá los valores de cada paso para evaluar en tiempo real el dimensionamiento, la curva horaria y el ahorro económico.
+        </p>
+      </div>
+
       <!-- PASO 1: INSTALACIÓN FOTOVOLTAICA -->
-      <section class="step-card glass-card">
+      <section
+        id="step-1-card"
+        class="step-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 1"
+      >
         <div class="step-header">
           <span class="step-number">1</span>
-          <div>
-            <h3 class="step-title">Instalación Fotovoltaica</h3>
+          <div class="step-header-text">
+            <div class="step-title-row">
+              <h3 class="step-title">Instalación Fotovoltaica</h3>
+              <span class="step-edit-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Ajustar
+              </span>
+            </div>
             <p class="step-desc">Módulos, potencia unitaria y rendimiento global</p>
           </div>
         </div>
@@ -252,11 +316,24 @@
       </section>
 
       <!-- PASO 2: RECURSO SOLAR -->
-      <section class="step-card glass-card">
+      <section
+        id="step-2-card"
+        class="step-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 2"
+      >
         <div class="step-header">
           <span class="step-number">2</span>
-          <div>
-            <h3 class="step-title">Recurso Solar</h3>
+          <div class="step-header-text">
+            <div class="step-title-row">
+              <h3 class="step-title">Recurso Solar</h3>
+              <span class="step-edit-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Ajustar
+              </span>
+            </div>
             <p class="step-desc">Localidad, mes de cálculo y horas de sol pico</p>
           </div>
         </div>
@@ -334,11 +411,24 @@
       </section>
 
       <!-- PASO 3: CONSUMO ELÉCTRICO Y PERFIL HORARIO -->
-      <section class="step-card glass-card">
+      <section
+        id="step-3-card"
+        class="step-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 3"
+      >
         <div class="step-header">
           <span class="step-number">3</span>
-          <div>
-            <h3 class="step-title">Consumo y Curva Horaria</h3>
+          <div class="step-header-text">
+            <div class="step-title-row">
+              <h3 class="step-title">Consumo y Curva Horaria</h3>
+              <span class="step-edit-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Ajustar
+              </span>
+            </div>
             <p class="step-desc">Demanda mensual y perfil de hábitos de uso</p>
           </div>
         </div>
@@ -444,11 +534,24 @@
       </section>
 
       <!-- PASO 4: VALOR ECONÓMICO -->
-      <section class="step-card glass-card">
+      <section
+        id="step-4-card"
+        class="step-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 4"
+      >
         <div class="step-header">
           <span class="step-number">4</span>
-          <div>
-            <h3 class="step-title">Parámetros Económicos</h3>
+          <div class="step-header-text">
+            <div class="step-title-row">
+              <h3 class="step-title">Parámetros Económicos</h3>
+              <span class="step-edit-hint">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M12 20h9"></path>
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                </svg>
+                Ajustar
+              </span>
+            </div>
             <p class="step-desc">Tarifas eléctricas para cuantificar el ahorro</p>
           </div>
         </div>
@@ -496,7 +599,11 @@
     </aside>
 
     <!-- PANEL DE RESULTADOS Y VISUALIZACIONES -->
-    <section class="results-panel">
+    <section
+      id="results-section"
+      class="results-panel"
+      [class.tour-target-active]="isTourActive() && tourStep() === 5"
+    >
       <!-- HERO CARD CON PRODUCCIÓN ESTIMADA -->
       <div class="hero-card glass-card">
         <div class="hero-top-row">
@@ -544,7 +651,7 @@
 
       <!-- 4 TARJETAS DE PREGUNTAS CLAVE -->
       <div class="questions-grid">
-        <!-- 1. ¿Cuánto genera? -->
+        <!-- ¿Cuánto genera? -->
         <div class="question-card glass-card">
           <div class="question-icon q1">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -560,7 +667,7 @@
             </svg>
           </div>
           <div class="question-body">
-            <span class="question-title">1. ¿Cuánto genera?</span>
+            <span class="question-title">¿Cuánto genera?</span>
             <strong class="question-highlight">{{ outputs().monthlyGenerationKwh | number:'1.0-0' }} kWh/mes</strong>
             <p class="question-desc">
               Con <strong>{{ outputs().peakPowerKwp | number:'1.2-2' }} kWp</strong> de potencia y recurso medio de <strong>{{ inputs().hsp | number:'1.2-2' }} HSP</strong> (PR {{ inputs().performanceRatio }}%).
@@ -568,7 +675,7 @@
           </div>
         </div>
 
-        <!-- 2. ¿Cuándo consume? -->
+        <!-- ¿Cuándo consume? -->
         <div class="question-card glass-card">
           <div class="question-icon q2">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -577,7 +684,7 @@
             </svg>
           </div>
           <div class="question-body">
-            <span class="question-title">2. ¿Cuándo consume?</span>
+            <span class="question-title">¿Cuándo consume?</span>
             <strong class="question-highlight">{{ outputs().monthlyConsumptionKwh | number:'1.0-0' }} kWh/mes</strong>
             <p class="question-desc">
               Perfil <strong>{{ outputs().profileLabel }}</strong>: {{ outputs().profileDescription }}.
@@ -585,7 +692,7 @@
           </div>
         </div>
 
-        <!-- 3. ¿Qué parte coincide? -->
+        <!-- ¿Qué parte coincide? -->
         <div class="question-card glass-card">
           <div class="question-icon q3">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -593,7 +700,7 @@
             </svg>
           </div>
           <div class="question-body">
-            <span class="question-title">3. ¿Qué parte coincide?</span>
+            <span class="question-title">¿Qué parte coincide?</span>
             <strong class="question-highlight">{{ outputs().selfConsumptionKwh | number:'1.0-0' }} kWh ({{ outputs().coveragePct | number:'1.1-1' }}%)</strong>
             <p class="question-desc">
               Autoconsumo simultáneo directo: energía solar consumida en el mismo instante en que se genera.
@@ -601,7 +708,7 @@
           </div>
         </div>
 
-        <!-- 4. ¿Qué ocurre con la diferencia? -->
+        <!-- ¿Qué ocurre con la diferencia? -->
         <div class="question-card glass-card">
           <div class="question-icon q4">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -610,7 +717,7 @@
             </svg>
           </div>
           <div class="question-body">
-            <span class="question-title">4. ¿Qué pasa con el resto?</span>
+            <span class="question-title">¿Qué pasa con el resto?</span>
             <strong class="question-highlight">{{ outputs().differenceLabel }}</strong>
             <p class="question-desc">
               Excedente inyectado: <strong>{{ outputs().exportSurplusKwh | number:'1.0-0' }} kWh</strong>. Importación de red: <strong>{{ outputs().importGridKwh | number:'1.0-0' }} kWh</strong>.
@@ -924,4 +1031,95 @@
       </div>
     </section>
   </div>
+
+  <!-- MODAL / DIALOG FLOTANTE DE GUÍA INTERACTIVA (TOUR) -->
+  @if (isTourActive()) {
+    <div class="tour-backdrop animate-fade-in" (click)="skipTour()"></div>
+    <div class="tour-dialog-wrapper animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="tour-dialog-title">
+      <div class="tour-card glass-card">
+        <div class="tour-card-header">
+          <div class="tour-badge-wrap">
+            <span class="tour-icon">{{ tourSteps[tourStep()].icon }}</span>
+            <span class="tour-step-badge">{{ tourSteps[tourStep()].badge }}</span>
+          </div>
+          <button
+            type="button"
+            class="tour-close-btn"
+            (click)="skipTour()"
+            title="Cerrar tutorial"
+            aria-label="Cerrar tutorial"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="tour-card-body">
+          <h3 id="tour-dialog-title" class="tour-step-title">{{ tourSteps[tourStep()].title }}</h3>
+          <p class="tour-step-desc">{{ tourSteps[tourStep()].description }}</p>
+          @if (tourSteps[tourStep()].hint; as hint) {
+            <div class="tour-step-hint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>{{ hint }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="tour-card-footer">
+          <!-- Indicador de progreso con puntos interactivos -->
+          <div class="tour-dots">
+            @for (step of tourSteps; track $index) {
+              <button
+                type="button"
+                class="tour-dot"
+                [class.active]="tourStep() === $index"
+                (click)="goToTourStep($index)"
+                [attr.aria-label]="'Ir al paso ' + ($index + 1)"
+              ></button>
+            }
+          </div>
+
+          <!-- Acciones de navegación -->
+          <div class="tour-actions">
+            @if (tourStep() > 0) {
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm tour-btn-prev"
+                (click)="prevTourStep()"
+              >
+                Anterior
+              </button>
+            } @else {
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm tour-btn-skip"
+                (click)="skipTour()"
+              >
+                Omitir
+              </button>
+            }
+
+            <button
+              type="button"
+              class="btn btn-primary btn-sm tour-btn-next"
+              (click)="nextTourStep()"
+            >
+              <span>{{ tourStep() === tourSteps.length - 1 ? '¡Comenzar a simular!' : 'Continuar' }}</span>
+              @if (tourStep() < tourSteps.length - 1) {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </main>

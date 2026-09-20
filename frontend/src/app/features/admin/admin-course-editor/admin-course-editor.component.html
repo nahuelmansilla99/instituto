@@ -238,72 +238,77 @@
                   <span>Ver Clase</span>
                 </button>
 
-                <!-- Quizzes Button -->
-                <button
-                  (click)="openQuestionsModal(lesson)"
-                  class="btn btn-secondary btn-sm btn-quiz-manage"
-                  title="Gestionar preguntas del examen"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 11 12 14 22 4"></polyline>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                  </svg>
-                  <span>Examen ({{ lesson.questions?.length || 0 }})</span>
-                </button>
-
-                <!-- Students Progress Button -->
-                <button
-                  (click)="openLessonStudentsModal(lesson)"
-                  class="btn btn-secondary btn-sm btn-lesson-students"
-                  title="Ver y gestionar que alumnos completaron esta clase"
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                  </svg>
-                  <span>Alumnos</span>
-                </button>
-
-                <!-- Publish / Unpublish Toggle -->
-                <button
-                  type="button"
-                  (click)="requestToggleLessonPublish(lesson)"
-                  class="btn btn-sm btn-publish-toggle"
-                  [ngClass]="lesson.isPublished !== false ? 'btn-toggle-unpublish' : 'btn-toggle-publish'"
-                  [title]="lesson.isPublished !== false ? 'Ocultar esta clase para que no le aparezca a los alumnos' : 'Publicar esta clase para que sea visible a los alumnos'"
-                  [disabled]="isTogglingPublish() === lesson.id"
-                >
-                  <span *ngIf="isTogglingPublish() === lesson.id" class="btn-spinner-icon">...</span>
-                  <ng-container *ngIf="isTogglingPublish() !== lesson.id">
-                    <svg *ngIf="lesson.isPublished !== false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                <!-- Dropdown Menu for Secondary Actions -->
+                <div class="lesson-menu-dropdown-wrapper">
+                  <button
+                    type="button"
+                    (click)="toggleLessonMenu(lesson.id, $event)"
+                    class="btn btn-secondary btn-sm btn-lesson-menu-trigger"
+                    [class.active]="openMenuLessonId() === lesson.id"
+                    title="Más opciones de la clase"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="5" r="1.5"></circle>
+                      <circle cx="12" cy="12" r="1.5"></circle>
+                      <circle cx="12" cy="19" r="1.5"></circle>
                     </svg>
-                    <svg *ngIf="lesson.isPublished === false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    <span>{{ lesson.isPublished !== false ? 'Ocultar' : 'Publicar' }}</span>
-                  </ng-container>
-                </button>
+                  </button>
 
-                <!-- Edit Lesson Modal Trigger -->
-                <button (click)="openEditLessonModal(lesson)" class="btn-action-icon" title="Editar Clase">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
+                  <div *ngIf="openMenuLessonId() === lesson.id" class="lesson-actions-dropdown animate-fade-in" (click)="$event.stopPropagation()">
+                    <button type="button" class="dropdown-item" (click)="openEditLessonModal(lesson); closeLessonMenu()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                      <span>Editar Clase</span>
+                    </button>
 
-                <!-- Delete Lesson -->
-                <button (click)="deleteLesson(lesson)" class="btn-action-icon btn-action-delete" title="Eliminar Clase">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
+                    <button type="button" class="dropdown-item" (click)="openQuestionsModal(lesson); closeLessonMenu()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                      </svg>
+                      <span>Examen ({{ lesson.questions?.length || 0 }})</span>
+                    </button>
+
+                    <button type="button" class="dropdown-item" (click)="openLessonStudentsModal(lesson); closeLessonMenu()">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
+                      <span>Ver Alumnos</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (click)="requestToggleLessonPublish(lesson); closeLessonMenu()"
+                      [disabled]="isTogglingPublish() === lesson.id"
+                    >
+                      <svg *ngIf="lesson.isPublished !== false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                      <svg *ngIf="lesson.isPublished === false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <span>{{ lesson.isPublished !== false ? 'Ocultar Clase' : 'Publicar Clase' }}</span>
+                    </button>
+
+                    <div class="dropdown-divider"></div>
+
+                    <button type="button" class="dropdown-item item-danger" (click)="requestDeleteLesson(lesson)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                      <span>Eliminar Clase</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -330,31 +335,75 @@
               </div>
             </div>
 
-            <!-- RESOURCES & ATTACHMENTS (PRESENTATION, PDF DOCS, TECHNICAL SHEETS) -->
+            <!-- RESOURCES & ATTACHMENTS (TABBED SYSTEM) -->
             <div class="lesson-resources-container">
-              <!-- SUBSECTION 1: PRESENTATION (POWERPOINT / PREZI) -->
-              <div class="resource-block">
+              <!-- Resource Tabs Navigation Bar -->
+              <div class="resource-tabs-nav">
+                <button
+                  type="button"
+                  class="resource-tab-btn"
+                  [class.active]="getResourceTab(lesson) === 'presentation'"
+                  (click)="setResourceTab(lesson.id, 'presentation')"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                  <span>Presentación</span>
+                  <span class="resource-tab-badge" *ngIf="lesson.presentationUrl">1</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="resource-tab-btn"
+                  [class.active]="getResourceTab(lesson) === 'docs'"
+                  (click)="setResourceTab(lesson.id, 'docs')"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                  </svg>
+                  <span>Documentación PDF</span>
+                  <span class="resource-tab-badge" [class.badge-count]="(lesson.lessonDocuments?.length || 0) > 0">
+                    {{ lesson.lessonDocuments?.length || 0 }}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  class="resource-tab-btn"
+                  [class.active]="getResourceTab(lesson) === 'sheets'"
+                  (click)="setResourceTab(lesson.id, 'sheets')"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                  </svg>
+                  <span>Fichas Técnicas</span>
+                  <span class="resource-tab-badge" [class.badge-count]="(lesson.technicalSheets?.length || 0) > 0">
+                    {{ lesson.technicalSheets?.length || 0 }}
+                  </span>
+                </button>
+              </div>
+
+              <!-- TAB 1: PRESENTATION -->
+              <div *ngIf="getResourceTab(lesson) === 'presentation'" class="resource-tab-pane animate-fade-in">
                 <div class="resource-block-header">
                   <div class="resource-title-group">
-                    <span class="resource-icon-badge ppt-badge">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                        <line x1="8" y1="21" x2="16" y2="21"></line>
-                        <line x1="12" y1="17" x2="12" y2="21"></line>
-                      </svg>
-                    </span>
                     <div>
-                      <h4 class="resource-title">Presentacion / Diapositivas</h4>
+                      <h4 class="resource-title">Presentación / Diapositivas</h4>
                       <p class="resource-subtitle">PowerPoint interactivo (.pptx, .ppt, .pdf) o enlace de Prezi</p>
                     </div>
                   </div>
 
-                  <!-- Quick upload/edit buttons if presentation already exists -->
+                  <!-- Header actions when presentation exists -->
                   <div *ngIf="lesson.presentationUrl" class="resource-header-actions">
                     <button
                       (click)="openPreziModal(lesson)"
                       class="btn btn-secondary btn-xs"
-                      title="Editar enlace o URL de presentacion"
+                      title="Vincular enlace o URL de presentación Prezi"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
@@ -362,7 +411,8 @@
                       </svg>
                       <span>Vincular URL</span>
                     </button>
-                    <label class="btn btn-secondary btn-xs btn-file-picker-label" title="Reemplazar archivo de presentacion">
+
+                    <label class="btn btn-secondary btn-xs btn-file-picker-label" title="Reemplazar archivo de presentación">
                       <input
                         type="file"
                         accept=".pptx, .ppt, .pdf, .odp"
@@ -379,7 +429,7 @@
                   </div>
                 </div>
 
-                <!-- Case A: Presentation Attached -->
+                <!-- Attached Presentation View -->
                 <div *ngIf="lesson.presentationUrl" class="presentation-attached-card animate-fade-in">
                   <div class="presentation-info">
                     <div class="ppt-file-icon" [class.prezi-theme]="isPreziUrl(lesson.presentationUrl)">
@@ -396,15 +446,15 @@
                     </div>
                     <div class="presentation-details">
                       <span class="presentation-type-label">
-                        {{ isPreziUrl(lesson.presentationUrl) ? 'Presentacion Online / Prezi' : 'Archivo de Diapositivas' }}
+                        {{ isPreziUrl(lesson.presentationUrl) ? 'Presentación Online / Prezi' : 'Archivo de Diapositivas' }}
                       </span>
-                      <a [href]="lesson.presentationUrl" target="_blank" rel="noopener noreferrer" class="presentation-link" title="Abrir presentacion">
+                      <a [href]="lesson.presentationUrl" target="_blank" rel="noopener noreferrer" class="presentation-link" title="Abrir presentación">
                         {{ lesson.presentationUrl }}
                       </a>
                     </div>
                   </div>
                   <div class="presentation-actions">
-                    <a [href]="lesson.presentationUrl" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" title="Abrir en pestana nueva">
+                    <a [href]="lesson.presentationUrl" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" title="Abrir en pestaña nueva">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                         <polyline points="15 3 21 3 21 9"></polyline>
@@ -412,7 +462,7 @@
                       </svg>
                       <span>Abrir</span>
                     </a>
-                    <button (click)="removePresentation(lesson)" class="btn-action-icon btn-action-delete" title="Quitar presentacion">
+                    <button (click)="removePresentation(lesson)" class="btn-action-icon btn-action-delete" title="Quitar presentación">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="3 6 5 6 21 6"></polyline>
                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -421,7 +471,7 @@
                   </div>
                 </div>
 
-                <!-- Case B: No Presentation -> Dropzone -->
+                <!-- Dropzone Area if no presentation -->
                 <div
                   *ngIf="!lesson.presentationUrl"
                   class="file-dropzone"
@@ -432,7 +482,7 @@
                 >
                   <div *ngIf="uploadingTarget()?.lessonId === lesson.id && uploadingTarget()?.type === 'presentation'" class="dropzone-uploading">
                     <div class="spinner-small"></div>
-                    <span>Subiendo presentacion...</span>
+                    <span>Subiendo presentación...</span>
                   </div>
                   <div *ngIf="!(uploadingTarget()?.lessonId === lesson.id && uploadingTarget()?.type === 'presentation')" class="dropzone-body">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -462,22 +512,15 @@
                 </div>
               </div>
 
-              <!-- SUBSECTION 2: DOCUMENTACION DE LA CLASE (PDF) -->
-              <div class="resource-block">
+              <!-- TAB 2: DOCUMENTACION DE LA CLASE (PDF) -->
+              <div *ngIf="getResourceTab(lesson) === 'docs'" class="resource-tab-pane animate-fade-in">
                 <div class="resource-block-header">
                   <div class="resource-title-group">
-                    <span class="resource-icon-badge doc-badge">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                      </svg>
-                    </span>
                     <div>
-                      <h4 class="resource-title">Documentacion de la Clase (PDF)</h4>
-                      <p class="resource-subtitle">Material de lectura, guias teoricas y anexos en formato PDF</p>
+                      <h4 class="resource-title">Documentación de la Clase (PDF)</h4>
+                      <p class="resource-subtitle">Material de lectura, guías teóricas y anexos en formato PDF</p>
                     </div>
                   </div>
-                  <span class="resource-counter-pill">{{ lesson.lessonDocuments?.length || 0 }} archivos</span>
                 </div>
 
                 <!-- PDF List -->
@@ -504,7 +547,7 @@
                       <button
                         (click)="openPdf(doc.fileUrl, 'doc')"
                         class="btn-pdf-action btn-pdf-view"
-                        title="Ver documento en nueva pestana"
+                        title="Ver documento en nueva pestaña"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -550,7 +593,7 @@
                 >
                   <div *ngIf="uploadingTarget()?.lessonId === lesson.id && uploadingTarget()?.type === 'doc'" class="dropzone-uploading">
                     <div class="spinner-small"></div>
-                    <span>Subiendo documento PDF...</span>
+                    <span>Subiendo documento(s) PDF...</span>
                   </div>
                   <div *ngIf="!(uploadingTarget()?.lessonId === lesson.id && uploadingTarget()?.type === 'doc')" class="dropzone-body dropzone-body-compact">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -558,37 +601,30 @@
                       <polyline points="17 8 12 3 7 8"></polyline>
                       <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    <span class="dropzone-text-compact">Arrastra un archivo PDF o</span>
-                    <label class="btn-dropzone-action">
+                    <span class="dropzone-text-compact">Arrastra uno o varios archivos PDF o</span>
+                    <label class="btn btn-secondary btn-xs btn-file-picker-label" title="Seleccionar uno o varios archivos PDF">
                       <input
                         type="file"
                         accept=".pdf"
+                        multiple
                         (change)="onLessonDocumentSelected($event, lesson)"
                         class="file-input-hidden"
                       />
-                      <span>Seleccionar PDF</span>
+                      <span>Seleccionar Archivo(s)</span>
                     </label>
                   </div>
                 </div>
               </div>
 
-              <!-- SUBSECTION 3: FICHAS TECNICAS (PDF) -->
-              <div class="resource-block">
+              <!-- TAB 3: FICHAS TECNICAS (PDF) -->
+              <div *ngIf="getResourceTab(lesson) === 'sheets'" class="resource-tab-pane animate-fade-in">
                 <div class="resource-block-header">
                   <div class="resource-title-group">
-                    <span class="resource-icon-badge sheet-badge">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                        <polyline points="2 17 12 22 22 17"></polyline>
-                        <polyline points="2 12 12 17 22 12"></polyline>
-                      </svg>
-                    </span>
                     <div>
-                      <h4 class="resource-title">Fichas Tecnicas (PDF)</h4>
-                      <p class="resource-subtitle">Hojas de especificaciones, ejercicios practicos y manuales tecnicos</p>
+                      <h4 class="resource-title">Fichas Técnicas (PDF)</h4>
+                      <p class="resource-subtitle">Hojas de especificaciones, ejercicios prácticos y manuales técnicos</p>
                     </div>
                   </div>
-                  <span class="resource-counter-pill">{{ lesson.technicalSheets?.length || 0 }} archivos</span>
                 </div>
 
                 <!-- Technical Sheets List -->
@@ -603,7 +639,7 @@
                           <line x1="16" y1="17" x2="8" y2="17"></line>
                           <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
-                        <span class="pdf-extension-tag">FICHA</span>
+                        <span class="pdf-extension-tag">PDF</span>
                       </div>
                       <div class="pdf-meta-info">
                         <span class="pdf-file-name" [title]="sheet.originalName">{{ sheet.originalName }}</span>
@@ -615,7 +651,7 @@
                       <button
                         (click)="openPdf(sheet.fileUrl, 'sheet')"
                         class="btn-pdf-action btn-pdf-view"
-                        title="Ver ficha tecnica en nueva pestana"
+                        title="Ver ficha técnica en nueva pestaña"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -627,7 +663,7 @@
                       <button
                         (click)="downloadPdf(sheet.fileUrl, sheet.originalName, 'sheet')"
                         class="btn-pdf-action btn-pdf-download"
-                        title="Descargar ficha tecnica"
+                        title="Descargar ficha técnica"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -640,7 +676,7 @@
                       <button
                         (click)="removeTechnicalSheet(sheet)"
                         class="btn-pdf-action btn-pdf-delete"
-                        title="Eliminar ficha tecnica"
+                        title="Eliminar ficha técnica"
                       >
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polyline points="3 6 5 6 21 6"></polyline>
@@ -661,7 +697,7 @@
                 >
                   <div *ngIf="uploadingTarget()?.lessonId === lesson.id && uploadingTarget()?.type === 'sheet'" class="dropzone-uploading">
                     <div class="spinner-small"></div>
-                    <span>Subiendo ficha tecnica...</span>
+                    <span>Subiendo ficha(s) técnica(s)...</span>
                   </div>
                   <div *ngIf="!(uploadingTarget()?.lessonId === lesson.id && uploadingTarget()?.type === 'sheet')" class="dropzone-body dropzone-body-compact">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -669,15 +705,16 @@
                       <polyline points="17 8 12 3 7 8"></polyline>
                       <line x1="12" y1="3" x2="12" y2="15"></line>
                     </svg>
-                    <span class="dropzone-text-compact">Arrastra una ficha tecnica PDF o</span>
-                    <label class="btn-dropzone-action">
+                    <span class="dropzone-text-compact">Arrastra uno o varios archivos PDF o</span>
+                    <label class="btn btn-secondary btn-xs btn-file-picker-label" title="Seleccionar uno o varios archivos PDF">
                       <input
                         type="file"
                         accept=".pdf"
+                        multiple
                         (change)="onTechnicalSheetSelected($event, lesson)"
                         class="file-input-hidden"
                       />
-                      <span>Seleccionar PDF</span>
+                      <span>Seleccionar Archivo(s)</span>
                     </label>
                   </div>
                 </div>
@@ -1272,6 +1309,45 @@
       >
         <span *ngIf="targetLesson.isPublished !== false">Sí, ocultar clase</span>
         <span *ngIf="targetLesson.isPublished === false">Sí, publicar clase</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Lesson Modal -->
+<div class="unenroll-modal-overlay" *ngIf="showDeleteLessonConfirmModal()" (click)="cancelDeleteLesson()">
+  <div class="unenroll-modal-content" (click)="$event.stopPropagation()" *ngIf="lessonToDelete() as targetLesson">
+    <div class="unenroll-modal-header">
+      <div class="unenroll-modal-icon text-danger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+      </div>
+      <h3 class="unenroll-modal-title">Confirmar Eliminación de Clase</h3>
+    </div>
+
+    <div class="publish-confirm-body">
+      <div class="publish-target-lesson-card">
+        <span class="publish-order-badge">Clase {{ formatLessonOrder(targetLesson.orderNumber) }}</span>
+        <span class="publish-lesson-title">{{ targetLesson.title }}</span>
+      </div>
+
+      <p class="unenroll-modal-message">
+        ¿Estás seguro que deseas eliminar esta clase? Esta acción <strong>no se puede deshacer</strong> y eliminará todos sus archivos adjuntos, presentaciones y preguntas asociadas.
+      </p>
+    </div>
+
+    <div class="unenroll-modal-actions">
+      <button type="button" class="unenroll-btn-cancel" (click)="cancelDeleteLesson()" [disabled]="isDeletingLesson()">Cancelar</button>
+      <button
+        type="button"
+        class="unenroll-btn-confirm btn-confirm-hide"
+        (click)="confirmDeleteLesson()"
+        [disabled]="isDeletingLesson()"
+      >
+        <span *ngIf="isDeletingLesson()" class="btn-spinner-icon">Eliminando...</span>
+        <span *ngIf="!isDeletingLesson()">Sí, eliminar clase</span>
       </button>
     </div>
   </div>

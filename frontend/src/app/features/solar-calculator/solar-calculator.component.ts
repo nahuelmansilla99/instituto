@@ -1,5 +1,6 @@
 import {
   Component,
+  OnInit,
   Input,
   Output,
   EventEmitter,
@@ -21,6 +22,15 @@ import {
   SolarLocation,
   SolarLocationKey,
 } from '../../core/models/solar-calculator.model';
+
+export interface TourStep {
+  targetId?: string;
+  badge: string;
+  title: string;
+  description: string;
+  hint?: string;
+  icon: string;
+}
 
 export interface ChartPoint {
   hour: number;
@@ -86,7 +96,7 @@ export interface ChartTooltipData {
   templateUrl: './solar-calculator.component.html',
   styleUrl: './solar-calculator.component.css',
 })
-export class SolarCalculatorComponent {
+export class SolarCalculatorComponent implements OnInit {
   readonly solarService = inject(SolarCalculatorService);
 
   @Input() isDrawer: boolean = false;
@@ -98,6 +108,79 @@ export class SolarCalculatorComponent {
   manualHspEdited = signal<boolean>(false);
   tooltip = signal<ChartTooltipData | null>(null);
   copiedFeedback = signal<boolean>(false);
+
+  // Signals y estado para el Tour / Guía Interactiva
+  isTourActive = signal<boolean>(false);
+  tourStep = signal<number>(0);
+
+  readonly tourSteps: TourStep[] = [
+    {
+      targetId: 'calculator-intro',
+      badge: 'Bienvenida',
+      title: '¡Bienvenido a la Calculadora Solar!',
+      description:
+        'Esta herramienta interactiva te permite dimensionar una instalación fotovoltaica, estimar su generación mes a mes y analizar el balance energético en tiempo real.',
+      hint: 'La pantalla está dividida en dos: a la izquierda tus parámetros de entrada, y a la derecha los resultados en vivo.',
+      icon: '☀️',
+    },
+    {
+      targetId: 'step-1-card',
+      badge: 'Paso 1 de 4',
+      title: 'Paso 1: Instalación Fotovoltaica',
+      description:
+        'Aquí definís la potencia unitaria de cada módulo (Wp), la cantidad total de paneles y el rendimiento global del sistema (PR).',
+      hint: 'Probá mover los controles deslizantes o escribir un valor. Verás la Potencia Pico resultante en kWp.',
+      icon: '⚡',
+    },
+    {
+      targetId: 'step-2-card',
+      badge: 'Paso 2 de 4',
+      title: 'Paso 2: Recurso Solar y Localidad',
+      description:
+        'Elegí la localidad y el mes a simular. El sistema carga automáticamente las Horas de Sol Pico (HSP) promedio de estaciones meteorológicas y NASA.',
+      hint: 'También podés editar las HSP manualmente si querés simular una radiación específica.',
+      icon: '📍',
+    },
+    {
+      targetId: 'step-3-card',
+      badge: 'Paso 3 de 4',
+      title: 'Paso 3: Consumo y Curva Horaria',
+      description:
+        'Indicá el consumo mensual en kWh de la factura de luz y seleccioná el hábito de demanda (Residencial, Comercial o Personalizado hora a hora).',
+      hint: 'Esto define a qué horas del día se consume la energía para evaluar la simultaneidad con el sol.',
+      icon: '🏠',
+    },
+    {
+      targetId: 'step-4-card',
+      badge: 'Paso 4 de 4',
+      title: 'Paso 4: Parámetros Económicos',
+      description:
+        'Ingresá la tarifa de compra de energía de la red y el valor acreditado por excedentes inyectados (Ley de Generación Distribuida).',
+      hint: 'Con estos valores se valoriza el ahorro económico mensual y el costo neto de tu factura.',
+      icon: '💵',
+    },
+    {
+      targetId: 'results-section',
+      badge: 'Resultados',
+      title: 'Balance y Curva 24h en Vivo',
+      description:
+        'A la derecha verás el gráfico interactivo hora por hora. Pasá el cursor por cada barra/punto para ver la generación vs consumo, el autoconsumo directo y la inyección a red.',
+      hint: '¡Podés compartir o imprimir el informe técnico en PDF en cualquier momento!',
+      icon: '📈',
+    },
+  ];
+
+  ngOnInit(): void {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      const tourSeen = localStorage.getItem('solar_calc_tour_seen');
+      if (!tourSeen) {
+        // Breve retardo para que el DOM se asiente
+        setTimeout(() => {
+          this.startTour();
+        }, 500);
+      }
+    }
+  }
 
   private copiedTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -450,5 +533,63 @@ export class SolarCalculatorComponent {
 
   onCloseDrawerClick(): void {
     this.closeDrawer.emit();
+  }
+
+  // --- MÉTODOS DE LA GUÍA INTERACTIVA (TOUR) ---
+  startTour(): void {
+    this.tourStep.set(0);
+    this.isTourActive.set(true);
+    this.scrollToStepTarget(0);
+  }
+
+  nextTourStep(): void {
+    const current = this.tourStep();
+    if (current < this.tourSteps.length - 1) {
+      const next = current + 1;
+      this.tourStep.set(next);
+      this.scrollToStepTarget(next);
+    } else {
+      this.finishTour();
+    }
+  }
+
+  prevTourStep(): void {
+    const current = this.tourStep();
+    if (current > 0) {
+      const prev = current - 1;
+      this.tourStep.set(prev);
+      this.scrollToStepTarget(prev);
+    }
+  }
+
+  goToTourStep(stepIndex: number): void {
+    if (stepIndex >= 0 && stepIndex < this.tourSteps.length) {
+      this.tourStep.set(stepIndex);
+      this.scrollToStepTarget(stepIndex);
+    }
+  }
+
+  skipTour(): void {
+    this.finishTour();
+  }
+
+  finishTour(): void {
+    this.isTourActive.set(false);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('solar_calc_tour_seen', 'true');
+    }
+  }
+
+  private scrollToStepTarget(stepIndex: number): void {
+    if (typeof document === 'undefined') return;
+    const step = this.tourSteps[stepIndex];
+    if (!step?.targetId) return;
+
+    setTimeout(() => {
+      const el = document.getElementById(step.targetId!);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 80);
   }
 }

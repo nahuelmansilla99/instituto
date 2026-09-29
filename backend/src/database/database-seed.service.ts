@@ -19,6 +19,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_url VARCHAR(500);`);
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_filename VARCHAR(255);`);
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS available_at TIMESTAMP WITH TIME ZONE;`);
+      await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS quiz_case_text TEXT;`);
 
       // Crear tabla de matriculaciones si no existe
       await this.dataSource.query(`

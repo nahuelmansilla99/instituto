@@ -22,6 +22,7 @@ export interface LessonDetail {
   hasViewedContent?: boolean;
   hasViewedSheets?: boolean;
   hasViewedDocs?: boolean;
+  quizCaseText?: string | null;
   quizQuestions: QuizQuestion[];
   questionResults?: QuizQuestionResult[];
   technicalSheets?: any[];

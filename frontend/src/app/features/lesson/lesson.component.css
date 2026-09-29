@@ -1198,3 +1198,38 @@
 }
 
 
+/* ==========================================================================
+   QUIZ CASO EN COMÚN
+   ========================================================================== */
+.quiz-case-block {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.04));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-left: 4px solid var(--primary, #6366f1);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+}
+
+.quiz-case-block-header {
+  margin-bottom: 10px;
+}
+
+.quiz-case-kicker {
+  display: inline-block;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--primary, #6366f1);
+  background: var(--primary-light, rgba(99, 102, 241, 0.1));
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.quiz-case-content {
+  font-size: 0.97rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: pre-wrap;
+}

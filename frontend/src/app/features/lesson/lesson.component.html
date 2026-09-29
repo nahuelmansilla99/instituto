@@ -270,6 +270,15 @@
 
         <!-- Quiz Area -->
         <div id="quiz-section" class="quiz-area animate-fade-in" *ngIf="isQuizStarted()">
+
+          <!-- Caso en Común -->
+          <div class="quiz-case-block" *ngIf="l.quizCaseText">
+            <div class="quiz-case-block-header">
+              <span class="quiz-case-kicker">📋 Caso en Común</span>
+            </div>
+            <p class="quiz-case-content">{{ l.quizCaseText }}</p>
+          </div>
+
           <div *ngIf="quizResult()" class="quiz-result-card glass-card" [class.passed]="quizResult()?.passed" [class.failed]="!quizResult()?.passed">
             <div class="quiz-result-badge">
               <span *ngIf="quizResult()?.passed">🎉 Examen Aprobado</span>

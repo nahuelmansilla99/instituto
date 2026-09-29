@@ -147,6 +147,9 @@ export class AdminService {
     if (dto.isPublished !== undefined) {
       lesson.isPublished = Boolean(dto.isPublished);
     }
+    if (dto.quizCaseText !== undefined) {
+      lesson.quizCaseText = dto.quizCaseText ? dto.quizCaseText.trim() : null;
+    }
 
     return this.lessonRepo.save(lesson);
   }

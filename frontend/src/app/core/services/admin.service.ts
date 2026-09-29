@@ -78,6 +78,7 @@ export class AdminService {
       presentationFilename?: string;
       availableAt?: string | null;
       isPublished?: boolean;
+      quizCaseText?: string | null;
     }>,
   ): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/lessons/${lessonId}`, data);

@@ -412,6 +412,8 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly activeLesson = signal<any | null>(null);
   readonly activeQuestions = signal<AdminQuizQuestion[]>([]);
   readonly isSavingQuestion = signal(false);
+  readonly quizCaseText = signal<string>('');
+  readonly isSavingCaseText = signal(false);
   
   readonly isEditingQuestion = signal(false);
   readonly currentEditingQuestionId = signal<string | null>(null);
@@ -866,6 +868,7 @@ export class AdminCourseEditorComponent implements OnInit {
   // ----------------------------------------------------
   openQuestionsModal(lesson: any): void {
     this.activeLesson.set(lesson);
+    this.quizCaseText.set(lesson.quizCaseText || '');
     this.showQuestionsModal.set(true);
     this.cancelEditQuestionMode();
     this.loadQuestions(lesson.id);
@@ -874,6 +877,7 @@ export class AdminCourseEditorComponent implements OnInit {
   closeQuestionsModal(): void {
     this.showQuestionsModal.set(false);
     this.activeLesson.set(null);
+    this.quizCaseText.set('');
     this.cancelEditQuestionMode();
     const c = this.course();
     if (c) this.loadCourse(c.id);
@@ -883,6 +887,23 @@ export class AdminCourseEditorComponent implements OnInit {
     this.adminService.getQuestions(lessonId).subscribe({
       next: (data) => {
         this.activeQuestions.set(data);
+      },
+    });
+  }
+
+  saveQuizCaseText(): void {
+    const lesson = this.activeLesson();
+    if (!lesson) return;
+    this.isSavingCaseText.set(true);
+    this.adminService.updateLesson(lesson.id, { quizCaseText: this.quizCaseText() || null }).subscribe({
+      next: (updated) => {
+        this.isSavingCaseText.set(false);
+        // Actualizar la lección activa con el nuevo valor
+        this.activeLesson.set({ ...lesson, quizCaseText: updated.quizCaseText });
+      },
+      error: (err) => {
+        this.isSavingCaseText.set(false);
+        alert('Error al guardar el caso: ' + (err.error?.message || 'Error desconocido'));
       },
     });
   }

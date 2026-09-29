@@ -2765,3 +2765,70 @@
 .resource-tab-pane {
   padding-top: 4px;
 }
+
+/* ==========================================================================
+   QUIZ CASE EDITOR (Admin Modal)
+   ========================================================================== */
+.quiz-case-editor-box {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.03));
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-left: 4px solid var(--primary, #6366f1);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.quiz-case-editor-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.quiz-case-editor-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.quiz-case-editor-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.optional-tag {
+  font-weight: 400;
+  font-size: 0.85em;
+  color: var(--text-muted, #94a3b8);
+}
+
+.quiz-case-editor-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.quiz-case-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 100px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.quiz-case-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-sm {
+  padding: 7px 16px;
+  font-size: 0.84rem;
+}

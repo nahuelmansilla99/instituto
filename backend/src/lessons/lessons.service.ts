@@ -233,6 +233,7 @@ export class LessonsService {
       hasViewedContent: targetProgress?.hasViewedContent ?? false,
       hasViewedSheets: targetProgress?.hasViewedSheets ?? false,
       hasViewedDocs: targetProgress?.hasViewedDocs ?? false,
+      quizCaseText: lesson.quizCaseText || null,
       quizQuestions: questions,
       questionResults,
       technicalSheets: lesson.technicalSheets || [],

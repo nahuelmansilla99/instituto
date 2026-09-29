@@ -33,4 +33,8 @@ export class CreateLessonDto {
   @IsOptional()
   @IsBoolean()
   isPublished?: boolean;
+
+  @IsOptional()
+  @IsString()
+  quizCaseText?: string | null;
 }

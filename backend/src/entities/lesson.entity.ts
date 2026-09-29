@@ -49,6 +49,9 @@ export class Lesson {
   @Column({ name: 'available_at', type: 'timestamp', nullable: true })
   availableAt: Date | null;
 
+  @Column({ name: 'quiz_case_text', type: 'text', nullable: true })
+  quizCaseText: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

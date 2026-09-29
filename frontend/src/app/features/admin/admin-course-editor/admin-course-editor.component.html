@@ -1709,6 +1709,43 @@
     </div>
 
     <div class="questions-manager-body">
+      <!-- Caso en Común del Examen -->
+      <div class="quiz-case-editor-box">
+        <div class="quiz-case-editor-header">
+          <span class="quiz-case-editor-icon">📋</span>
+          <div>
+            <h4 class="quiz-case-editor-title">Caso / Contexto del Examen <span class="optional-tag">(opcional)</span></h4>
+            <p class="quiz-case-editor-subtitle">Este texto aparecerá encima de todas las preguntas para que el alumno lo lea antes de responder. Ideal para casos clínicos, situaciones hipotéticas o contextos compartidos.</p>
+          </div>
+        </div>
+        <textarea
+          class="form-control quiz-case-textarea"
+          placeholder="Ej: Un paciente de 45 años llega a la guardia con dolor precordial irradiado al brazo izquierdo. Se le realiza un ECG que muestra elevación del segmento ST. A partir de esta situación, responda las siguientes preguntas..."
+          rows="5"
+          [value]="quizCaseText()"
+          (input)="quizCaseText.set($any($event.target).value)"
+        ></textarea>
+        <div class="quiz-case-editor-actions">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            (click)="quizCaseText.set('')"
+            [disabled]="!quizCaseText()"
+            title="Limpiar el caso"
+          >
+            🗑️ Limpiar
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="saveQuizCaseText()"
+            [disabled]="isSavingCaseText()"
+          >
+            {{ isSavingCaseText() ? 'Guardando...' : '💾 Guardar caso' }}
+          </button>
+        </div>
+      </div>
+
       <!-- Existing Questions List -->
       <div class="existing-questions-list">
         <h4>Preguntas Actuales ({{ activeQuestions().length }})</h4>

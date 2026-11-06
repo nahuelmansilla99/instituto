@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed, HostListener } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AdminService, AdminCourseDetail } from '../../../core/services/admin.service';
 import { CoursesService } from '../../../core/services/courses.service';
@@ -42,6 +43,7 @@ export class AdminCourseEditorComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly coursesService = inject(CoursesService);
   private readonly fb = inject(FormBuilder);
+  private readonly sanitizer = inject(DomSanitizer);
 
   readonly course = signal<AdminCourseDetail | null>(null);
   readonly isLoading = signal(true);
@@ -56,7 +58,7 @@ export class AdminCourseEditorComponent implements OnInit {
 
   // Lesson actions menu & resource tabs UX signals
   readonly openMenuLessonId = signal<string | null>(null);
-  readonly activeResourceTabMap = signal<{ [lessonId: string]: 'presentation' | 'docs' | 'sheets' }>({});
+  readonly activeResourceTabMap = signal<{ [lessonId: string]: 'presentation' | 'youtube' | 'docs' | 'sheets' }>({});
   readonly showDeleteLessonConfirmModal = signal(false);
   readonly lessonToDelete = signal<any | null>(null);
   readonly isDeletingLesson = signal(false);
@@ -74,16 +76,17 @@ export class AdminCourseEditorComponent implements OnInit {
     this.openMenuLessonId.set(null);
   }
 
-  getResourceTab(lesson: any): 'presentation' | 'docs' | 'sheets' {
+  getResourceTab(lesson: any): 'presentation' | 'youtube' | 'docs' | 'sheets' {
     const current = this.activeResourceTabMap()[lesson.id];
     if (current) return current;
+    if (lesson.youtubeUrl) return 'youtube';
     if (lesson.presentationUrl) return 'presentation';
     if (lesson.lessonDocuments && lesson.lessonDocuments.length > 0) return 'docs';
     if (lesson.technicalSheets && lesson.technicalSheets.length > 0) return 'sheets';
     return 'docs';
   }
 
-  setResourceTab(lessonId: string, tab: 'presentation' | 'docs' | 'sheets'): void {
+  setResourceTab(lessonId: string, tab: 'presentation' | 'youtube' | 'docs' | 'sheets'): void {
     this.activeResourceTabMap.update((map) => ({ ...map, [lessonId]: tab }));
   }
 
@@ -395,6 +398,7 @@ export class AdminCourseEditorComponent implements OnInit {
     content: [''],
     orderNumber: [null],
     meetUrl: [''],
+    youtubeUrl: [''],
     presentationUrl: [''],
     availableAt: [''],
     isPublished: [true],
@@ -406,6 +410,12 @@ export class AdminCourseEditorComponent implements OnInit {
   readonly preziInputUrl = signal('');
   readonly preziInputTitle = signal('');
   readonly isSavingPrezi = signal(false);
+
+  // Dedicated YouTube Video Modal
+  readonly showYoutubeModal = signal(false);
+  readonly selectedYoutubeLesson = signal<any | null>(null);
+  readonly youtubeInputUrl = signal('');
+  readonly isSavingYoutube = signal(false);
 
   // Questions Modal
   readonly showQuestionsModal = signal(false);
@@ -660,6 +670,7 @@ export class AdminCourseEditorComponent implements OnInit {
       content: lesson.content || '',
       orderNumber: lesson.orderNumber,
       meetUrl: lesson.meetUrl || '',
+      youtubeUrl: lesson.youtubeUrl || '',
       presentationUrl: lesson.presentationUrl || '',
       availableAt: formattedDate,
       isPublished: lesson.isPublished !== undefined ? lesson.isPublished : true,
@@ -722,6 +733,7 @@ export class AdminCourseEditorComponent implements OnInit {
       content: formVal.content?.trim() || '',
       orderNumber: formVal.orderNumber ? Number(formVal.orderNumber) : undefined,
       meetUrl: formVal.meetUrl || undefined,
+      youtubeUrl: formVal.youtubeUrl?.trim() || null,
       presentationUrl: formVal.presentationUrl?.trim() || undefined,
       presentationFilename: formVal.presentationUrl?.trim()
         ? (formVal.presentationUrl.includes('prezi.com') ? 'Presentación Prezi' : 'Presentación Online')
@@ -859,6 +871,103 @@ export class AdminCourseEditorComponent implements OnInit {
       error: (err) => {
         this.isSavingPrezi.set(false);
         alert('Error al vincular presentación: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  // ----------------------------------------------------
+  // YOUTUBE VIDEO LINK MANAGEMENT
+  // ----------------------------------------------------
+  private readonly youtubeEmbedCache = new Map<string, SafeResourceUrl>();
+
+  extractYoutubeVideoId(rawUrl?: string | null): string | null {
+    if (!rawUrl) return null;
+    let url = rawUrl.trim();
+    if (!url) return null;
+
+    if (url.includes('<iframe') && url.includes('src=')) {
+      const srcMatch = url.match(/src=["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) {
+        url = srcMatch[1];
+      }
+    }
+
+    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regExp);
+    return match && match[1] ? match[1] : null;
+  }
+
+  getSafeYoutubeEmbedUrl(rawUrl?: string | null): SafeResourceUrl | null {
+    const videoId = this.extractYoutubeVideoId(rawUrl);
+    if (!videoId) return null;
+    if (this.youtubeEmbedCache.has(videoId)) {
+      return this.youtubeEmbedCache.get(videoId)!;
+    }
+    const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${videoId}?rel=0`,
+    );
+    this.youtubeEmbedCache.set(videoId, safeUrl);
+    return safeUrl;
+  }
+
+  openYoutubeModal(lesson: any): void {
+    this.selectedYoutubeLesson.set(lesson);
+    this.youtubeInputUrl.set(lesson.youtubeUrl || '');
+    this.showYoutubeModal.set(true);
+  }
+
+  closeYoutubeModal(): void {
+    this.showYoutubeModal.set(false);
+    this.selectedYoutubeLesson.set(null);
+    this.youtubeInputUrl.set('');
+  }
+
+  onYoutubeUrlChange(event: any): void {
+    this.youtubeInputUrl.set(event.target.value || '');
+  }
+
+  saveYoutubeLink(): void {
+    const lesson = this.selectedYoutubeLesson();
+    const c = this.course();
+    if (!lesson || !c) return;
+
+    const url = this.youtubeInputUrl().trim();
+    if (!url) return;
+
+    if (!this.extractYoutubeVideoId(url)) {
+      alert('Por favor ingresa un enlace válido de YouTube (ej: https://www.youtube.com/watch?v=... o https://youtu.be/...)');
+      return;
+    }
+
+    this.isSavingYoutube.set(true);
+    this.adminService.updateLesson(lesson.id, { youtubeUrl: url }).subscribe({
+      next: () => {
+        this.isSavingYoutube.set(false);
+        this.closeYoutubeModal();
+        this.presentationSuccessMessage.set(`Video de YouTube vinculado exitosamente a "${lesson.title}"`);
+        setTimeout(() => this.presentationSuccessMessage.set(null), 4000);
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        this.isSavingYoutube.set(false);
+        alert('Error al vincular video de YouTube: ' + (err.error?.message || 'Error'));
+      },
+    });
+  }
+
+  removeYoutubeVideo(lesson: any): void {
+    if (!confirm(`¿Estás seguro de quitar el video de YouTube de la clase "${lesson.title}"?`)) {
+      return;
+    }
+    const c = this.course();
+    if (!c) return;
+
+    this.adminService.updateLesson(lesson.id, { youtubeUrl: null }).subscribe({
+      next: () => {
+        this.loadCourse(c.id);
+      },
+      error: (err) => {
+        alert('Error al quitar video de YouTube: ' + (err.error?.message || 'Error'));
       },
     });
   }

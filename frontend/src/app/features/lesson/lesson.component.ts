@@ -114,7 +114,7 @@ export class LessonComponent implements OnInit, OnDestroy {
         this.manualSheetsViewed.set(data.hasViewedSheets ?? false);
         this.manualDocsViewed.set(data.hasViewedDocs ?? false);
 
-        // Auto-complete content if none exists
+        // Auto-complete content if no presentation/text exists (or if only an embedded YouTube video is shown directly)
         if (!data.presentationUrl && !data.content && !this.hasViewedContent()) {
           this.hasViewedContent.set(true);
           this.coursesService.updateLessonProgress(data.id, { hasViewedContent: true }).subscribe();
@@ -360,6 +360,46 @@ export class LessonComponent implements OnInit, OnDestroy {
 
   isPreziUrl(url?: string | null): boolean {
     return !!url && url.toLowerCase().includes('prezi.com');
+  }
+
+  private readonly youtubeEmbedCache = new Map<string, SafeResourceUrl>();
+
+  extractYoutubeVideoId(rawUrl?: string | null): string | null {
+    if (!rawUrl) return null;
+    let url = rawUrl.trim();
+    if (!url) return null;
+
+    if (url.includes('<iframe') && url.includes('src=')) {
+      const srcMatch = url.match(/src=["']([^"']+)["']/i);
+      if (srcMatch && srcMatch[1]) {
+        url = srcMatch[1];
+      }
+    }
+
+    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    const match = url.match(regExp);
+    return match && match[1] ? match[1] : null;
+  }
+
+  getSafeYoutubeEmbedUrl(rawUrl?: string | null): SafeResourceUrl | null {
+    const videoId = this.extractYoutubeVideoId(rawUrl);
+    if (!videoId) return null;
+    if (this.youtubeEmbedCache.has(videoId)) {
+      return this.youtubeEmbedCache.get(videoId)!;
+    }
+    const safeUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+      `https://www.youtube.com/embed/${videoId}?rel=0`,
+    );
+    this.youtubeEmbedCache.set(videoId, safeUrl);
+    return safeUrl;
+  }
+
+  markYoutubeContentViewed(): void {
+    if (!this.hasViewedContent()) {
+      this.hasViewedContent.set(true);
+      const l = this.lesson();
+      if (l) this.coursesService.updateLessonProgress(l.id, { hasViewedContent: true }).subscribe();
+    }
   }
 
   toggleFullscreenPresentation(): void {

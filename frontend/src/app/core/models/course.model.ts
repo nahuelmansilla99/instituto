@@ -19,6 +19,7 @@ export interface CourseLessonItem {
   title: string;
   orderNumber: number;
   meetUrl?: string | null;
+  youtubeUrl?: string | null;
   presentationUrl?: string | null;
   presentationFilename?: string | null;
   availableAt?: string | null;

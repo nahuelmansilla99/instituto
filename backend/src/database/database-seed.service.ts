@@ -16,6 +16,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       // Garantizar que las columnas necesarias existan en las tablas
       await this.dataSource.query(`ALTER TABLE courses ADD COLUMN IF NOT EXISTS meet_url VARCHAR(500);`);
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS meet_url VARCHAR(500);`);
+      await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS youtube_url VARCHAR(500);`);
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_url VARCHAR(500);`);
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS presentation_filename VARCHAR(255);`);
       await this.dataSource.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS available_at TIMESTAMP WITH TIME ZONE;`);

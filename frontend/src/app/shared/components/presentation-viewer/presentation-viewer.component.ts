@@ -173,6 +173,18 @@ export class PresentationViewerComponent implements OnInit, OnChanges, OnDestroy
       return;
     }
 
+    // 3b. Detect YouTube Video if pasted in presentationUrl
+    const ytMatch = rawUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (ytMatch && ytMatch[1]) {
+      this.format.set('embed');
+      const embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?rel=0`;
+      this.safeEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl));
+      this.isLoading.set(false);
+      this.errorMessage.set(null);
+      this.totalSlides.set(1);
+      return;
+    }
+
     // 4. Detect PDF Document
     if (cleanUrl.endsWith('.pdf')) {
       this.format.set('pdf');

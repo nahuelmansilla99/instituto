@@ -2832,3 +2832,40 @@
   padding: 7px 16px;
   font-size: 0.84rem;
 }
+
+/* ==========================================================================
+   YOUTUBE VIDEO SUPPORT (Admin Cards & Modals)
+   ========================================================================== */
+.meta-youtube {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.ppt-file-icon.youtube-theme {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.youtube-modal-preview {
+  margin-top: 14px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: #000;
+}
+
+.youtube-preview-aspect {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+}
+
+.youtube-preview-aspect iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}

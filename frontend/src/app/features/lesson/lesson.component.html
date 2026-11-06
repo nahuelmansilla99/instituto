@@ -69,13 +69,13 @@
       </header>
 
       <!-- 2. Checklist de progreso de la clase -->
-      <div class="progress-checklist-card glass-card animate-fade-in" *ngIf="(l.presentationUrl || l.content) || (l.technicalSheets && l.technicalSheets.length > 0) || (l.quizQuestions && l.quizQuestions.length > 0) || (l.lessonDocuments && l.lessonDocuments.length > 0)">
+      <div class="progress-checklist-card glass-card animate-fade-in" *ngIf="(l.presentationUrl || l.youtubeUrl || l.content) || (l.technicalSheets && l.technicalSheets.length > 0) || (l.quizQuestions && l.quizQuestions.length > 0) || (l.lessonDocuments && l.lessonDocuments.length > 0)">
         <div class="progress-checklist-header">
           <span class="checklist-title">Requisitos para completar la lección</span>
         </div>
         <div class="progress-chips-grid">
           <!-- Chip 1: Contenido -->
-          <div class="progress-chip" *ngIf="l.presentationUrl || l.content" [class.completed]="hasViewedContent()">
+          <div class="progress-chip" *ngIf="l.presentationUrl || l.youtubeUrl || l.content" [class.completed]="hasViewedContent()">
             <div class="chip-status-icon">
               <svg *ngIf="hasViewedContent()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
               <svg *ngIf="!hasViewedContent()" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
@@ -112,7 +112,63 @@
         </div>
       </div>
 
-      <!-- 3. Sección "Contenido de la clase" -->
+      <!-- 3.A Sección "Video de la clase (YouTube)" -->
+      <div class="section-container glass-card animate-fade-in" *ngIf="l.youtubeUrl">
+        <div class="section-top-bar">
+          <div class="section-title-group">
+            <span class="section-kicker">Material audiovisual</span>
+            <h2 class="section-title">Video de la clase</h2>
+          </div>
+          <a
+            [href]="l.youtubeUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-secondary btn-sm"
+            (click)="markYoutubeContentViewed()"
+            title="Abrir video en YouTube"
+          >
+            <span>Abrir en YouTube</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+        </div>
+
+        <div class="youtube-video-wrapper" *ngIf="getSafeYoutubeEmbedUrl(l.youtubeUrl) as safeYoutubeUrl; else directYoutubeFallback">
+          <div class="youtube-aspect-ratio">
+            <iframe
+              [src]="safeYoutubeUrl"
+              [title]="l.title"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+
+        <ng-template #directYoutubeFallback>
+          <div class="content-banner-card">
+            <div class="content-info">
+              <div class="content-type-icon youtube-icon-box">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+              </div>
+              <div class="content-text-group">
+                <span class="content-name">Enlace de Video: {{ l.title }}</span>
+                <span class="content-hint">{{ l.youtubeUrl }}</span>
+              </div>
+            </div>
+            <a [href]="l.youtubeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm" (click)="markYoutubeContentViewed()">
+              <span>Ver Video</span>
+            </a>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- 3.B Sección "Contenido de la clase" -->
       <div class="section-container glass-card animate-fade-in" *ngIf="l.presentationUrl || l.content">
         <div class="section-top-bar">
           <div class="section-title-group">

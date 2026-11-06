@@ -58,6 +58,7 @@ export class AdminService {
       content?: string;
       orderNumber?: number;
       meetUrl?: string;
+      youtubeUrl?: string | null;
       presentationUrl?: string;
       presentationFilename?: string;
       availableAt?: string | null;
@@ -74,6 +75,7 @@ export class AdminService {
       content?: string;
       orderNumber?: number;
       meetUrl?: string;
+      youtubeUrl?: string | null;
       presentationUrl?: string;
       presentationFilename?: string;
       availableAt?: string | null;

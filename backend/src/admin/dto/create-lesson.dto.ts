@@ -20,6 +20,10 @@ export class CreateLessonDto {
 
   @IsOptional()
   @IsString()
+  youtubeUrl?: string | null;
+
+  @IsOptional()
+  @IsString()
   presentationUrl?: string;
 
   @IsOptional()

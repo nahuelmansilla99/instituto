@@ -120,6 +120,7 @@ export class AdminService {
       content: dto.content ? dto.content.trim() : '',
       orderNumber,
       meetUrl: dto.meetUrl?.trim() || null,
+      youtubeUrl: dto.youtubeUrl?.trim() || null,
       presentationUrl: dto.presentationUrl?.trim() || null,
       presentationFilename: dto.presentationFilename?.trim() || null,
       availableAt: dto.availableAt ? new Date(dto.availableAt) : null,
@@ -139,6 +140,7 @@ export class AdminService {
     if (dto.content !== undefined) lesson.content = dto.content ? dto.content.trim() : '';
     if (dto.orderNumber !== undefined) lesson.orderNumber = dto.orderNumber;
     if (dto.meetUrl !== undefined) lesson.meetUrl = dto.meetUrl?.trim() || null;
+    if (dto.youtubeUrl !== undefined) lesson.youtubeUrl = dto.youtubeUrl?.trim() || null;
     if (dto.presentationUrl !== undefined) lesson.presentationUrl = dto.presentationUrl?.trim() || null;
     if (dto.presentationFilename !== undefined) lesson.presentationFilename = dto.presentationFilename?.trim() || null;
     if (dto.availableAt !== undefined) {

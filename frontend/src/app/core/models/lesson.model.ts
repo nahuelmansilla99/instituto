@@ -7,6 +7,7 @@ export interface LessonDetail {
   courseTitle: string;
   courseMeetUrl?: string | null;
   meetUrl?: string | null;
+  youtubeUrl?: string | null;
   presentationUrl?: string | null;
   presentationFilename?: string | null;
   availableAt?: string | null;

@@ -159,6 +159,9 @@
                   <ng-container *ngIf="isPreziUrl(lesson.presentationUrl)">🌀 Prezi</ng-container>
                   <ng-container *ngIf="!isPreziUrl(lesson.presentationUrl)">📊 Diapositivas</ng-container>
                 </span>
+                <span *ngIf="lesson.youtubeUrl" class="meta-badge minimal-badge meta-youtube">
+                  ▶️ Video YouTube
+                </span>
                 <span *ngIf="lesson.meetUrl" class="meta-badge minimal-badge meta-meet">
                   🔴 Meet
                 </span>

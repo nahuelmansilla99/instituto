@@ -200,6 +200,14 @@
                       Meet vinculado
                     </span>
 
+                    <span *ngIf="lesson.youtubeUrl" class="meta-badge meta-youtube" title="Video de YouTube vinculado">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                        <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                      </svg>
+                      Video de YouTube
+                    </span>
+
                     <span *ngIf="lesson.presentationUrl" class="meta-badge meta-presentation" [class.meta-prezi]="isPreziUrl(lesson.presentationUrl)">
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -357,6 +365,20 @@
                 <button
                   type="button"
                   class="resource-tab-btn"
+                  [class.active]="getResourceTab(lesson) === 'youtube'"
+                  (click)="setResourceTab(lesson.id, 'youtube')"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                  </svg>
+                  <span>Video YouTube</span>
+                  <span class="resource-tab-badge" *ngIf="lesson.youtubeUrl">1</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="resource-tab-btn"
                   [class.active]="getResourceTab(lesson) === 'docs'"
                   (click)="setResourceTab(lesson.id, 'docs')"
                 >
@@ -508,6 +530,81 @@
                         <span>Vincular Prezi / Enlace</span>
                       </button>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: YOUTUBE VIDEO -->
+              <div *ngIf="getResourceTab(lesson) === 'youtube'" class="resource-tab-pane animate-fade-in">
+                <div class="resource-block-header">
+                  <div class="resource-title-group">
+                    <div>
+                      <h4 class="resource-title">Video de la Clase (YouTube)</h4>
+                      <p class="resource-subtitle">Vincula un video de YouTube para que los alumnos lo reproduzcan directamente en la plataforma</p>
+                    </div>
+                  </div>
+
+                  <div *ngIf="lesson.youtubeUrl" class="resource-header-actions">
+                    <button
+                      type="button"
+                      (click)="openYoutubeModal(lesson)"
+                      class="btn btn-secondary btn-xs"
+                      title="Cambiar enlace de YouTube"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                      <span>Cambiar enlace</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Attached YouTube Video View -->
+                <div *ngIf="lesson.youtubeUrl" class="presentation-attached-card animate-fade-in">
+                  <div class="presentation-info">
+                    <div class="ppt-file-icon youtube-theme">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                        <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                      </svg>
+                    </div>
+                    <div class="presentation-details">
+                      <span class="presentation-type-label">Video de YouTube Vinculado</span>
+                      <a [href]="lesson.youtubeUrl" target="_blank" rel="noopener noreferrer" class="presentation-link" title="Abrir en YouTube">
+                        {{ lesson.youtubeUrl }}
+                      </a>
+                    </div>
+                  </div>
+                  <div class="presentation-actions">
+                    <a [href]="lesson.youtubeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" title="Abrir en YouTube">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                      <span>Abrir</span>
+                    </a>
+                    <button type="button" (click)="removeYoutubeVideo(lesson)" class="btn-action-icon btn-action-delete" title="Quitar video de YouTube">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Empty State if no YouTube video -->
+                <div *ngIf="!lesson.youtubeUrl" class="file-dropzone dropzone-compact">
+                  <div class="dropzone-body dropzone-body-compact">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                      <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+                    </svg>
+                    <span class="dropzone-text-compact">No hay ningún video de YouTube vinculado a esta clase</span>
+                    <button type="button" (click)="openYoutubeModal(lesson)" class="btn btn-secondary btn-xs">
+                      <span>Vincular Video de YouTube</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1586,6 +1683,45 @@
         </div>
       </div>
 
+      <!-- SECTION: YOUTUBE VIDEO -->
+      <div class="form-section-card glass-card">
+        <h4 class="section-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+            <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+          </svg>
+          Video de la Clase - YouTube (Opcional)
+        </h4>
+        <p class="section-card-desc">Pega un enlace de YouTube para que los alumnos puedan ver el video directamente dentro de la clase en la plataforma.</p>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="lYoutubeUrl">
+            <span>Enlace de YouTube</span>
+          </label>
+          <input
+            id="lYoutubeUrl"
+            type="url"
+            class="form-control"
+            placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
+            formControlName="youtubeUrl"
+          />
+          <span class="form-hint">Admite enlaces normales de YouTube (<code>youtube.com/watch?v=...</code>), enlaces cortos (<code>youtu.be/...</code>) o enlaces embed.</span>
+
+          <!-- Live YouTube Preview inside Modal -->
+          <div *ngIf="getSafeYoutubeEmbedUrl(lessonForm.get('youtubeUrl')?.value) as safeYtUrl" class="youtube-modal-preview animate-fade-in">
+            <div class="youtube-preview-aspect">
+              <iframe
+                [src]="safeYtUrl"
+                title="Vista previa de YouTube"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- SECTION: VISIBILITY & PUBLISHING -->
       <div class="form-section-card glass-card">
         <h4 class="section-card-title">👁️ Visibilidad y Publicación para Alumnos</h4>
@@ -1692,6 +1828,58 @@
         [disabled]="!preziInputUrl().trim() || isSavingPrezi()"
       >
         <span>{{ isSavingPrezi() ? 'Guardando...' : 'Vincular Presentación Prezi' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DEDICATED YOUTUBE VIDEO LINK -->
+<div class="modal-backdrop animate-fade-in" *ngIf="showYoutubeModal()">
+  <div class="modal-content glass-card animate-fade-in">
+    <div class="modal-header">
+      <div>
+        <h3>▶️ Vincular Video de YouTube</h3>
+        <p class="modal-subtitle" *ngIf="selectedYoutubeLesson() as l">Clase: {{ l.title }}</p>
+      </div>
+      <button (click)="closeYoutubeModal()" class="btn-close">&times;</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="youtubeUrlInput">URL del Video de YouTube *</label>
+      <input
+        id="youtubeUrlInput"
+        type="url"
+        class="form-control"
+        placeholder="https://www.youtube.com/watch?v=... o https://youtu.be/..."
+        [value]="youtubeInputUrl()"
+        (input)="onYoutubeUrlChange($event)"
+      />
+      <span class="form-hint">Pega el enlace del video de YouTube. Los alumnos podrán reproducirlo directamente dentro de la clase.</span>
+
+      <div *ngIf="getSafeYoutubeEmbedUrl(youtubeInputUrl()) as safeModalYtUrl" class="youtube-modal-preview animate-fade-in">
+        <div class="youtube-preview-aspect">
+          <iframe
+            [src]="safeModalYtUrl"
+            title="Vista previa de YouTube"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" (click)="closeYoutubeModal()" class="btn btn-secondary">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        (click)="saveYoutubeLink()"
+        class="btn btn-primary"
+        [disabled]="!youtubeInputUrl().trim() || isSavingYoutube()"
+      >
+        <span>{{ isSavingYoutube() ? 'Guardando...' : 'Guardar Video de YouTube' }}</span>
       </button>
     </div>
   </div>

@@ -37,6 +37,9 @@ export class Lesson {
   @Column({ name: 'meet_url', length: 500, nullable: true })
   meetUrl: string;
 
+  @Column({ name: 'youtube_url', length: 500, nullable: true })
+  youtubeUrl: string;
+
   @Column({ name: 'presentation_url', length: 500, nullable: true })
   presentationUrl: string;
 

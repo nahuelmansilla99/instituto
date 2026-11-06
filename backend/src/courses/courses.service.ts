@@ -162,6 +162,7 @@ export class CoursesService {
         orderNumber: lesson.orderNumber,
         isPublished: lesson.isPublished,
         meetUrl: lesson.meetUrl || null,
+        youtubeUrl: lesson.youtubeUrl || null,
         presentationUrl: lesson.presentationUrl || null,
         presentationFilename: lesson.presentationFilename || null,
         availableAt: lesson.availableAt || null,

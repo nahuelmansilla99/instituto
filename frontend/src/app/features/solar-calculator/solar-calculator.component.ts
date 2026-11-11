@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { SolarCalculatorService } from '../../core/services/solar-calculator.service';
 import {
@@ -92,7 +92,7 @@ export interface ChartTooltipData {
 @Component({
   selector: 'app-solar-calculator',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, NavbarComponent],
   templateUrl: './solar-calculator.component.html',
   styleUrl: './solar-calculator.component.css',
 })

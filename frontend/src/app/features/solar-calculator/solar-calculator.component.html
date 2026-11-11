@@ -39,6 +39,35 @@
 }
 
 <main class="calculator-container" [class.is-drawer-mode]="isDrawer">
+  <!-- Barra superior de navegación entre herramientas técnicas -->
+  @if (!isDrawer) {
+    <nav class="tools-switcher-bar animate-fade-in" aria-label="Herramientas fotovoltaicas">
+      <a
+        routerLink="/calculadora"
+        routerLinkActive="active"
+        class="tool-switch-pill active"
+      >
+        <span class="pill-icon">☀️</span>
+        <div class="pill-text">
+          <span class="pill-title">Calculadora Solar</span>
+          <span class="pill-sub">Dimensionamiento y curva 24h</span>
+        </div>
+      </a>
+
+      <a
+        routerLink="/presupuesto"
+        routerLinkActive="active"
+        class="tool-switch-pill"
+      >
+        <span class="pill-icon">📋</span>
+        <div class="pill-text">
+          <span class="pill-title">Calculadora de Presupuesto</span>
+          <span class="pill-sub">Costos por rubro, margen y cotización</span>
+        </div>
+      </a>
+    </nav>
+  }
+
   <!-- Cabecera principal en vista completa -->
   @if (!isDrawer) {
     <section

@@ -78,6 +78,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'presupuesto',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/budget-calculator/budget-calculator.component').then(
+        (m) => m.BudgetCalculatorComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

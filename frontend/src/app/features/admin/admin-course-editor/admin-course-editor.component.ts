@@ -6,6 +6,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { AdminService, AdminCourseDetail } from '../../../core/services/admin.service';
 import { CoursesService } from '../../../core/services/courses.service';
+import { PdfReportService, PdfExportColumnsConfig } from '../../../core/services/pdf-report.service';
 import {
   AdminQuizQuestion,
   EnrolledStudentReport,
@@ -42,6 +43,7 @@ export class AdminCourseEditorComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly adminService = inject(AdminService);
   private readonly coursesService = inject(CoursesService);
+  private readonly pdfReportService = inject(PdfReportService);
   private readonly fb = inject(FormBuilder);
   private readonly sanitizer = inject(DomSanitizer);
 
@@ -364,6 +366,209 @@ export class AdminCourseEditorComponent implements OnInit {
     this.filterScoreStatus.set('all');
     this.studentSortBy.set('name');
     this.studentSortDirection.set('asc');
+  }
+
+  // ----------------------------------------------------
+  // PDF EXPORT & STUDENT EXCLUSION STATE
+  // ----------------------------------------------------
+  readonly showExportPdfModal = signal<boolean>(false);
+  readonly excludedStudentIds = signal<Set<string>>(new Set());
+  readonly exportModalSearchText = signal<string>('');
+
+  readonly pdfColumnsConfig = signal<PdfExportColumnsConfig>({
+    includeSummaryStats: true,
+    includeActiveFiltersInfo: true,
+    indexNumber: true,
+    name: true,
+    email: true,
+    status: true,
+    enrolledAt: true,
+    registeredAt: false,
+    progressPercentage: true,
+    completedLessons: true,
+    averageScore: true,
+  });
+
+  readonly activeFilterBadges = computed<string[]>(() => {
+    const badges: string[] = [];
+
+    const enroll = this.filterEnrollmentStatus();
+    if (enroll === 'enrolled') badges.push('Estado: Matriculados');
+    else if (enroll === 'not_enrolled') badges.push('Estado: No Matriculados');
+    else if (enroll === 'dropped') badges.push('Estado: Dados de baja');
+    else badges.push('Estado: Todos');
+
+    const prog = this.filterProgressStatus();
+    if (prog === 'not_started') badges.push('Actividad: Sin iniciar (0%)');
+    else if (prog === 'in_progress') badges.push('Actividad: En curso (1%–99%)');
+    else if (prog === 'completed') badges.push('Actividad: Completado (100%)');
+
+    const score = this.filterScoreStatus();
+    if (score === 'high') badges.push('Calificaciones: Destacados (≥80%)');
+    else if (score === 'evaluated') badges.push('Calificaciones: Con evaluaciones');
+    else if (score === 'risk') badges.push('Calificaciones: En riesgo (<60%)');
+    else if (score === 'none') badges.push('Calificaciones: Sin evaluaciones');
+
+    const search = this.studentSearchText().trim();
+    if (search) {
+      badges.push(`Búsqueda: "${search}"`);
+    }
+
+    return badges;
+  });
+
+  readonly studentsForPdfExport = computed<MergedStudentRow[]>(() => {
+    const excluded = this.excludedStudentIds();
+    return this.filteredStudentsList().filter((s) => !excluded.has(s.studentId));
+  });
+
+  readonly excludedInCurrentFilterCount = computed<number>(() => {
+    const excluded = this.excludedStudentIds();
+    return this.filteredStudentsList().filter((s) => excluded.has(s.studentId)).length;
+  });
+
+  readonly isAllFilteredIncluded = computed<boolean>(() => {
+    const list = this.filteredStudentsList();
+    if (list.length === 0) return false;
+    const excluded = this.excludedStudentIds();
+    return list.every((s) => !excluded.has(s.studentId));
+  });
+
+  readonly modalFilteredStudentsList = computed<MergedStudentRow[]>(() => {
+    const baseList = this.filteredStudentsList();
+    const query = this.exportModalSearchText().trim().toLowerCase();
+    if (!query) return baseList;
+    return baseList.filter(
+      (s) =>
+        s.name.toLowerCase().includes(query) ||
+        s.email.toLowerCase().includes(query),
+    );
+  });
+
+  readonly hasAtLeastOneColumnSelected = computed<boolean>(() => {
+    const cols = this.pdfColumnsConfig();
+    return (
+      cols.indexNumber ||
+      cols.name ||
+      cols.email ||
+      cols.status ||
+      cols.enrolledAt ||
+      cols.registeredAt ||
+      cols.progressPercentage ||
+      cols.completedLessons ||
+      cols.averageScore
+    );
+  });
+
+  openExportPdfModal(): void {
+    this.exportModalSearchText.set('');
+    this.showExportPdfModal.set(true);
+  }
+
+  closeExportPdfModal(): void {
+    this.showExportPdfModal.set(false);
+  }
+
+  isStudentExcluded(studentId: string): boolean {
+    return this.excludedStudentIds().has(studentId);
+  }
+
+  toggleExcludeStudent(studentId: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.excludedStudentIds.update((prev) => {
+      const next = new Set(prev);
+      if (next.has(studentId)) {
+        next.delete(studentId);
+      } else {
+        next.add(studentId);
+      }
+      return next;
+    });
+  }
+
+  toggleAllFilteredStudentsInclusion(): void {
+    if (this.isAllFilteredIncluded()) {
+      this.excludeAllFilteredStudents();
+    } else {
+      this.includeAllFilteredStudents();
+    }
+  }
+
+  includeAllFilteredStudents(): void {
+    const filteredIds = this.filteredStudentsList().map((s) => s.studentId);
+    this.excludedStudentIds.update((prev) => {
+      const next = new Set(prev);
+      filteredIds.forEach((id) => next.delete(id));
+      return next;
+    });
+  }
+
+  excludeAllFilteredStudents(): void {
+    const filteredIds = this.filteredStudentsList().map((s) => s.studentId);
+    this.excludedStudentIds.update((prev) => {
+      const next = new Set(prev);
+      filteredIds.forEach((id) => next.add(id));
+      return next;
+    });
+  }
+
+  togglePdfColumn(key: keyof PdfExportColumnsConfig): void {
+    this.pdfColumnsConfig.update((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  }
+
+  selectAllPdfColumns(): void {
+    this.pdfColumnsConfig.set({
+      includeSummaryStats: true,
+      includeActiveFiltersInfo: true,
+      indexNumber: true,
+      name: true,
+      email: true,
+      status: true,
+      enrolledAt: true,
+      registeredAt: true,
+      progressPercentage: true,
+      completedLessons: true,
+      averageScore: true,
+    });
+  }
+
+  selectBasicPdfColumns(): void {
+    this.pdfColumnsConfig.set({
+      includeSummaryStats: false,
+      includeActiveFiltersInfo: true,
+      indexNumber: true,
+      name: true,
+      email: true,
+      status: true,
+      enrolledAt: false,
+      registeredAt: false,
+      progressPercentage: false,
+      completedLessons: false,
+      averageScore: false,
+    });
+  }
+
+  downloadStudentsPdf(): void {
+    const c = this.course();
+    const studentsToExport = this.studentsForPdfExport();
+    if (!c || studentsToExport.length === 0 || !this.hasAtLeastOneColumnSelected()) {
+      return;
+    }
+
+    this.pdfReportService.generateStudentsReportPdf({
+      courseTitle: c.title,
+      students: studentsToExport,
+      excludedCount: this.excludedInCurrentFilterCount(),
+      activeFilterLabels: this.activeFilterBadges(),
+      columns: this.pdfColumnsConfig(),
+    });
+
+    this.closeExportPdfModal();
   }
 
   readonly showStudentProgressModal = signal(false);

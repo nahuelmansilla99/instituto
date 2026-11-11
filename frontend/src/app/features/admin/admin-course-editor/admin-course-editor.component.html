@@ -855,6 +855,23 @@
             <h2>Alumnos de la Plataforma</h2>
             <p class="section-desc">Gestiona la matrícula y seguimiento de los alumnos en este curso</p>
           </div>
+          <div class="students-header-actions" *ngIf="!isLoadingStudents() && allMergedStudents().length > 0">
+            <button
+              type="button"
+              class="btn btn-primary btn-export-pdf"
+              (click)="openExportPdfModal()"
+              title="Configurar qué datos descargar y qué alumnos excluir del PDF"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <polyline points="9 15 12 18 15 15"></polyline>
+              </svg>
+              <span>Descargar PDF</span>
+              <span class="export-count-pill">{{ studentsForPdfExport().length }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Loading Students -->
@@ -886,6 +903,19 @@
             </button>
             <span class="top-bar-counter">
               Mostrando <strong>{{ filteredStudentsCount() }}</strong> de {{ totalStudentsCount() }}
+              <ng-container *ngIf="excludedInCurrentFilterCount() > 0">
+                <span class="excluded-counter-badge">
+                  • {{ excludedInCurrentFilterCount() }} excluido(s) del PDF
+                  <button
+                    type="button"
+                    class="btn-restore-excluded"
+                    (click)="includeAllFilteredStudents()"
+                    title="Volver a incluir a todos en el PDF"
+                  >
+                    Restaurar
+                  </button>
+                </span>
+              </ng-container>
             </span>
           </div>
 
@@ -916,6 +946,16 @@
           <table class="admin-table advanced-table">
             <thead>
               <tr class="table-header-row">
+                <!-- Include/Exclude Checkbox Column -->
+                <th class="col-th col-th-checkbox" title="Incluir / Excluir todos los alumnos filtrados del PDF">
+                  <input
+                    type="checkbox"
+                    class="pdf-row-checkbox"
+                    [checked]="isAllFilteredIncluded()"
+                    (change)="toggleAllFilteredStudentsInclusion()"
+                  />
+                </th>
+
                 <!-- Name Column -->
                 <th class="col-th">
                   <div class="th-header-wrapper">
@@ -1220,7 +1260,7 @@
             <tbody>
               <!-- Empty Results Row -->
               <tr *ngIf="filteredStudentsList().length === 0" class="no-results-row">
-                <td colspan="5" class="no-results-cell">
+                <td colspan="6" class="no-results-cell">
                   <div class="table-empty-message">
                     <span class="empty-icon-sm">🔍</span>
                     <p>No se encontraron alumnos con los filtros seleccionados.</p>
@@ -1232,7 +1272,22 @@
               </tr>
 
               <!-- Students Minimalist Rows -->
-              <tr *ngFor="let student of filteredStudentsList()" class="table-row minimal-row">
+              <tr
+                *ngFor="let student of filteredStudentsList()"
+                class="table-row minimal-row"
+                [class.row-excluded-pdf]="isStudentExcluded(student.studentId)"
+              >
+                <!-- Include/Exclude Checkbox -->
+                <td class="col-td-checkbox">
+                  <input
+                    type="checkbox"
+                    class="pdf-row-checkbox"
+                    [checked]="!isStudentExcluded(student.studentId)"
+                    (change)="toggleExcludeStudent(student.studentId, $event)"
+                    [title]="isStudentExcluded(student.studentId) ? 'Alumno excluido del PDF (clic para incluir)' : 'Incluido en el PDF (clic para excluir)'"
+                  />
+                </td>
+
                 <!-- Name & Email -->
                 <td>
                   <div
@@ -1333,6 +1388,307 @@
           </table>
         </div>
       </section>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EXPORT STUDENTS PDF CONFIGURATOR -->
+<div class="modal-backdrop animate-fade-in" *ngIf="showExportPdfModal()" (click)="closeExportPdfModal()">
+  <div class="modal-content glass-card animate-fade-in modal-export-pdf" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h3>📄 Descargar Reporte de Alumnos en PDF</h3>
+        <p class="modal-subtitle">
+          Selecciona qué datos incluir en el documento y excluye los alumnos que no desees exportar.
+        </p>
+      </div>
+      <button type="button" (click)="closeExportPdfModal()" class="btn-close">&times;</button>
+    </div>
+
+    <div class="export-pdf-body">
+      <!-- Active Filters Banner (Synced with Table Filters) -->
+      <div class="export-filters-banner">
+        <div class="export-filters-top">
+          <span class="export-section-label">🔍 Filtros activos aplicados al listado:</span>
+          <button
+            *ngIf="hasActiveFilters()"
+            type="button"
+            class="btn-link-xs"
+            (click)="resetStudentFilters()"
+          >
+            Restablecer todos los filtros
+          </button>
+        </div>
+
+        <div class="export-active-badges">
+          <span class="filter-chip-badge" *ngFor="let badge of activeFilterBadges()">
+            {{ badge }}
+          </span>
+        </div>
+
+        <!-- Quick Status Filter Selector inside Modal -->
+        <div class="export-quick-status-row">
+          <span class="quick-status-label">Filtro rápido de estado:</span>
+          <div class="quick-status-pills">
+            <button
+              type="button"
+              class="quick-pill-btn"
+              [class.active]="filterEnrollmentStatus() === 'all'"
+              (click)="setEnrollmentFilter('all')"
+            >
+              Todos ({{ totalStudentsCount() }})
+            </button>
+            <button
+              type="button"
+              class="quick-pill-btn"
+              [class.active]="filterEnrollmentStatus() === 'enrolled'"
+              (click)="setEnrollmentFilter('enrolled')"
+            >
+              Solo Matriculados ({{ activeEnrolledCount() }})
+            </button>
+            <button
+              type="button"
+              class="quick-pill-btn"
+              [class.active]="filterEnrollmentStatus() === 'not_enrolled'"
+              (click)="setEnrollmentFilter('not_enrolled')"
+            >
+              No Matriculados ({{ notEnrolledCount() }})
+            </button>
+            <button
+              type="button"
+              class="quick-pill-btn"
+              [class.active]="filterEnrollmentStatus() === 'dropped'"
+              (click)="setEnrollmentFilter('dropped')"
+            >
+              Dados de baja ({{ droppedStudentsCount() }})
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Column Grid: 1) Select What to Download, 2) Exclude Students -->
+      <div class="export-config-grid">
+        <!-- SECTION 1: SELECT DATA / COLUMNS TO DOWNLOAD -->
+        <div class="export-panel-card">
+          <div class="export-panel-header">
+            <div>
+              <h4>1. ¿Qué datos deseas descargar?</h4>
+              <p>Elige las columnas y secciones del PDF</p>
+            </div>
+            <div class="export-preset-btns">
+              <button type="button" class="btn-preset-xs" (click)="selectAllPdfColumns()">Todo</button>
+              <button type="button" class="btn-preset-xs" (click)="selectBasicPdfColumns()">Básico</button>
+            </div>
+          </div>
+
+          <div class="export-columns-group">
+            <span class="group-sublabel">Secciones del Documento</span>
+            <label class="export-check-item" [class.checked]="pdfColumnsConfig().includeSummaryStats">
+              <input
+                type="checkbox"
+                [checked]="pdfColumnsConfig().includeSummaryStats"
+                (change)="togglePdfColumn('includeSummaryStats')"
+              />
+              <span class="check-item-text">Resumen estadístico (Total, Avance y Nota promedio)</span>
+            </label>
+
+            <label class="export-check-item" [class.checked]="pdfColumnsConfig().includeActiveFiltersInfo">
+              <input
+                type="checkbox"
+                [checked]="pdfColumnsConfig().includeActiveFiltersInfo"
+                (change)="togglePdfColumn('includeActiveFiltersInfo')"
+              />
+              <span class="check-item-text">Detalle de filtros aplicados en cabecera</span>
+            </label>
+          </div>
+
+          <div class="export-columns-group">
+            <span class="group-sublabel">Columnas de la Tabla de Alumnos</span>
+            <div class="export-columns-grid-2">
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().indexNumber">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().indexNumber"
+                  (change)="togglePdfColumn('indexNumber')"
+                />
+                <span class="check-item-text">Nº de fila (#)</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().name">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().name"
+                  (change)="togglePdfColumn('name')"
+                />
+                <span class="check-item-text">Nombre completo</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().email">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().email"
+                  (change)="togglePdfColumn('email')"
+                />
+                <span class="check-item-text">Email</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().status">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().status"
+                  (change)="togglePdfColumn('status')"
+                />
+                <span class="check-item-text">Estado de matrícula</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().enrolledAt">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().enrolledAt"
+                  (change)="togglePdfColumn('enrolledAt')"
+                />
+                <span class="check-item-text">Fecha de matrícula</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().registeredAt">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().registeredAt"
+                  (change)="togglePdfColumn('registeredAt')"
+                />
+                <span class="check-item-text">Fecha de registro</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().progressPercentage">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().progressPercentage"
+                  (change)="togglePdfColumn('progressPercentage')"
+                />
+                <span class="check-item-text">Avance del curso (%)</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().completedLessons">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().completedLessons"
+                  (change)="togglePdfColumn('completedLessons')"
+                />
+                <span class="check-item-text">Clases aprobadas</span>
+              </label>
+
+              <label class="export-check-item" [class.checked]="pdfColumnsConfig().averageScore">
+                <input
+                  type="checkbox"
+                  [checked]="pdfColumnsConfig().averageScore"
+                  (change)="togglePdfColumn('averageScore')"
+                />
+                <span class="check-item-text">Promedio en Quizes (%)</span>
+              </label>
+            </div>
+            <p *ngIf="!hasAtLeastOneColumnSelected()" class="export-warning-msg">
+              ⚠️ Selecciona al menos una columna de datos para poder generar la tabla.
+            </p>
+          </div>
+        </div>
+
+        <!-- SECTION 2: EXCLUDE / INCLUDE STUDENTS -->
+        <div class="export-panel-card">
+          <div class="export-panel-header">
+            <div>
+              <h4>2. Incluir / Excluir Alumnos</h4>
+              <p>Desmarca los alumnos que quieras excluir de la descarga</p>
+            </div>
+            <div class="export-preset-btns">
+              <button type="button" class="btn-preset-xs" (click)="includeAllFilteredStudents()">
+                Incluir todos
+              </button>
+              <button type="button" class="btn-preset-xs" (click)="excludeAllFilteredStudents()">
+                Excluir todos
+              </button>
+            </div>
+          </div>
+
+          <!-- Search inside modal student list -->
+          <div class="export-student-search">
+            <input
+              type="text"
+              class="form-control export-search-input"
+              placeholder="Buscar alumno en esta lista para excluir/incluir..."
+              [ngModel]="exportModalSearchText()"
+              (ngModelChange)="exportModalSearchText.set($event)"
+            />
+          </div>
+
+          <!-- Scrollable List of Filtered Students -->
+          <div class="export-students-list">
+            <div *ngIf="modalFilteredStudentsList().length === 0" class="export-empty-list">
+              No hay alumnos que coincidan con los filtros actuales.
+            </div>
+
+            <div
+              *ngFor="let st of modalFilteredStudentsList()"
+              class="export-student-item"
+              [class.excluded]="isStudentExcluded(st.studentId)"
+              (click)="toggleExcludeStudent(st.studentId)"
+            >
+              <input
+                type="checkbox"
+                class="pdf-row-checkbox"
+                [checked]="!isStudentExcluded(st.studentId)"
+                (click)="$event.stopPropagation()"
+                (change)="toggleExcludeStudent(st.studentId)"
+              />
+              <div class="export-student-info">
+                <span class="export-student-name">{{ st.name }}</span>
+                <span class="export-student-email">{{ st.email }}</span>
+              </div>
+              <div class="export-student-badges">
+                <span
+                  class="status-pill status-pill-xs"
+                  [ngClass]="{
+                    'status-pill-active': st.isEnrolled,
+                    'status-pill-dropped': st.isDropped,
+                    'status-pill-inactive': !st.isEnrolled && !st.isDropped
+                  }"
+                >
+                  {{ st.isEnrolled ? 'Matriculado' : (st.isDropped ? 'Baja' : 'No matr.') }}
+                </span>
+                <span
+                  class="inclusion-badge"
+                  [ngClass]="isStudentExcluded(st.studentId) ? 'badge-excluded' : 'badge-included'"
+                >
+                  {{ isStudentExcluded(st.studentId) ? 'Excluido' : 'Incluido' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer export-modal-footer">
+      <div class="export-footer-summary">
+        <span>
+          Se exportarán <strong>{{ studentsForPdfExport().length }}</strong> de {{ filteredStudentsCount() }} alumno(s) filtrados
+        </span>
+        <span *ngIf="excludedInCurrentFilterCount() > 0" class="footer-excluded-note">
+          ({{ excludedInCurrentFilterCount() }} excluido/s manualmente)
+        </span>
+      </div>
+      <div class="export-footer-actions">
+        <button type="button" (click)="closeExportPdfModal()" class="btn btn-secondary">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          (click)="downloadStudentsPdf()"
+          class="btn btn-primary btn-download-confirm"
+          [disabled]="studentsForPdfExport().length === 0 || !hasAtLeastOneColumnSelected()"
+        >
+          <span>📥 Descargar PDF ({{ studentsForPdfExport().length }})</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

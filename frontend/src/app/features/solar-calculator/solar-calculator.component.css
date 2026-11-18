@@ -103,6 +103,64 @@
   background: transparent;
 }
 
+.tools-switcher-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.1));
+  border-radius: 16px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.tool-switch-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-secondary, #475569);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tool-switch-pill:hover {
+  background: rgba(48, 163, 216, 0.06);
+  color: var(--text-primary, #0f172a);
+}
+
+.tool-switch-pill.active {
+  background: #ffffff;
+  color: var(--primary, #30a3d8);
+  border-color: rgba(48, 163, 216, 0.3);
+  box-shadow: 0 4px 12px rgba(48, 163, 216, 0.12);
+}
+
+.pill-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.pill-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pill-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pill-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted, #64748b);
+}
+
 .calculator-header {
   display: flex;
   align-items: center;
@@ -1598,6 +1656,7 @@
   app-navbar,
   .drawer-header,
   .drawer-actions-bar,
+  .tools-switcher-bar,
   .calculator-header .header-actions,
   .controls-panel,
   .toast-feedback,

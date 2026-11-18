@@ -4,3 +4,5 @@ export * from './lesson.model';
 export * from './quiz.model';
 export * from './student.model';
 export * from './solar-calculator.model';
+export * from './budget-calculator.model';
+

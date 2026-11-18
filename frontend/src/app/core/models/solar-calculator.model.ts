@@ -1,9 +1,19 @@
-export type SolarLocationKey = 'laplata' | 'caba' | 'mardel' | 'bahia' | 'junin';
+export type SolarLocationKey = 'laplata' | 'caba' | 'mardel' | 'bahia' | 'junin' | 'geo';
 
 export interface SolarLocation {
   key: SolarLocationKey;
   name: string;
+  lat?: number;
+  lon?: number;
   monthlyHsp: number[];
+}
+
+export interface GeoLocationData {
+  lat: number;
+  lon: number;
+  name: string;
+  monthlyHsp: number[];
+  source: 'nasa' | 'estimated';
 }
 
 export interface MonthData {
@@ -18,6 +28,10 @@ export interface SolarCalculatorInputs {
   panelCount: number; // default 10
   performanceRatio: number; // default 80 (80%)
   locationKey: SolarLocationKey; // default 'laplata'
+  locationName?: string; // Nombre de ubicación geolocalizada o de referencia
+  latitude?: number;
+  longitude?: number;
+  customMonthlyHsp?: number[]; // 12 meses de HSP para geolocalización
   monthIndex: number; // default 7 (Agosto)
   hsp: number; // default autocompleted from location and month
   monthlyConsumptionKwh: number; // default 620 kWh

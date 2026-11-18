@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
+  GeoLocationData,
   HourlyDataPoint,
   HourlyProfileType,
   MonthData,
@@ -9,30 +10,40 @@ import {
   SolarLocationKey,
 } from '../models/solar-calculator.model';
 
-export const SOLAR_LOCATIONS: Record<SolarLocationKey, SolarLocation> = {
+export const SOLAR_LOCATIONS: Record<Exclude<SolarLocationKey, 'geo'>, SolarLocation> = {
   laplata: {
     key: 'laplata',
     name: 'La Plata / Gonnet',
+    lat: -34.9214,
+    lon: -57.9544,
     monthlyHsp: [5.55, 5.05, 4.45, 3.55, 2.75, 2.35, 2.60, 3.20, 4.05, 4.85, 5.45, 5.70],
   },
   caba: {
     key: 'caba',
     name: 'CABA',
+    lat: -34.6037,
+    lon: -58.3816,
     monthlyHsp: [5.65, 5.15, 4.50, 3.60, 2.80, 2.40, 2.65, 3.25, 4.10, 4.95, 5.55, 5.80],
   },
   mardel: {
     key: 'mardel',
     name: 'Mar del Plata',
+    lat: -38.0055,
+    lon: -57.5426,
     monthlyHsp: [5.55, 4.95, 4.20, 3.25, 2.45, 2.05, 2.30, 2.90, 3.75, 4.65, 5.35, 5.65],
   },
   bahia: {
     key: 'bahia',
     name: 'Bahía Blanca',
+    lat: -38.7183,
+    lon: -62.2663,
     monthlyHsp: [6.20, 5.65, 4.85, 3.90, 3.05, 2.65, 2.90, 3.60, 4.55, 5.45, 6.00, 6.35],
   },
   junin: {
     key: 'junin',
     name: 'Junín',
+    lat: -34.585,
+    lon: -60.9489,
     monthlyHsp: [6.05, 5.55, 4.80, 3.90, 3.05, 2.65, 2.90, 3.55, 4.45, 5.35, 5.90, 6.20],
   },
 };
@@ -78,6 +89,13 @@ export class SolarCalculatorService {
    * Obtiene una localidad por su clave identificadora.
    */
   getLocation(key: SolarLocationKey): SolarLocation {
+    if (key === 'geo') {
+      return {
+        key: 'geo',
+        name: 'Ubicación actual (GPS)',
+        monthlyHsp: SOLAR_LOCATIONS.laplata.monthlyHsp,
+      };
+    }
     return SOLAR_LOCATIONS[key] || SOLAR_LOCATIONS.laplata;
   }
 
@@ -89,12 +107,153 @@ export class SolarCalculatorService {
   }
 
   /**
-   * Retorna las HSP históricas de referencia según localidad y mes (0-11).
+   * Retorna las HSP históricas de referencia según localidad (o arreglo personalizado de geolocalización) y mes (0-11).
    */
-  getDefaultHsp(locationKey: SolarLocationKey, monthIndex: number): number {
-    const loc = this.getLocation(locationKey);
+  getDefaultHsp(
+    locationKey: SolarLocationKey,
+    monthIndex: number,
+    customMonthlyHsp?: number[]
+  ): number {
     const validMonth = Math.max(0, Math.min(11, monthIndex));
+    if (
+      locationKey === 'geo' &&
+      Array.isArray(customMonthlyHsp) &&
+      customMonthlyHsp.length === 12
+    ) {
+      return customMonthlyHsp[validMonth] ?? 3.2;
+    }
+    const loc = this.getLocation(locationKey);
     return loc.monthlyHsp[validMonth] ?? 3.2;
+  }
+
+  /**
+   * Estima la curva de 12 meses de HSP a partir de la latitud y longitud
+   * interpolando estaciones cercanas o modelando por latitud astronómica como respaldo inmediato.
+   */
+  estimateMonthlyHspByCoords(lat: number, lon: number): number[] {
+    const stations = Object.values(SOLAR_LOCATIONS);
+    // Interpolación por inversa de la distancia (IDW) combinada con ajuste latitudinal
+    let weightSum = 0;
+    const weightedHsp = new Array(12).fill(0);
+
+    for (const st of stations) {
+      if (st.lat === undefined || st.lon === undefined) continue;
+      const dLat = lat - st.lat;
+      const dLon = lon - st.lon;
+      const distDeg = Math.sqrt(dLat * dLat + dLon * dLon);
+      if (distDeg < 0.05) {
+        return [...st.monthlyHsp];
+      }
+      const w = 1 / Math.pow(distDeg, 2);
+      weightSum += w;
+      for (let m = 0; m < 12; m++) {
+        weightedHsp[m] += st.monthlyHsp[m] * w;
+      }
+    }
+
+    if (weightSum > 0 && lat >= -45 && lat <= -28 && lon >= -68 && lon <= -53) {
+      return weightedHsp.map((val) => Number((val / weightSum).toFixed(2)));
+    }
+
+    // Modelo general por latitud para cualquier punto fuera de la región pampeana
+    const absLat = Math.min(65, Math.abs(lat));
+    const isSouthern = lat < 0;
+    const baseAnnual = Math.max(2.5, 6.2 - (absLat / 90) * 3.2);
+    const seasonalAmp = Math.min(2.6, (absLat / 45) * 1.85);
+
+    return Array.from({ length: 12 }, (_, m) => {
+      // En hemisferio sur el pico es en diciembre/enero (m=0, 11) y mínimo en junio (m=5)
+      const angle = ((m - (isSouthern ? 0 : 6)) / 12) * 2 * Math.PI;
+      const hsp = baseAnnual + seasonalAmp * Math.cos(angle);
+      return Number(Math.max(1.2, Math.min(8.5, hsp)).toFixed(2));
+    });
+  }
+
+  /**
+   * Obtiene el nombre de la ciudad/localidad mediante geocodificación inversa (Nominatim OpenStreetMap)
+   * y las HSP mensuales reales de NASA POWER para las coordenadas del usuario.
+   */
+  async resolveGeolocationSolarData(lat: number, lon: number): Promise<GeoLocationData> {
+    const fallbackHsp = this.estimateMonthlyHspByCoords(lat, lon);
+    const coordLabel = `Lat ${lat.toFixed(2)}°, Lon ${lon.toFixed(2)}°`;
+
+    const [placeName, nasaHsp] = await Promise.all([
+      this.fetchReverseGeocodeName(lat, lon, coordLabel),
+      this.fetchNasaMonthlyHsp(lat, lon),
+    ]);
+
+    return {
+      lat,
+      lon,
+      name: placeName,
+      monthlyHsp: nasaHsp ?? fallbackHsp,
+      source: nasaHsp ? 'nasa' : 'estimated',
+    };
+  }
+
+  private async fetchReverseGeocodeName(
+    lat: number,
+    lon: number,
+    fallback: string
+  ): Promise<string> {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${encodeURIComponent(
+        lat
+      )}&lon=${encodeURIComponent(lon)}&zoom=10&accept-language=es`;
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) return fallback;
+      const data = await res.json();
+      const addr = data?.address;
+      if (addr) {
+        const city =
+          addr.city ||
+          addr.town ||
+          addr.municipality ||
+          addr.village ||
+          addr.suburb ||
+          addr.county ||
+          addr.state_district;
+        const state = addr.state;
+        if (city && state && city !== state) {
+          return `${city}, ${state}`;
+        }
+        if (city || state) {
+          return city || state;
+        }
+      }
+      if (typeof data?.display_name === 'string' && data.display_name.trim()) {
+        return data.display_name.split(',').slice(0, 2).join(',').trim();
+      }
+      return fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  private async fetchNasaMonthlyHsp(lat: number, lon: number): Promise<number[] | null> {
+    try {
+      const url = `https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&longitude=${encodeURIComponent(
+        lon
+      )}&latitude=${encodeURIComponent(lat)}&format=JSON`;
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const param = data?.properties?.parameter?.ALLSKY_SFC_SW_DWN;
+      if (!param) return null;
+
+      const keys = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      const values = keys.map((k) => Number(param[k]));
+      if (values.some((v) => isNaN(v) || v <= 0 || v > 15)) {
+        return null;
+      }
+      return values.map((v) => Number(v.toFixed(2)));
+    } catch {
+      return null;
+    }
   }
 
   /**
@@ -272,12 +431,16 @@ export class SolarCalculatorService {
     outputs: SolarCalculatorOutputs
   ): string {
     const loc = this.getLocation(inputs.locationKey);
+    const locationDisplay =
+      inputs.locationKey === 'geo' && inputs.locationName
+        ? `${inputs.locationName} (${inputs.latitude?.toFixed(2)}°, ${inputs.longitude?.toFixed(2)}°)`
+        : loc.name;
     const totalSavings = outputs.selfConsumptionSavings + outputs.exportCreditSavings;
 
     return [
       `☀️ BALANCE SOLAR - CALCULADORA FOTOVOLTAICA`,
       `-------------------------------------------------`,
-      `📍 Ubicación: ${loc.name}`,
+      `📍 Ubicación: ${locationDisplay}`,
       `📅 Período: ${outputs.periodLabel}`,
       `⚡ Perfil: ${outputs.profileLabel} (${outputs.profileDescription})`,
       ``,

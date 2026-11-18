@@ -1,0 +1,843 @@
+@if (!isDrawer) {
+  <app-navbar></app-navbar>
+}
+
+@if (isDrawer) {
+  <header class="drawer-header">
+    <div class="drawer-title-group">
+      <div class="drawer-icon-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="18" rx="2"></rect>
+          <line x1="8" y1="7" x2="16" y2="7"></line>
+          <line x1="8" y1="11" x2="16" y2="11"></line>
+          <line x1="8" y1="15" x2="12" y2="15"></line>
+        </svg>
+      </div>
+      <div>
+        <h2 class="drawer-title">Presupuesto Fotovoltaico</h2>
+        <span class="drawer-subtitle">Cálculo bimonetario ARS / USD</span>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="drawer-close-btn"
+      (click)="onCloseDrawerClick()"
+      title="Cerrar panel lateral"
+      aria-label="Cerrar panel"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </header>
+}
+
+<main class="budget-container" [class.is-drawer-mode]="isDrawer">
+  <!-- Barra superior de navegación entre herramientas técnicas -->
+  @if (!isDrawer) {
+    <nav class="tools-switcher-bar animate-fade-in" aria-label="Herramientas fotovoltaicas">
+      <a
+        routerLink="/calculadora"
+        routerLinkActive="active"
+        class="tool-switch-pill"
+      >
+        <span class="pill-icon">☀️</span>
+        <div class="pill-text">
+          <span class="pill-title">Calculadora Solar</span>
+          <span class="pill-sub">Dimensionamiento y curva 24h</span>
+        </div>
+      </a>
+
+      <a
+        routerLink="/presupuesto"
+        routerLinkActive="active"
+        class="tool-switch-pill active"
+      >
+        <span class="pill-icon">📋</span>
+        <div class="pill-text">
+          <span class="pill-title">Calculadora de Presupuesto</span>
+          <span class="pill-sub">Costos por rubro, margen y cotización</span>
+        </div>
+      </a>
+    </nav>
+
+    <!-- Cabecera principal -->
+    <section
+      id="budget-intro"
+      class="budget-header glass-card"
+      [class.tour-target-active]="isTourActive() && tourStep() === 0"
+    >
+      <div class="header-content">
+        <div class="header-badges-row">
+          <span class="header-badge">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>ANEXO PRÁCTICO · Herramienta Interactiva</span>
+          </span>
+          @if (simulation()) {
+            <span class="sim-active-badge">⚡ Ejemplo simulado activo</span>
+          }
+        </div>
+        <h1 class="page-title">Presupuesto de una instalación fotovoltaica</h1>
+        <p class="page-subtitle">
+          Cargá los costos en pesos o dólares. La calculadora convierte cada ítem con la cotización que definas
+          y muestra el presupuesto en ambas monedas. Funciona sin conexión a internet.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-outline-info action-btn"
+          (click)="startTour()"
+          title="Ver guía interactiva paso a paso"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Guía / Tutorial</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary action-btn"
+          (click)="shareBudget()"
+          title="Copiar resumen del presupuesto"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          <span>Compartir / Copiar</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary action-btn"
+          (click)="printBudget()"
+          title="Imprimir presupuesto o guardar como PDF"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Imprimir / PDF</span>
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Toast flotante de notificaciones -->
+  @if (toastMessage(); as msg) {
+    <div
+      class="toast-feedback animate-fade-in"
+      [class.toast-error]="toastType() === 'error'"
+      role="alert"
+    >
+      @if (toastType() === 'success') {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      } @else {
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      }
+      <span>{{ msg }}</span>
+    </div>
+  }
+
+  <!-- Estructura principal: Editor de Presupuesto (Izquierda) / Resumen Ejecutivo en Vivo (Derecha) -->
+  <div class="budget-grid">
+    <!-- COLUMNA PRINCIPAL DE CONFIGURACIÓN Y RUBROS -->
+    <div class="budget-editor-column">
+      <!-- PASO 1: DATOS DE LA OBRA Y COTIZACIÓN -->
+      <section
+        id="budget-step-general"
+        class="sheet-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 1"
+      >
+        <div class="section-card-header">
+          <div class="section-step-title">
+            <span class="step-number">1</span>
+            <div>
+              <h2 class="section-heading">Datos de la obra y cotización de referencia</h2>
+              <p class="section-subheading">Identificación del proyecto y tipo de cambio manual ARS / USD</p>
+            </div>
+          </div>
+
+          <div class="quick-actions-group">
+            <button
+              id="example"
+              type="button"
+              class="btn-tool-primary"
+              (click)="promptLoadSimulatedExample()"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+              <span>Cargar ejemplo simulado</span>
+            </button>
+
+            <button
+              id="clear"
+              type="button"
+              class="btn-tool-alt"
+              (click)="promptClearAll()"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>Vaciar importes</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="fields-grid-3">
+          <div class="field-group">
+            <label for="obra" class="field-label">Nombre de la obra</label>
+            <input
+              id="obra"
+              type="text"
+              class="form-control"
+              [ngModel]="values().obra"
+              (ngModelChange)="updateObra($event)"
+              placeholder="Ej.: Instalación en zona urbana"
+            />
+          </div>
+
+          <div class="field-group">
+            <div class="label-row">
+              <label for="tc" class="field-label">Cotización: pesos por 1 USD</label>
+              <div class="tc-presets">
+                <button type="button" class="tc-chip" [class.active]="values().tc === 1200" (click)="applyQuickTc(1200)">$1.200</button>
+                <button type="button" class="tc-chip" [class.active]="values().tc === 1500" (click)="applyQuickTc(1500)">$1.500</button>
+              </div>
+            </div>
+            <div class="currency-input-wrap">
+              <span class="curr-prefix">ARS/USD</span>
+              <input
+                id="tc"
+                type="number"
+                min="0.01"
+                step="0.01"
+                class="form-control input-with-prefix"
+                [ngModel]="values().tc"
+                (ngModelChange)="updateTc($event)"
+                placeholder="Ingresar cotización"
+              />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="referencia" class="field-label">Referencia de la cotización</label>
+            <input
+              id="referencia"
+              type="text"
+              class="form-control"
+              [ngModel]="values().referencia"
+              (ngModelChange)="updateReferencia($event)"
+              placeholder="Ej.: cotización acordada con proveedor"
+            />
+          </div>
+        </div>
+
+        <p class="help-text">
+          La cotización es manual y no se actualiza desde internet. El equivalente en USD es una conversión de referencia.
+          Si cambia el dólar, varían en pesos los ítems cargados en USD; los cargados en pesos mantienen su importe.
+        </p>
+
+        <!-- Mensaje de validación en tiempo real -->
+        @if (calculationState().error; as errMsg) {
+          <div id="error" class="validation-banner" aria-live="polite">
+            <div class="validation-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <div class="validation-content">
+              <strong>Atención requerida para calcular:</strong>
+              <span>{{ errMsg }}</span>
+            </div>
+            @if (!values().tc || values().tc! <= 0) {
+              <button type="button" class="btn-banner-action" (click)="executeLoadSimulatedExample()">
+                Probar con ejemplo ($1.500)
+              </button>
+            }
+          </div>
+        } @else {
+          <div id="error" class="error-empty" aria-live="polite"></div>
+        }
+      </section>
+
+      <!-- PASO 2: LOS 4 RUBROS DE COSTOS -->
+      <div
+        id="budget-step-rubros"
+        class="rubros-wrapper"
+        [class.tour-target-active]="isTourActive() && tourStep() === 2"
+      >
+        <div id="sections" class="rubros-stack">
+          @for (group of groups; track group.key; let gIdx = $index) {
+            <section class="sheet-card glass-card rubro-section">
+              <div class="rubro-header">
+                <div class="rubro-title-wrap">
+                  <span class="rubro-dot" [style.background]="group.badgeColor"></span>
+                  <div>
+                    <h2 class="rubro-title">{{ group.label }}</h2>
+                    <p class="rubro-desc">{{ group.description }}</p>
+                  </div>
+                </div>
+
+                <div class="rubro-subtotal-pill">
+                  <span class="rubro-subtotal-label">Subtotal rubro:</span>
+                  <strong class="rubro-subtotal-val">{{ getGroupSubtotalFormatted(group.key) }}</strong>
+                </div>
+              </div>
+
+              <div class="table-scroll">
+                <table class="budget-table">
+                  <thead>
+                    <tr>
+                      <th class="col-check">Incluir</th>
+                      <th class="col-name">Concepto</th>
+                      <th class="col-qty">Cantidad</th>
+                      <th class="col-unit">Unidad</th>
+                      <th class="col-cost">Costo unitario</th>
+                      <th class="col-cur">Moneda</th>
+                      <th class="col-sub">Subtotal ARS</th>
+                      <th class="col-del" aria-label="Acciones"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of getRowsByGroup(group.key); track row.id) {
+                      <tr [class.row-excluded]="!row.on" [class.row-zero-warning]="row.on && row.v === 0">
+                        <td class="col-check">
+                          <label class="checkbox-wrapper">
+                            <input
+                              type="checkbox"
+                              [checked]="row.on"
+                              (change)="toggleRowIncluded(row.id, $any($event.target).checked)"
+                              [attr.aria-label]="'Incluir ' + row.name"
+                            />
+                            <span class="checkmark"></span>
+                          </label>
+                        </td>
+
+                        <td class="col-name">
+                          <input
+                            type="text"
+                            class="table-input input-name"
+                            [ngModel]="row.name"
+                            (ngModelChange)="updateRowName(row.id, $event)"
+                            aria-label="Concepto"
+                          />
+                        </td>
+
+                        <td class="col-qty">
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            class="table-input input-number"
+                            [ngModel]="row.q"
+                            (ngModelChange)="updateRowQuantity(row.id, $event)"
+                            aria-label="Cantidad"
+                          />
+                        </td>
+
+                        <td class="col-unit">
+                          <input
+                            type="text"
+                            class="table-input input-unit"
+                            [ngModel]="row.unit"
+                            (ngModelChange)="updateRowUnit(row.id, $event)"
+                            aria-label="Unidad"
+                          />
+                        </td>
+
+                        <td class="col-cost">
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            class="table-input input-number"
+                            [ngModel]="row.v"
+                            (ngModelChange)="updateRowUnitCost(row.id, $event)"
+                            aria-label="Costo unitario"
+                          />
+                        </td>
+
+                        <td class="col-cur">
+                          <select
+                            class="table-select"
+                            [class.cur-usd]="row.cur === 'USD'"
+                            [ngModel]="row.cur"
+                            (ngModelChange)="updateRowCurrency(row.id, $event)"
+                            aria-label="Moneda"
+                          >
+                            <option value="ARS">ARS</option>
+                            <option value="USD">USD</option>
+                          </select>
+                        </td>
+
+                        <td class="col-sub">
+                          <span
+                            [id]="'row' + row.id"
+                            class="row-subtotal-text"
+                            [class.excluded-badge]="!row.on"
+                          >
+                            {{ getRowSubtotalDisplay(row) }}
+                          </span>
+                        </td>
+
+                        <td class="col-del">
+                          <button
+                            type="button"
+                            class="btn-delete-row"
+                            title="Quitar concepto"
+                            (click)="removeRow(row.id)"
+                          >
+                            ×
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="rubro-footer">
+                <button
+                  type="button"
+                  class="btn-add-concept"
+                  (click)="addRow(group.key)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Agregar concepto a {{ group.shortLabel }}</span>
+                </button>
+              </div>
+            </section>
+          }
+        </div>
+      </div>
+
+      <!-- PASO 3: AJUSTES DE PRESUPUESTO -->
+      <section
+        id="budget-step-ajustes"
+        class="sheet-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 3"
+      >
+        <div class="section-card-header">
+          <div class="section-step-title">
+            <span class="step-number">3</span>
+            <div>
+              <h2 class="section-heading">Ajustes de presupuesto</h2>
+              <p class="section-subheading">Previsión de contingencia, criterio de utilidad comercial e impuestos</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="fields-grid-4">
+          <div class="field-group">
+            <label for="cont" class="field-label">Contingencia sobre costos (%)</label>
+            <div class="pct-input-wrap">
+              <input
+                id="cont"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="form-control"
+                [ngModel]="values().cont"
+                (ngModelChange)="updateCont($event)"
+              />
+              <span class="pct-suffix">%</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="modo" class="field-label">Criterio comercial</label>
+            <select
+              id="modo"
+              class="form-control form-select"
+              [ngModel]="values().modo"
+              (ngModelChange)="updateModo($event)"
+            >
+              <option value="margen">Margen sobre precio de venta</option>
+              <option value="recargo">Recargo sobre costo</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="benef" class="field-label">Margen o recargo (%)</label>
+            <div class="pct-input-wrap">
+              <input
+                id="benef"
+                type="number"
+                min="0"
+                max="99.9"
+                step="0.1"
+                class="form-control"
+                [ngModel]="values().benef"
+                (ngModelChange)="updateBenef($event)"
+              />
+              <span class="pct-suffix">%</span>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="tax" class="field-label">Impuesto agregado al precio (%)</label>
+            <div class="pct-input-wrap">
+              <input
+                id="tax"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                class="form-control"
+                [ngModel]="values().tax"
+                (ngModelChange)="updateTax($event)"
+              />
+              <span class="pct-suffix">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="formulas-info-box">
+          <p class="help-text">
+            <strong>Fórmulas aplicadas:</strong> Contingencia = subtotal de costos × porcentaje.
+            Margen: <code>precio = costo previsto ÷ (1 − margen)</code>.
+            Recargo: <code>precio = costo previsto × (1 + recargo)</code>.
+            El ajuste comercial aplica a todos los rubros incluidos, también servicios externos.
+            Usá costos internos, sin duplicar gastos o ganancia ya incluidos en una tarifa.
+          </p>
+          <p class="help-text">
+            El campo impositivo es un ajuste didáctico único y comienza en cero.
+            Cargá los costos sobre una base impositiva coherente. No determina el tratamiento fiscal de una operación real.
+          </p>
+        </div>
+      </section>
+
+      <!-- PASO 4: ALCANCE, CONDICIONES Y ARCHIVOS -->
+      <section
+        id="budget-step-alcance"
+        class="sheet-card glass-card"
+        [class.tour-target-active]="isTourActive() && tourStep() === 4"
+      >
+        <div class="section-card-header">
+          <div class="section-step-title">
+            <span class="step-number">4</span>
+            <div>
+              <h2 class="section-heading">Alcance y condiciones</h2>
+              <p class="section-subheading">Condicionantes técnicos, exclusiones y resguardo de datos del ejercicio</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="structural-note">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <p>
+            Si hay dudas sobre la cubierta o la estructura de soporte, el montaje queda condicionado al estudio y aval
+            documentado de un profesional con competencia estructural. Los refuerzos o reparaciones que indique deben
+            resolverse antes del montaje.
+          </p>
+        </div>
+
+        <div class="field-group alcance-group">
+          <label for="alcance" class="field-label">Descripción de lo incluido, exclusiones y condiciones</label>
+          <textarea
+            id="alcance"
+            rows="3"
+            class="form-control alcance-textarea"
+            [ngModel]="values().alcance"
+            (ngModelChange)="updateAlcance($event)"
+            placeholder="Equipos, recorridos, entrega, garantía y condiciones de pago"
+          ></textarea>
+        </div>
+
+        <p class="help-text">
+          La medición de puesta a tierra debe cotizarse indicando su alcance y la entrega del informe correspondiente.
+          Si el resultado exige adecuaciones, presupuestalas por separado. La obra civil complementaria debe detallar
+          trabajos, materiales y terminaciones. Un importe cero significa que el rubro no tiene costo cargado; no
+          acredita que el trabajo esté resuelto.
+        </p>
+
+        <div class="file-actions-bar">
+          <button
+            id="print"
+            type="button"
+            class="btn-tool-primary"
+            (click)="printBudget()"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Imprimir / guardar como PDF</span>
+          </button>
+
+          <button
+            id="save"
+            type="button"
+            class="btn-tool-alt"
+            (click)="saveJsonFile()"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Guardar datos de la obra (.json)</span>
+          </button>
+
+          <button
+            id="load"
+            type="button"
+            class="btn-tool-alt"
+            (click)="triggerOpenJsonFile()"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <span>Abrir datos guardados</span>
+          </button>
+
+          <input
+            #fileInput
+            id="file"
+            type="file"
+            accept="application/json,.json"
+            hidden
+            (change)="onFileSelected($event)"
+          />
+        </div>
+
+        <p class="muted-note">
+          Guardá los datos para retomar el ejercicio. El archivo JSON conserva los valores ingresados y se abre desde
+          esta misma calculadora. Los datos no se envían a ningún servidor.
+        </p>
+      </section>
+    </div>
+
+    <!-- COLUMNA DERECHA STICKY: RESULTADO DEL PRESUPUESTO -->
+    <aside
+      id="budget-results-panel"
+      class="budget-results-column"
+      [class.tour-target-active]="isTourActive() && tourStep() === 5"
+    >
+      <div id="results" class="results-sticky-card glass-card">
+        <div class="results-card-header">
+          <div class="results-badge-row">
+            <span class="pulse-dot"></span>
+            <span class="results-kicker">RESUMEN EJECUTIVO</span>
+          </div>
+          <h2 class="results-heading">Resultado del presupuesto</h2>
+          <p class="results-obra-name">{{ values().obra || 'Obra sin título' }}</p>
+        </div>
+
+        <!-- Totales Principales (ARS y USD) -->
+        <div class="totals-hero-box">
+          <div class="total-primary-item">
+            <small class="total-label">PRECIO FINAL EN PESOS</small>
+            <div id="ars" class="total-amount amount-ars">
+              {{ calculationState().result ? budgetService.formatCurrency(calculationState().result!.total, 'ARS') : '—' }}
+            </div>
+          </div>
+
+          <div class="total-divider"></div>
+
+          <div class="total-secondary-item">
+            <small class="total-label">EQUIVALENTE EN DÓLARES</small>
+            <div id="usd" class="total-amount amount-usd">
+              {{ calculationState().result ? budgetService.formatCurrency(calculationState().result!.usd, 'USD') : '—' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Barra de composición visual del precio -->
+        @if (compositionSegments().length > 0) {
+          <div class="composition-widget">
+            <div class="composition-bar-Header">
+              <span class="comp-title">Estructura porcentual del precio final</span>
+            </div>
+            <div class="composition-bar">
+              @for (seg of compositionSegments(); track seg.key) {
+                <div
+                  class="comp-segment"
+                  [style.width.%]="seg.pct"
+                  [style.background]="seg.color"
+                  [title]="seg.label + ': ' + (seg.pct | number:'1.1-1') + '%'"
+                ></div>
+              }
+            </div>
+            <div class="composition-legend">
+              @for (seg of compositionSegments(); track seg.key) {
+                <div class="comp-legend-item">
+                  <span class="comp-dot" [style.background]="seg.color"></span>
+                  <span class="comp-name">{{ seg.label }}</span>
+                  <strong class="comp-pct">{{ seg.pct | number:'1.0-1' }}%</strong>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Tabla de desglose de los 10 conceptos clave -->
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <tbody id="resbody">
+              @if (calculationState().result; as res) {
+                @for (line of res.lines; track line.key) {
+                  <tr
+                    [class.summary-row-subtotal]="line.isSubtotal"
+                    [class.summary-row-highlight]="line.isHighlight"
+                  >
+                    <td class="summary-cell-label">{{ line.label }}</td>
+                    <td class="summary-cell-amount">{{ budgetService.formatCurrency(line.amount, 'ARS') }}</td>
+                  </tr>
+                }
+              } @else {
+                <tr>
+                  <td colspan="2" class="summary-empty-cell">
+                    Ingresá una cotización USD mayor a cero para visualizar el desglose completo.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Estado de cotización y conceptos en cero -->
+        <div class="state-status-box" [class.has-valid-result]="!!calculationState().result">
+          <p id="state" class="state-text">{{ stateText() }}</p>
+        </div>
+
+        <p class="muted-note">
+          El resultado comercial previsto es la diferencia entre el precio antes del impuesto agregado y el costo con
+          contingencia. No representa la ganancia neta definitiva.
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <!-- MODAL DE CONFIRMACIÓN -->
+  @if (confirmModal(); as modal) {
+    <div class="modal-backdrop animate-fade-in" (click)="closeConfirmModal()">
+      <div class="modal-dialog glass-card" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <h3 class="modal-title">{{ modal.title }}</h3>
+        </div>
+        <p class="modal-message">{{ modal.message }}</p>
+        <div class="modal-actions">
+          <button type="button" class="btn-tool-alt" (click)="closeConfirmModal()">Cancelar</button>
+          <button
+            type="button"
+            [class]="modal.isDanger ? 'btn-tool-danger' : 'btn-tool-primary'"
+            (click)="modal.onConfirm()"
+          >
+            {{ modal.confirmLabel }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL / DIALOG FLOTANTE DE GUÍA INTERACTIVA (TOUR) -->
+  @if (isTourActive()) {
+    <div class="tour-backdrop animate-fade-in" (click)="skipTour()"></div>
+    <div class="tour-dialog-wrapper animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="tour-dialog-title">
+      <div class="tour-card glass-card">
+        <div class="tour-card-header">
+          <div class="tour-badge-wrap">
+            <span class="tour-icon">{{ tourSteps[tourStep()].icon }}</span>
+            <span class="tour-step-badge">{{ tourSteps[tourStep()].badge }}</span>
+          </div>
+          <button
+            type="button"
+            class="tour-close-btn"
+            (click)="skipTour()"
+            title="Cerrar tutorial"
+            aria-label="Cerrar tutorial"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="tour-card-body">
+          <h3 id="tour-dialog-title" class="tour-step-title">{{ tourSteps[tourStep()].title }}</h3>
+          <p class="tour-step-desc">{{ tourSteps[tourStep()].description }}</p>
+          @if (tourSteps[tourStep()].hint; as hint) {
+            <div class="tour-step-hint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>{{ hint }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="tour-card-footer">
+          <div class="tour-dots">
+            @for (step of tourSteps; track $index) {
+              <button
+                type="button"
+                class="tour-dot"
+                [class.active]="tourStep() === $index"
+                (click)="goToTourStep($index)"
+                [attr.aria-label]="'Ir al paso ' + ($index + 1)"
+              ></button>
+            }
+          </div>
+
+          <div class="tour-actions">
+            @if (tourStep() > 0) {
+              <button type="button" class="btn btn-secondary btn-sm tour-btn-prev" (click)="prevTourStep()">
+                Anterior
+              </button>
+            } @else {
+              <button type="button" class="btn btn-ghost btn-sm tour-btn-skip" (click)="skipTour()">
+                Omitir
+              </button>
+            }
+
+            <button type="button" class="btn btn-primary btn-sm tour-btn-next" (click)="nextTourStep()">
+              <span>{{ tourStep() === tourSteps.length - 1 ? '¡Empezar a presupuestar!' : 'Continuar' }}</span>
+              @if (tourStep() < tourSteps.length - 1) {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</main>

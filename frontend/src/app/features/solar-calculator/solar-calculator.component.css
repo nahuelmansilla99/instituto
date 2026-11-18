@@ -103,6 +103,64 @@
   background: transparent;
 }
 
+.tools-switcher-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border-subtle, rgba(0, 0, 0, 0.1));
+  border-radius: 16px;
+  margin-bottom: 18px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.tool-switch-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-secondary, #475569);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tool-switch-pill:hover {
+  background: rgba(48, 163, 216, 0.06);
+  color: var(--text-primary, #0f172a);
+}
+
+.tool-switch-pill.active {
+  background: #ffffff;
+  color: var(--primary, #30a3d8);
+  border-color: rgba(48, 163, 216, 0.3);
+  box-shadow: 0 4px 12px rgba(48, 163, 216, 0.12);
+}
+
+.pill-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.pill-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pill-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.pill-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted, #64748b);
+}
+
 .calculator-header {
   display: flex;
   align-items: center;
@@ -509,6 +567,131 @@
   font-size: 1.25rem;
   font-weight: 800;
   color: #b45309;
+}
+
+/* Geolocation Box inside Step 2 */
+.geolocation-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(48, 163, 216, 0.04);
+  border: 1px solid rgba(48, 163, 216, 0.2);
+  transition: all 0.2s ease;
+}
+
+.geolocation-box.is-located {
+  background: rgba(16, 185, 129, 0.05);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.geo-current-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.geo-pin-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: rgba(48, 163, 216, 0.12);
+  color: var(--primary, #30a3d8);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.geo-pin-icon.active {
+  background: rgba(16, 185, 129, 0.16);
+  color: #059669;
+}
+
+.geo-text-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.geo-location-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary, #111111);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.geo-coords {
+  font-size: 0.74rem;
+  color: var(--text-muted, #64748b);
+  margin-top: 1px;
+}
+
+.btn-geolocate {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--primary, #30a3d8);
+  background: var(--primary, #30a3d8);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(48, 163, 216, 0.2);
+}
+
+.btn-geolocate:hover:not(:disabled) {
+  background: #238bba;
+  border-color: #238bba;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(48, 163, 216, 0.3);
+}
+
+.btn-geolocate:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.geo-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: geoSpin 0.75s linear infinite;
+}
+
+@keyframes geoSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.geo-error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.geo-error-alert svg {
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 /* HSP Input Wrap */
@@ -1598,6 +1781,7 @@
   app-navbar,
   .drawer-header,
   .drawer-actions-bar,
+  .tools-switcher-bar,
   .calculator-header .header-actions,
   .controls-panel,
   .toast-feedback,

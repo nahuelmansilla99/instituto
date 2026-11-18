@@ -15,6 +15,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { SolarCalculatorService } from '../../core/services/solar-calculator.service';
 import {
   DEFAULT_SOLAR_INPUTS,
+  GeoLocationData,
   HourlyProfileType,
   MonthData,
   SolarCalculatorInputs,
@@ -109,6 +110,11 @@ export class SolarCalculatorComponent implements OnInit {
   tooltip = signal<ChartTooltipData | null>(null);
   copiedFeedback = signal<boolean>(false);
 
+  // Signals para Geolocalización del usuario
+  isLocating = signal<boolean>(false);
+  geoError = signal<string | null>(null);
+  geoData = signal<GeoLocationData | null>(null);
+
   // Signals y estado para el Tour / Guía Interactiva
   isTourActive = signal<boolean>(false);
   tourStep = signal<number>(0);
@@ -135,9 +141,9 @@ export class SolarCalculatorComponent implements OnInit {
     {
       targetId: 'step-2-card',
       badge: 'Paso 2 de 4',
-      title: 'Paso 2: Recurso Solar y Localidad',
+      title: 'Paso 2: Recurso Solar y Geolocalización',
       description:
-        'Elegí la localidad y el mes a simular. El sistema carga automáticamente las Horas de Sol Pico (HSP) promedio de estaciones meteorológicas y NASA.',
+        'Pulsá el botón para obtener tu ubicación actual por GPS y elegir el mes a simular. El sistema calcula automáticamente las Horas de Sol Pico (HSP) de tu zona con datos de NASA.',
       hint: 'También podés editar las HSP manualmente si querés simular una radiación específica.',
       icon: '📍',
     },
@@ -201,8 +207,17 @@ export class SolarCalculatorComponent implements OnInit {
 
   // Computed: valor de referencia de HSP histórica para la ubicación y mes seleccionados
   readonly hspHint = computed<number>(() => {
-    const { locationKey, monthIndex } = this.inputs();
-    return this.solarService.getDefaultHsp(locationKey, monthIndex);
+    const { locationKey, monthIndex, customMonthlyHsp } = this.inputs();
+    return this.solarService.getDefaultHsp(locationKey, monthIndex, customMonthlyHsp);
+  });
+
+  // Computed: nombre legible de la ubicación actual o de referencia
+  readonly locationDisplayName = computed<string>(() => {
+    const current = this.inputs();
+    if (current.locationKey === 'geo' && current.locationName) {
+      return current.locationName;
+    }
+    return this.solarService.getLocation(current.locationKey).name;
   });
 
   // Computed: estructura completa para renderizado vectorial SVG de 900x330
@@ -332,8 +347,29 @@ export class SolarCalculatorComponent implements OnInit {
   // Métodos de cambio de configuración
   onLocationChange(key: SolarLocationKey): void {
     const currentMonth = this.inputs().monthIndex;
-    const defaultHsp = this.solarService.getDefaultHsp(key, currentMonth);
     this.manualHspEdited.set(false);
+    this.geoError.set(null);
+
+    if (key === 'geo') {
+      const savedGeo = this.geoData();
+      if (savedGeo) {
+        const geoHsp = savedGeo.monthlyHsp[currentMonth] ?? 3.2;
+        this.inputs.update((prev) => ({
+          ...prev,
+          locationKey: 'geo',
+          locationName: savedGeo.name,
+          latitude: savedGeo.lat,
+          longitude: savedGeo.lon,
+          customMonthlyHsp: savedGeo.monthlyHsp,
+          hsp: geoHsp,
+        }));
+      } else {
+        this.useCurrentLocation();
+      }
+      return;
+    }
+
+    const defaultHsp = this.solarService.getDefaultHsp(key, currentMonth);
     this.inputs.update((prev) => ({
       ...prev,
       locationKey: key,
@@ -341,10 +377,86 @@ export class SolarCalculatorComponent implements OnInit {
     }));
   }
 
+  useCurrentLocation(): void {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      this.geoError.set('Tu navegador no soporta la geolocalización.');
+      return;
+    }
+
+    this.isLocating.set(true);
+    this.geoError.set(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const currentMonth = this.inputs().monthIndex;
+
+        // 1. Respuesta inmediata con estimación por coordenadas
+        const initialMonthlyHsp = this.solarService.estimateMonthlyHspByCoords(lat, lon);
+        const initialHsp = initialMonthlyHsp[currentMonth] ?? 3.2;
+
+        this.manualHspEdited.set(false);
+        this.inputs.update((prev) => ({
+          ...prev,
+          locationKey: 'geo',
+          locationName: `Lat ${lat.toFixed(2)}°, Lon ${lon.toFixed(2)}°`,
+          latitude: lat,
+          longitude: lon,
+          customMonthlyHsp: initialMonthlyHsp,
+          hsp: initialHsp,
+        }));
+
+        // 2. Consulta asíncrona a Nominatim (ciudad) y NASA POWER (HSP oficial)
+        try {
+          const resolved = await this.solarService.resolveGeolocationSolarData(lat, lon);
+          this.geoData.set(resolved);
+          const monthIdx = this.inputs().monthIndex;
+          const updatedHsp = resolved.monthlyHsp[monthIdx] ?? initialHsp;
+
+          this.inputs.update((prev) => ({
+            ...prev,
+            locationKey: 'geo',
+            locationName: resolved.name,
+            latitude: resolved.lat,
+            longitude: resolved.lon,
+            customMonthlyHsp: resolved.monthlyHsp,
+            hsp: this.manualHspEdited() ? prev.hsp : updatedHsp,
+          }));
+        } finally {
+          this.isLocating.set(false);
+        }
+      },
+      (err: GeolocationPositionError) => {
+        this.isLocating.set(false);
+        if (err.code === err.PERMISSION_DENIED) {
+          this.geoError.set(
+            'Permiso de ubicación denegado. Habilitá el acceso al GPS en tu navegador para detectar tu localidad.'
+          );
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          this.geoError.set('No se pudo determinar tu ubicación actual.');
+        } else if (err.code === err.TIMEOUT) {
+          this.geoError.set('Se agotó el tiempo de espera al obtener la ubicación.');
+        } else {
+          this.geoError.set('Ocurrió un error al obtener tu geolocalización.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000,
+      }
+    );
+  }
+
   onMonthChange(monthIdx: number): void {
     const parsedIdx = Number(monthIdx);
-    const currentLoc = this.inputs().locationKey;
-    const defaultHsp = this.solarService.getDefaultHsp(currentLoc, parsedIdx);
+    const { locationKey, customMonthlyHsp } = this.inputs();
+    const defaultHsp = this.solarService.getDefaultHsp(
+      locationKey,
+      parsedIdx,
+      customMonthlyHsp
+    );
     this.manualHspEdited.set(false);
     this.inputs.update((prev) => ({
       ...prev,
@@ -363,8 +475,12 @@ export class SolarCalculatorComponent implements OnInit {
   }
 
   resetHspToDefault(): void {
-    const { locationKey, monthIndex } = this.inputs();
-    const defaultHsp = this.solarService.getDefaultHsp(locationKey, monthIndex);
+    const { locationKey, monthIndex, customMonthlyHsp } = this.inputs();
+    const defaultHsp = this.solarService.getDefaultHsp(
+      locationKey,
+      monthIndex,
+      customMonthlyHsp
+    );
     this.manualHspEdited.set(false);
     this.inputs.update((prev) => ({
       ...prev,

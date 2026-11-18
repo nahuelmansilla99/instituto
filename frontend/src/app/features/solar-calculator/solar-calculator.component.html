@@ -368,9 +368,15 @@
         </div>
 
         <div class="step-body">
-          <!-- Selector de Localidad -->
+          <!-- Selector de Localidad + Botón de Geolocalización -->
           <div class="form-group">
-            <label for="locationKey" class="form-label">Localidad de referencia</label>
+            <div class="label-with-value">
+              <label for="locationKey" class="form-label">Localidad de referencia</label>
+              @if (inputs().locationKey === 'geo') {
+                <span class="tag-auto">GPS Activo</span>
+              }
+            </div>
+
             <select
               id="locationKey"
               class="form-control form-select"
@@ -380,7 +386,66 @@
               @for (loc of locations; track loc.key) {
                 <option [value]="loc.key">{{ loc.name }}</option>
               }
+              @if (geoData() || inputs().locationKey === 'geo') {
+                <option value="geo">
+                  📍 {{ geoData()?.name || inputs().locationName || 'Mi ubicación actual' }} (GPS)
+                </option>
+              }
             </select>
+
+            <div class="geolocation-box" [class.is-located]="inputs().locationKey === 'geo'">
+              @if (inputs().locationKey === 'geo') {
+                <div class="geo-current-info">
+                  <div class="geo-pin-icon active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div class="geo-text-wrap">
+                    <strong class="geo-location-name">{{ locationDisplayName() }}</strong>
+                    @if (inputs().latitude !== undefined && inputs().longitude !== undefined) {
+                      <span class="geo-coords">
+                        Lat: {{ inputs().latitude | number:'1.2-2' }}° · Lon: {{ inputs().longitude | number:'1.2-2' }}°
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <button
+                type="button"
+                class="btn-geolocate"
+                [disabled]="isLocating()"
+                (click)="useCurrentLocation()"
+              >
+                @if (isLocating()) {
+                  <span class="geo-spinner" aria-hidden="true"></span>
+                  <span>Obteniendo ubicación...</span>
+                } @else {
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 2v3"></path>
+                    <path d="M12 19v3"></path>
+                    <path d="M2 12h3"></path>
+                    <path d="M19 12h3"></path>
+                    <circle cx="12" cy="12" r="7"></circle>
+                  </svg>
+                  <span>{{ inputs().locationKey === 'geo' ? 'Actualizar mi ubicación actual' : 'Usar mi ubicación actual' }}</span>
+                }
+              </button>
+            </div>
+
+            @if (geoError(); as errMsg) {
+              <div class="geo-error-alert" role="alert">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>{{ errMsg }}</span>
+              </div>
+            }
           </div>
 
           <!-- Selector de Mes -->
@@ -433,7 +498,7 @@
               }
             </div>
             <span class="field-hint">
-              Referencia para {{ solarService.getLocation(inputs().locationKey).name }} en el mes elegido: {{ hspHint() | number:'1.2-2' }} h/día.
+              Referencia para {{ locationDisplayName() }} en el mes elegido: {{ hspHint() | number:'1.2-2' }} h/día.
             </span>
           </div>
         </div>

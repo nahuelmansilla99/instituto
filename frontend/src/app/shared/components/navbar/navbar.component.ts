@@ -17,17 +17,48 @@ export class NavbarComponent {
   private router = inject(Router);
 
   isDropdownOpen = false;
+  isToolsDropdownOpen = false;
   showLogoutModal = false;
 
   @HostListener('document:click', ['$event'])
   clickout(event: Event) {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.isDropdownOpen = false;
+      this.isToolsDropdownOpen = false;
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    this.isDropdownOpen = false;
+    this.isToolsDropdownOpen = false;
+  }
+
+  isToolsRouteActive(): boolean {
+    const url = this.router.url || '';
+    return (
+      url.startsWith('/calculadora') ||
+      url.startsWith('/presupuesto') ||
+      url.startsWith('/disenador-fv')
+    );
+  }
+
+  toggleToolsDropdown() {
+    this.isToolsDropdownOpen = !this.isToolsDropdownOpen;
+    if (this.isToolsDropdownOpen) {
+      this.isDropdownOpen = false;
+    }
+  }
+
+  closeToolsDropdown() {
+    this.isToolsDropdownOpen = false;
   }
 
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
+    if (this.isDropdownOpen) {
+      this.isToolsDropdownOpen = false;
+    }
   }
 
   getInitials(name: string): string {

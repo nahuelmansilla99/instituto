@@ -15,17 +15,79 @@
 
     <!-- Right Side Nav -->
     <div class="nav-actions" *ngIf="authService.currentUser() as user">
-      <!-- Enlace directo Calculadora Solar -->
-      <a routerLink="/calculadora" routerLinkActive="active" class="nav-tool-btn" title="Calculadora Solar Interactiva">
-        <span class="tool-icon">☀</span>
-        <span class="tool-text">Calculadora Solar</span>
-      </a>
+      <!-- Menú desplegable unificado de Herramientas FV -->
+      <div class="tools-menu-container">
+        <button
+          type="button"
+          class="nav-tool-btn"
+          [class.active]="isToolsDropdownOpen || isToolsRouteActive()"
+          (click)="toggleToolsDropdown()"
+          [attr.aria-expanded]="isToolsDropdownOpen"
+          aria-haspopup="menu"
+          title="Herramientas Fotovoltaicas"
+        >
+          <span class="tool-icon">⚡</span>
+          <span class="tool-text">Herramientas FV</span>
+          <svg
+            class="chevron-icon tool-chevron"
+            [class.rotated]="isToolsDropdownOpen"
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
 
-      <!-- Enlace directo Calculadora de Presupuesto -->
-      <a routerLink="/presupuesto" routerLinkActive="active" class="nav-tool-btn" title="Calculadora de Presupuesto Fotovoltaico">
-        <span class="tool-icon">📋</span>
-        <span class="tool-text">Presupuesto FV</span>
-      </a>
+        <div class="dropdown-menu tools-dropdown-menu" *ngIf="isToolsDropdownOpen" role="menu">
+          <div class="dropdown-header">Herramientas Fotovoltaicas</div>
+
+          <a
+            routerLink="/calculadora"
+            routerLinkActive="active"
+            class="dropdown-item tool-dropdown-item"
+            (click)="closeToolsDropdown()"
+            role="menuitem"
+          >
+            <span class="tool-item-badge solar">☀️</span>
+            <div class="tool-item-content">
+              <span class="tool-item-title">Calculadora Solar</span>
+              <span class="tool-item-desc">Dimensionamiento y curva 24h</span>
+            </div>
+          </a>
+
+          <a
+            routerLink="/presupuesto"
+            routerLinkActive="active"
+            class="dropdown-item tool-dropdown-item"
+            (click)="closeToolsDropdown()"
+            role="menuitem"
+          >
+            <span class="tool-item-badge budget">📋</span>
+            <div class="tool-item-content">
+              <span class="tool-item-title">Presupuesto FV</span>
+              <span class="tool-item-desc">Costos por rubro, margen y cotización</span>
+            </div>
+          </a>
+
+          <a
+            routerLink="/disenador-fv"
+            routerLinkActive="active"
+            class="dropdown-item tool-dropdown-item"
+            (click)="closeToolsDropdown()"
+            role="menuitem"
+          >
+            <span class="tool-item-badge designer">⚡</span>
+            <div class="tool-item-content">
+              <span class="tool-item-title">Diseñador FV</span>
+              <span class="tool-item-desc">Superficies, strings, MPPT e informe</span>
+            </div>
+          </a>
+        </div>
+      </div>
 
       <!-- User Profile & Dropdown -->
       <div class="user-menu-container">

@@ -86,6 +86,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'disenador-fv',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/pv-designer/pv-designer.component').then(
+        (m) => m.PvDesignerComponent,
+      ),
+  },
+  {
     path: '**',
     redirectTo: 'dashboard',
   },

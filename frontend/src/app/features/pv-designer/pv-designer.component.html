@@ -1,0 +1,1752 @@
+@if (!isDrawer) {
+  <app-navbar class="no-print"></app-navbar>
+}
+
+@if (isDrawer) {
+  <header class="drawer-header no-print">
+    <div class="drawer-title-group">
+      <div class="drawer-icon-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg>
+      </div>
+      <div>
+        <h2 class="drawer-title">Diseñador FV</h2>
+        <span class="drawer-subtitle">Anteproyecto fotovoltaico integral</span>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="drawer-close-btn"
+      (click)="onCloseDrawerClick()"
+      title="Cerrar panel lateral"
+      aria-label="Cerrar panel"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </header>
+}
+
+<main class="pv-page-container" [class.is-drawer-mode]="isDrawer">
+  <!-- Barra superior de navegación entre herramientas técnicas -->
+  @if (!isDrawer) {
+    <nav class="tools-switcher-bar animate-fade-in no-print" aria-label="Herramientas fotovoltaicas">
+      <a routerLink="/calculadora" routerLinkActive="active" class="tool-switch-pill">
+        <span class="pill-icon">☀️</span>
+        <div class="pill-text">
+          <span class="pill-title">Calculadora Solar</span>
+          <span class="pill-sub">Dimensionamiento y curva 24h</span>
+        </div>
+      </a>
+
+      <a routerLink="/presupuesto" routerLinkActive="active" class="tool-switch-pill">
+        <span class="pill-icon">📋</span>
+        <div class="pill-text">
+          <span class="pill-title">Calculadora de Presupuesto</span>
+          <span class="pill-sub">Costos por rubro, margen y cotización</span>
+        </div>
+      </a>
+
+      <a routerLink="/disenador-fv" routerLinkActive="active" class="tool-switch-pill active">
+        <span class="pill-icon">⚡</span>
+        <div class="pill-text">
+          <span class="pill-title">Diseñador FV</span>
+          <span class="pill-sub">Superficies, strings, MPPT e informe</span>
+        </div>
+      </a>
+    </nav>
+
+    <!-- Cabecera principal -->
+    <section
+      id="pv-intro"
+      class="pv-header glass-card no-print"
+      [class.tour-target-active]="isTourActive() && tourStep() === 0"
+    >
+      <div class="header-content">
+        <div class="header-badge">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>TALLER FLEXIBLE · Anteproyecto Fotovoltaico</span>
+        </div>
+        <h1 class="page-title">Diseñador de Instalaciones Fotovoltaicas</h1>
+        <p class="page-subtitle">
+          Dimensioná superficies con obstáculos, configurá strings y MPPT, consultá NASA POWER o importá series horarias CSV,
+          verificá cables CC/CA y generá un informe técnico trazable.
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button
+          type="button"
+          class="btn btn-outline-info action-btn"
+          (click)="startTour()"
+          title="Ver guía interactiva paso a paso"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Guía</span>
+        </button>
+
+        <button type="button" class="btn btn-secondary action-btn" (click)="saveProject()" title="Descargar proyecto JSON">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          <span>Guardar proyecto</span>
+        </button>
+
+        <label class="btn btn-secondary action-btn file-btn-label" title="Abrir proyecto JSON guardado">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span>Abrir proyecto</span>
+          <input type="file" accept=".json,application/json" (change)="onOpenProjectSelected($event)" hidden />
+        </label>
+
+        <button type="button" class="btn btn-primary action-btn" (click)="printReport()" title="Ir al informe e imprimir o guardar PDF">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Informe / PDF</span>
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- Shell principal del Diseñador FV -->
+  <div class="pv-shell glass-card">
+    <!-- SIDEBAR DE PROYECTO Y 6 SECCIONES -->
+    <aside
+      id="pv-sidebar"
+      class="pv-aside no-print"
+      [class.tour-target-active]="isTourActive() && tourStep() === 1"
+    >
+      <div class="project-label">PROYECTO FV</div>
+      <h2 class="project-sidebar-title">{{ state().name }}</h2>
+
+      <div class="examples-box">
+        <label for="pv-example-select">Cargar ejemplo</label>
+        <select
+          id="pv-example-select"
+          [ngModel]="selectedExample()"
+          (ngModelChange)="onExampleSelect($event)"
+        >
+          <option value="">Seleccionar…</option>
+          <option value="home">Vivienda · 6 kW</option>
+          <option value="mobile">Casa rodante · 1 kW</option>
+          <option value="park">Parque · 10 MWp</option>
+        </select>
+      </div>
+
+      <nav class="pv-nav" aria-label="Etapas del diseñador fotovoltaico">
+        @for (item of navItems; track item.view) {
+          <button
+            type="button"
+            [class.active]="activeView() === item.view"
+            (click)="setView(item.view)"
+          >
+            <span class="nav-code">{{ item.code }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+          </button>
+        }
+      </nav>
+
+      <div class="aside-note">
+        <b>Anteproyecto calculado</b>
+        <p>
+          Equipos y recurso de ejemplo hasta que incorpores datos del sitio. El informe conserva los supuestos y las
+          verificaciones pendientes.
+        </p>
+      </div>
+
+      <div class="aside-footer-btns">
+        <button type="button" class="pv-btn subtle w-full" (click)="confirmReset()">Nuevo proyecto</button>
+        <button type="button" class="pv-btn subtle w-full method-link-btn" (click)="showMethodModal.set(true)">
+          Método y alcance
+        </button>
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL DE CONTENIDO -->
+    <div
+      id="pv-content-area"
+      class="pv-main"
+      [class.tour-target-active]="isTourActive() && tourStep() >= 2"
+    >
+      <div class="topline no-print">
+        <div>
+          <span class="eyebrow">DISEÑO FOTOVOLTAICO</span>
+          <h2 class="view-heading">{{ viewTitles[activeView()] }}</h2>
+        </div>
+        <span class="status-pill" [class.fail]="statusInfo().type === 'fail'" [class.pending]="statusInfo().type === 'pending'">
+          {{ statusInfo().label }}
+        </span>
+      </div>
+
+      <!-- Errores de validación -->
+      @if (result().errors.length > 0) {
+        <div class="error-box" role="alert">
+          <b>Revisar datos</b>
+          <ul>
+            @for (err of result().errors; track $index) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- 4 Tarjetas de KPIs en vivo -->
+      @if (validResult(); as res) {
+        <section class="metrics-grid no-print">
+          <div class="metric-card">
+            <label>Potencia instalada</label>
+            <strong>{{ pvService.fmt(res.kw, 2) }} <span class="unit">kWp</span></strong>
+            <small>{{ pvService.fmt(res.ac, 1) }} kW CA · relación CC/CA {{ pvService.fmt(res.dcAc, 2) }}</small>
+          </div>
+          <div class="metric-card">
+            <label>Paneles</label>
+            <strong>{{ pvService.fmt(res.count, 0) }}</strong>
+            <small>{{ pvService.fmt(res.moduleArea, 1) }} m² de módulos</small>
+          </div>
+          <div class="metric-card">
+            <label>Conexionado</label>
+            <strong>{{ pvService.fmt(res.strings, 0) }} <span class="unit">strings</span></strong>
+            <small>{{ pvService.fmt(res.mppts, 0) }} MPPT usados · {{ pvService.fmt(res.blocks.length, 0) }} inversores</small>
+          </div>
+          <div class="metric-card">
+            <label>Generación estimada</label>
+            <strong>{{ pvService.fmt(res.annual / 1000, 2) }} <span class="unit">MWh/año</span></strong>
+            <small>{{ res.hourly ? 'Serie horaria importada' : 'Modelo mensual preliminar' }}</small>
+          </div>
+        </section>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VISTA 01: NECESIDAD Y RECURSO SOLAR                                 -->
+      <!-- =================================================================== -->
+      @if (activeView() === 'project') {
+        <div class="pv-grid">
+          <div class="pv-card">
+            <h3>Proyecto y necesidad</h3>
+            <div class="fields">
+              <label class="field">
+                Nombre del proyecto
+                <input type="text" maxlength="240" [ngModel]="state().name" (ngModelChange)="updateRoot('name', $event)" />
+              </label>
+              <label class="field">
+                Localidad / referencia
+                <input type="text" maxlength="240" [ngModel]="state().site" (ngModelChange)="updateRoot('site', $event)" />
+              </label>
+              <label class="field">
+                Tipo de sistema
+                <select [ngModel]="state().system" (ngModelChange)="updateRoot('system', $event)">
+                  <option value="grid">Conectado a red</option>
+                  <option value="hybrid">Híbrido con respaldo</option>
+                  <option value="offgrid">Aislado de la red</option>
+                </select>
+              </label>
+              <label class="field">
+                Dimensionar a partir de
+                <select [ngModel]="state().mode" (ngModelChange)="updateRoot('mode', $event)">
+                  <option value="energy">Consumo y cobertura</option>
+                  <option value="power">Potencia FV objetivo</option>
+                </select>
+              </label>
+              <label class="field">
+                Consumo mensual medio (kWh)
+                <input type="number" step="any" min="0" [ngModel]="state().demand" (ngModelChange)="updateRoot('demand', $event, true)" />
+                <span class="hint">No es la potencia instantánea. Usar facturas o medición.</span>
+              </label>
+              <label class="field">
+                Potencia máxima simultánea (kW)
+                <input type="number" step="any" min="0" [ngModel]="state().peak" (ngModelChange)="updateRoot('peak', $event, true)" />
+              </label>
+              <label class="field">
+                Cobertura energética objetivo (%)
+                <input type="number" step="any" min="1" max="100" [ngModel]="state().coverage" (ngModelChange)="updateRoot('coverage', $event, true)" />
+              </label>
+              <label class="field">
+                Potencia objetivo CC (kWp)
+                <input type="number" step="any" min="0.001" max="10000" [ngModel]="state().target" (ngModelChange)="updateRoot('target', $event, true)" />
+                <span class="hint">Se utiliza en modo potencia; 10 MWp = 10.000 kWp.</span>
+              </label>
+              <label class="field">
+                Tensión entre conductores CA (V)
+                <input type="number" step="any" min="12" [ngModel]="state().voltage" (ngModelChange)="updateRoot('voltage', $event, true)" />
+                <span class="hint">Trifásica: tensión entre fases. Monofásica: fase–neutro.</span>
+              </label>
+              <label class="field">
+                Red de salida
+                <select [ngModel]="state().phases" (ngModelChange)="updatePhases($event)">
+                  <option [ngValue]="1">Monofásica</option>
+                  <option [ngValue]="3">Trifásica</option>
+                </select>
+              </label>
+              <label class="field">
+                Factor de potencia CA
+                <input type="number" step="any" min="0.1" max="1" [ngModel]="state().pf" (ngModelChange)="updateRoot('pf', $event, true)" />
+              </label>
+              <label class="field">
+                Perfil de consumo ilustrativo
+                <select [ngModel]="state().loadProfile" (ngModelChange)="updateRoot('loadProfile', $event)">
+                  <option value="home">Residencial nocturno</option>
+                  <option value="business">Comercial diurno</option>
+                  <option value="flat">Constante</option>
+                </select>
+              </label>
+            </div>
+            <div class="callout">
+              El objetivo de cobertura compara energía anual. Para autoconsumo, respaldo o suministro aislado se necesita un
+              perfil medido y análisis temporal.
+            </div>
+          </div>
+
+          <div class="pv-card">
+            <h3>Ubicación y condiciones de diseño</h3>
+            <div class="fields">
+              <label class="field">
+                Latitud (°)
+                <input type="number" step="any" min="-89" max="89" [ngModel]="state().lat" (ngModelChange)="updateRoot('lat', $event, true)" />
+              </label>
+              <label class="field">
+                Longitud (°)
+                <input type="number" step="any" min="-180" max="180" [ngModel]="state().lon" (ngModelChange)="updateRoot('lon', $event, true)" />
+              </label>
+              <label class="field">
+                Mínima de diseño del sitio (°C)
+                <input type="number" step="any" [ngModel]="state().tmin" (ngModelChange)="updateRoot('tmin', $event, true)" />
+                <span class="hint">Se utiliza como mínima de celda para Voc; verificar estadística local.</span>
+              </label>
+              <label class="field">
+                Máxima de celda de diseño (°C)
+                <input type="number" step="any" [ngModel]="state().tmax" (ngModelChange)="updateRoot('tmax', $event, true)" />
+                <span class="hint">Temperatura de celda, no del aire.</span>
+              </label>
+              <label class="field">
+                Irradiancia máxima de diseño (W/m²)
+                <input type="number" step="any" min="1000" max="1600" [ngModel]="state().irrmax" (ngModelChange)="updateRoot('irrmax', $event, true)" />
+              </label>
+              <label class="field">
+                Margen de tensión (%)
+                <input type="number" step="any" min="0" max="20" [ngModel]="state().margin" (ngModelChange)="updateRoot('margin', $event, true)" />
+              </label>
+              <label class="field">
+                Pérdidas no térmicas (%)
+                <input type="number" step="any" min="0" max="80" [ngModel]="state().losses" (ngModelChange)="updateRoot('losses', $event, true)" />
+                <span class="hint">Suciedad, cable, disponibilidad y otras. No incluye eficiencia del inversor, temperatura ni sombra del sector.</span>
+              </label>
+              <label class="field">
+                Fracción difusa estimada (0–1)
+                <input type="number" step="any" min="0" max="1" [ngModel]="state().diffuse" (ngModelChange)="updateRoot('diffuse', $event, true)" />
+              </label>
+              <label class="field">
+                Albedo del suelo (0–1)
+                <input type="number" step="any" min="0" max="1" [ngModel]="state().albedo" (ngModelChange)="updateRoot('albedo', $event, true)" />
+              </label>
+            </div>
+            <div class="callout warning">
+              Los valores iniciales son ejemplos editables. La aplicación no deduce temperaturas extremas ni sombras a partir
+              de una fotografía.
+            </div>
+          </div>
+
+          <div class="pv-card wide">
+            <div class="plot-title">
+              <h3>Recurso solar mensual</h3>
+              <button type="button" class="pv-btn primary" [disabled]="isLoadingNasa()" (click)="loadNasaPower()">
+                {{ isLoadingNasa() ? 'Consultando…' : 'Obtener NASA POWER' }}
+              </button>
+            </div>
+            <p class="muted source">{{ state().resourceSource }}</p>
+            <div class="fields resource-meta-fields">
+              <label class="field check-field">
+                <input
+                  type="checkbox"
+                  [ngModel]="state().resourceVerified"
+                  (ngModelChange)="updateRoot('resourceVerified', $event)"
+                />
+                <span>Datos de recurso revisados</span>
+              </label>
+              <label class="field">
+                Fuente / período del recurso
+                <input
+                  type="text"
+                  maxlength="240"
+                  [ngModel]="state().resourceSource"
+                  (ngModelChange)="updateRoot('resourceSource', $event)"
+                />
+              </label>
+            </div>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Mes</th>
+                    @for (m of months; track m) {
+                      <th>{{ m }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>Horizontal (kWh/m²/día)</th>
+                    @for (h of state().hsp; track $index) {
+                      <td>
+                        <input
+                          [attr.aria-label]="'Recurso ' + months[$index]"
+                          type="number"
+                          min="0.01"
+                          max="15"
+                          step="0.01"
+                          [ngModel]="h"
+                          (ngModelChange)="updateHsp($index, $event)"
+                        />
+                      </td>
+                    }
+                  </tr>
+                  <tr>
+                    <th>Ambiente media (°C)</th>
+                    @for (t of state().ambient; track $index) {
+                      <td>
+                        <input
+                          [attr.aria-label]="'Temperatura ' + months[$index]"
+                          type="number"
+                          step="0.1"
+                          [ngModel]="t"
+                          (ngModelChange)="updateAmbient($index, $event)"
+                        />
+                      </td>
+                    }
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="hint">
+              NASA POWER aporta recurso horizontal, no irradiación del plano de los módulos. La conversión por orientación e
+              inclinación aquí es aproximada. También podés cargar datos de otra fuente.
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VISTA 02: SUPERFICIE Y DISTRIBUCIÓN DE PANELES                      -->
+      <!-- =================================================================== -->
+      @if (activeView() === 'surface') {
+        <div class="pv-card">
+          <div class="plot-title">
+            <h3>Plano de distribución · sector seleccionado</h3>
+            <button type="button" class="pv-btn primary" (click)="addZone()">Agregar sector</button>
+          </div>
+          <div class="toolbar">
+            <button
+              type="button"
+              class="pv-btn"
+              [class.selected]="surfaceTool() === 'inspect'"
+              (click)="surfaceTool.set('inspect')"
+            >
+              Inspeccionar
+            </button>
+            <button
+              type="button"
+              class="pv-btn"
+              [class.selected]="surfaceTool() === 'obstacle'"
+              (click)="surfaceTool.set('obstacle')"
+            >
+              Dibujar obstáculo
+            </button>
+            <span class="hint">
+              Arrastrá para marcar la zona excluida. Dimensiones expresadas en el plano de referencia.
+            </span>
+          </div>
+          <canvas
+            id="surface-canvas"
+            class="pv-canvas"
+            [class.crosshair]="surfaceTool() === 'obstacle'"
+            height="500"
+            aria-label="Plano de paneles y obstáculos"
+            (pointerdown)="onSurfacePointerDown($event)"
+            (pointermove)="onSurfacePointerMove($event)"
+            (pointerup)="onSurfacePointerUp($event)"
+            (pointercancel)="onPointerCancel()"
+          ></canvas>
+          <div class="legend">
+            <span><i></i>Módulos asignados</span>
+            <span><i class="gray"></i>Posición disponible</span>
+            <span><i class="red"></i>Obstáculo</span>
+          </div>
+          <p class="hint">{{ layoutCaption() }}</p>
+        </div>
+
+        <div class="pv-grid">
+          <div class="pv-card">
+            <h3>Sectores de instalación</h3>
+            @for (z of state().zones; track z.id; let j = $index) {
+              <div class="sector" [class.active]="selectedZoneId() === z.id">
+                <div class="sector-head">
+                  <b>
+                    <span class="color-label" [style.background]="zoneColors[j % zoneColors.length]"></span>
+                    {{ z.name }}
+                  </b>
+                  <div class="sector-head-actions">
+                    <button type="button" class="pv-btn small-btn" (click)="selectZone(z.id)">Ver</button>
+                    <button
+                      type="button"
+                      class="pv-btn small-btn"
+                      [disabled]="state().zones.length === 1"
+                      (click)="removeZone(z.id)"
+                    >
+                      Quitar
+                    </button>
+                  </div>
+                </div>
+                <div class="fields triple">
+                  <label class="field">
+                    Nombre
+                    <input type="text" maxlength="240" [ngModel]="z.name" (ngModelChange)="updateZone(j, 'name', $event)" />
+                  </label>
+                  <label class="field">
+                    Ancho útil de referencia (m)
+                    <input type="number" step="any" [ngModel]="z.width" (ngModelChange)="updateZone(j, 'width', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Largo útil de referencia (m)
+                    <input type="number" step="any" [ngModel]="z.height" (ngModelChange)="updateZone(j, 'height', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Inclinación (°)
+                    <input type="number" step="any" [ngModel]="z.tilt" (ngModelChange)="updateZone(j, 'tilt', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Azimut geográfico (°)
+                    <input type="number" step="any" [ngModel]="z.azimuth" (ngModelChange)="updateZone(j, 'azimuth', $event, true)" />
+                    <span class="hint">0 norte; 90 este; 180 sur; 270 oeste.</span>
+                  </label>
+                  <label class="field">
+                    Disposición
+                    <select [ngModel]="z.roofType" (ngModelChange)="updateZone(j, 'roofType', $event)">
+                      <option value="coplanar">Coplanar con la cubierta</option>
+                      <option value="ground">Filas inclinadas sobre plano horizontal</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    Retiro perimetral (m)
+                    <input type="number" step="any" [ngModel]="z.edge" (ngModelChange)="updateZone(j, 'edge', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Separación entre módulos (m)
+                    <input type="number" step="any" [ngModel]="z.gap" (ngModelChange)="updateZone(j, 'gap', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Separación mínima entre filas (m)
+                    <input type="number" step="any" [ngModel]="z.rowGap" (ngModelChange)="updateZone(j, 'rowGap', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Altura solar para separación (°)
+                    <input type="number" step="any" [ngModel]="z.alpha" (ngModelChange)="updateZone(j, 'alpha', $event, true)" />
+                    <span class="hint">En filas: separación ≥ altura del panel / tan(altura solar). No evalúa sombras laterales.</span>
+                  </label>
+                  <label class="field">
+                    Pérdida media por sombra (%)
+                    <input type="number" step="any" [ngModel]="z.shade" (ngModelChange)="updateZone(j, 'shade', $event, true)" />
+                  </label>
+                  <label class="field">
+                    Factor POA/H horizontal
+                    <input type="number" step="any" [ngModel]="z.poaFactor" (ngModelChange)="updateZone(j, 'poaFactor', $event, true)" />
+                    <span class="hint">0: aproximación automática. Otro valor: factor externo para todos los meses.</span>
+                  </label>
+                  <label class="field check-field">
+                    <input type="checkbox" [ngModel]="z.portrait" (ngModelChange)="updateZone(j, 'portrait', $event)" />
+                    <span>Módulos en vertical</span>
+                  </label>
+                </div>
+
+                @if (validResult(); as res) {
+                  <p class="availability">
+                    {{ pvService.fmt(res.layouts[j].count, 0) }} posiciones geométricas ·
+                    {{ pvService.fmt(res.layouts[j].rowGap, 2) }} m entre filas ·
+                    {{ pvService.fmt(res.usedByZone[z.id] || 0, 0) }} módulos asignados
+                  </p>
+                }
+                @if (z.obstacles.length > 0) {
+                  <div class="obstacles-row">
+                    <span class="hint">{{ z.obstacles.length }} obstáculos rectangulares</span>
+                    <button type="button" class="pv-btn small-btn" (click)="clearObstacles(z.id)">Quitar obstáculos</button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="pv-card">
+            <h3>Foto o plano del sitio</h3>
+            <p class="muted">
+              La foto sirve como referencia visual. Para extraer medidas necesitás una vista ortogonal o plano a escala y una
+              distancia conocida.
+            </p>
+            <div class="toolbar">
+              <label class="pv-btn primary file-btn-label">
+                Cargar imagen
+                <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onPhotoFileSelected($event)" hidden />
+              </label>
+              <button type="button" class="pv-btn" (click)="clearPhoto()">Quitar foto</button>
+            </div>
+
+            <div class="fields photo-calib-fields">
+              <label class="field">
+                Distancia de referencia (m)
+                <input
+                  type="number"
+                  min="0.01"
+                  step="any"
+                  [ngModel]="photoReference()"
+                  (ngModelChange)="onPhotoReferenceChange($event)"
+                />
+              </label>
+              <label class="field check-field">
+                <input
+                  type="checkbox"
+                  [ngModel]="photoOrthographic()"
+                  (ngModelChange)="photoOrthographic.set($event)"
+                />
+                <span>Confirmo vista ortogonal / plano sin perspectiva</span>
+              </label>
+            </div>
+
+            <div class="toolbar">
+              <button
+                type="button"
+                class="pv-btn"
+                [class.selected]="photoTool() === 'reference'"
+                (click)="setPhotoTool('reference')"
+              >
+                Marcar dos extremos
+              </button>
+              <button
+                type="button"
+                class="pv-btn"
+                [class.selected]="photoTool() === 'sector'"
+                (click)="setPhotoTool('sector')"
+              >
+                Dibujar sector
+              </button>
+            </div>
+
+            <p class="hint">
+              @if (photoScale() > 0) {
+                Escala: {{ pvService.fmt(photoScale(), 4) }} m/píxel de imagen original. Dibujá un sector sólo sobre una vista ortogonal.
+              } @else {
+                Marcá dos puntos separados por la distancia de referencia.
+              }
+            </p>
+
+            <canvas
+              id="photo-canvas"
+              class="pv-canvas"
+              [class.crosshair]="hasPhoto()"
+              height="410"
+              aria-label="Foto del lugar con referencias y sectores"
+              (pointerdown)="onPhotoPointerDown($event)"
+              (pointermove)="onPhotoPointerMove($event)"
+              (pointerup)="onPhotoPointerUp($event)"
+              (pointercancel)="onPointerCancel()"
+            ></canvas>
+
+            <div class="callout warning">
+              No hay reconocimiento automático del techo ni corrección de perspectiva. La medida de un plano horizontal no
+              determina por sí sola la longitud de una cubierta inclinada.
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VISTA 03: EQUIPOS, STRINGS Y MPPT                                   -->
+      <!-- =================================================================== -->
+      @if (activeView() === 'equipment') {
+        <div class="pv-card">
+          <div class="plot-title">
+            <h3>Conexión de strings a MPPT</h3>
+            <button type="button" class="pv-btn" [class.primary]="!state().manual" (click)="toggleManualMode()">
+              {{ state().manual ? 'Volver a propuesta automática' : 'Editar conexión manual' }}
+            </button>
+          </div>
+          <p class="muted">
+            S = módulos en serie por string · P = strings en paralelo sobre un MPPT · cantidad = repetición de ese bloque. Un
+            MPPT puede tener varias entradas físicas.
+          </p>
+
+          @if (validResult(); as res) {
+            <div class="callout">
+              Ventana preliminar: <b>{{ res.limits.minN }} a {{ res.limits.maxN }} módulos en serie</b>. Voc por panel en frío
+              {{ pvService.fmt(res.limits.vocCold, 2) }} V; Vmp en caliente {{ pvService.fmt(res.limits.vmpHot, 2) }} V.
+              Objetivo preliminar {{ pvService.fmt(res.targetN, 0) }} paneles.
+            </div>
+          }
+
+          <canvas id="strings-canvas" class="pv-canvas" height="460" aria-label="Esquema de conexión en serie, paralelo y MPPT"></canvas>
+
+          @if (validResult(); as res) {
+            <div class="table-wrap mt-16">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Sector</th>
+                    <th>Serie (S)</th>
+                    <th>Paralelo (P)</th>
+                    <th>Bloques MPPT</th>
+                    <th>Paneles</th>
+                    <th>CC (kWp)</th>
+                    @if (state().manual) {
+                      <th></th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of (state().manual ? state().assignments : res.rows); track $index) {
+                    <tr>
+                      <td>
+                        @if (state().manual) {
+                          <select
+                            [attr.aria-label]="'Sector bloque ' + ($index + 1)"
+                            [ngModel]="r.zone"
+                            (ngModelChange)="updateAssignment($index, 'zone', $event)"
+                          >
+                            @for (z of state().zones; track z.id) {
+                              <option [ngValue]="z.id">{{ z.name }}</option>
+                            }
+                          </select>
+                        } @else {
+                          {{ zoneName(r.zone) }}
+                        }
+                      </td>
+                      <td>
+                        @if (state().manual) {
+                          <input
+                            [attr.aria-label]="'series bloque ' + ($index + 1)"
+                            type="number"
+                            min="1"
+                            step="1"
+                            [ngModel]="r.series"
+                            (ngModelChange)="updateAssignment($index, 'series', $event)"
+                          />
+                        } @else {
+                          {{ pvService.fmt(r.series, 0) }}
+                        }
+                      </td>
+                      <td>
+                        @if (state().manual) {
+                          <input
+                            [attr.aria-label]="'parallel bloque ' + ($index + 1)"
+                            type="number"
+                            min="1"
+                            step="1"
+                            [ngModel]="r.parallel"
+                            (ngModelChange)="updateAssignment($index, 'parallel', $event)"
+                          />
+                        } @else {
+                          {{ pvService.fmt(r.parallel, 0) }}
+                        }
+                      </td>
+                      <td>
+                        @if (state().manual) {
+                          <input
+                            [attr.aria-label]="'quantity bloque ' + ($index + 1)"
+                            type="number"
+                            min="1"
+                            step="1"
+                            [ngModel]="r.quantity"
+                            (ngModelChange)="updateAssignment($index, 'quantity', $event)"
+                          />
+                        } @else {
+                          {{ pvService.fmt(r.quantity, 0) }}
+                        }
+                      </td>
+                      <td>{{ pvService.fmt(r.series * r.parallel * r.quantity, 0) }}</td>
+                      <td>{{ pvService.fmt((r.series * r.parallel * r.quantity * state().module.p) / 1000, 2) }}</td>
+                      @if (state().manual) {
+                        <td>
+                          <button type="button" class="pv-btn small-btn" (click)="removeAssignment($index)">Quitar</button>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (state().manual) {
+            <div class="mt-12">
+              <button type="button" class="pv-btn" (click)="addAssignment()">Agregar bloque MPPT</button>
+            </div>
+          }
+
+          <p class="hint">
+            El dibujo representa los primeros tres bloques. La tabla de inversores detalla la asignación completa. Cada string
+            utiliza una entrada física; esta versión no diseña cajas de combinación externas.
+          </p>
+        </div>
+
+        <div class="pv-grid">
+          <div class="pv-card">
+            <h3>Ficha del panel · un modelo por proyecto</h3>
+            <div class="fields">
+              <label class="field">
+                Marca y modelo
+                <input type="text" maxlength="240" [ngModel]="state().module.name" (ngModelChange)="updateModule('name', $event)" />
+              </label>
+              <label class="field">
+                Referencia de ficha técnica
+                <input type="text" maxlength="240" [ngModel]="state().module.source" (ngModelChange)="updateModule('source', $event)" />
+              </label>
+              <label class="field check-field">
+                <input type="checkbox" [ngModel]="state().module.verified" (ngModelChange)="updateModule('verified', $event)" />
+                <span>Datos cotejados con ficha original</span>
+              </label>
+              @for (f of moduleFields; track f.key) {
+                <label class="field">
+                  {{ f.label }}
+                  <input
+                    type="number"
+                    step="any"
+                    [ngModel]="state().module[f.key]"
+                    (ngModelChange)="updateModule(f.key, $event, true)"
+                  />
+                  @if (f.hint) {
+                    <span class="hint">{{ f.hint }}</span>
+                  }
+                </label>
+              }
+            </div>
+            <p class="hint">
+              Si falta el coeficiente Vmp, pedirlo al fabricante; no reemplazarlo por el coeficiente Voc. Los valores genéricos
+              no representan una marca comercial.
+            </p>
+          </div>
+
+          <div class="pv-card">
+            <h3>Ficha del inversor / equipo híbrido</h3>
+            <div class="fields">
+              <label class="field">
+                Marca y modelo
+                <input type="text" maxlength="240" [ngModel]="state().inverter.name" (ngModelChange)="updateInverter('name', $event)" />
+              </label>
+              <label class="field">
+                Referencia de ficha técnica
+                <input type="text" maxlength="240" [ngModel]="state().inverter.source" (ngModelChange)="updateInverter('source', $event)" />
+              </label>
+              <label class="field check-field">
+                <input type="checkbox" [ngModel]="state().inverter.verified" (ngModelChange)="updateInverter('verified', $event)" />
+                <span>Datos cotejados con ficha original</span>
+              </label>
+              @for (f of inverterFields; track f.key) {
+                <label class="field">
+                  {{ f.label }}
+                  <input
+                    type="number"
+                    step="any"
+                    [ngModel]="state().inverter[f.key]"
+                    (ngModelChange)="updateInverter(f.key, $event, true)"
+                  />
+                  @if (f.hint) {
+                    <span class="hint">{{ f.hint }}</span>
+                  }
+                </label>
+              }
+            </div>
+            <p class="hint">
+              Se modelan MPPT iguales. Equipos con límites distintos por tracker, microinversores y reguladores externos
+              requieren ampliar el modelo.
+            </p>
+          </div>
+        </div>
+
+        @if (validResult(); as res) {
+          <div class="pv-card view-section">
+            <h3>Asignación por inversor</h3>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Inversor</th>
+                    <th>Potencia CC</th>
+                    <th>Asignación de cada tracker</th>
+                    <th>MPPT libres</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (b of res.blocks.slice(0, 500); track b.number) {
+                    <tr>
+                      <td>{{ formatInverterCode(b.number) }}</td>
+                      <td>{{ pvService.fmt(b.kw, 2) }} kWp</td>
+                      <td>
+                        @for (r of b.mppts; track $index) {
+                          <div>MPPT {{ r.mppt }}: {{ zoneName(r.zone) }} · {{ r.series }}S × {{ r.parallel }}P</div>
+                        }
+                      </td>
+                      <td>{{ state().inverter.mppts - b.used }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (res.blocks.length > 500) {
+              <p class="hint">Se muestran 500 inversores; exportar CSV para la lista completa.</p>
+            }
+          </div>
+        }
+      }
+
+      <!-- =================================================================== -->
+      <!-- VISTA 04: GENERACIÓN Y RESERVA DE ENERGÍA                           -->
+      <!-- =================================================================== -->
+      @if (activeView() === 'energy') {
+        <div class="pv-grid">
+          <div class="pv-card wide">
+            <h3>Simular con datos horarios</h3>
+            <p class="muted">
+              Importá un año continuo de irradiancia en el plano de cada sector, temperatura ambiente y demanda. Se utiliza la
+              serie importada en lugar de la aproximación mensual.
+            </p>
+            <div class="toolbar">
+              <label class="pv-btn primary file-btn-label">
+                Importar CSV anual
+                <input type="file" accept=".csv,text/csv" (change)="onHourlyCsvSelected($event)" hidden />
+              </label>
+              <button type="button" class="pv-btn" (click)="downloadHourlyTemplate()">Formato CSV</button>
+              @if (state().hourly) {
+                <button type="button" class="pv-btn" (click)="removeHourlyData()">Volver a estimación mensual</button>
+                <button type="button" class="pv-btn" (click)="exportHourlyResults()">Exportar resultados horarios</button>
+              }
+            </div>
+            <p class="hint">
+              Columnas: time, temp_c, load_kw, {{ hourlyColumnsHint() }}. 8.760 o 8.784 registros horarios UTC; separador coma
+              o punto y coma; decimales con punto.
+            </p>
+
+            @if (validResult()?.hourly; as h) {
+              <div class="callout">
+                <b>Simulación horaria:</b> {{ h.source }} · {{ state().hourly!.time.length }} horas. SOC inicial: reserva vacía.
+                Sin límite de inyección a red.
+              </div>
+              <div class="report-summary">
+                <div>
+                  Compra a red
+                  <strong>{{ pvService.fmt(h.gridImport, 1) }} kWh</strong>
+                </div>
+                <div>
+                  Inyección a red
+                  <strong>{{ pvService.fmt(h.gridExport, 1) }} kWh</strong>
+                </div>
+                <div>
+                  Demanda no abastecida
+                  <strong>{{ pvService.fmt(h.unserved, 1) }} kWh</strong>
+                </div>
+              </div>
+              <div class="minirow">
+                <span>Energía recortada por potencia CA</span>
+                <b>{{ pvService.fmt(h.clipped, 1) }} kWh</b>
+              </div>
+              @if (state().system !== 'grid') {
+                <div class="minirow">
+                  <span>Reserva útil CC del banco / final</span>
+                  <b>{{ pvService.fmt(h.cap, 2) }} / {{ pvService.fmt(h.socSeries[h.socSeries.length - 1], 2) }} kWh</b>
+                </div>
+                <div class="minirow">
+                  <span>Carga desde excedente FV / descarga CA</span>
+                  <b>{{ pvService.fmt(h.charged, 1) }} / {{ pvService.fmt(h.discharged, 1) }} kWh</b>
+                </div>
+              }
+            } @else {
+              <div class="callout warning">
+                Sin una serie importada, se muestra una estimación mensual y curvas ilustrativas. La imagen del sitio no aporta
+                datos meteorológicos horarios.
+              </div>
+            }
+
+            <hr class="pv-divider" />
+
+            <h3>Generación y consumo mensual</h3>
+            <canvas id="energy-canvas" class="pv-canvas" height="360" aria-label="Gráfico mensual de generación y consumo"></canvas>
+            <div class="legend">
+              <span><i></i>Generación estimada</span>
+              <span><i class="amber"></i>{{ state().hourly ? 'Demanda importada' : 'Consumo anual distribuido por días' }}</span>
+            </div>
+            <div class="callout warning">
+              @if (state().hourly) {
+                Simulación sobre la serie POA y consumo importados. Temperatura NMOT, eficiencia fija y clipping CA. Sombras del
+                sector se aplican como pérdida constante; no se modelan curvas I–V ni regulación dinámica.
+              } @else {
+                Estimación mensual aproximada. Para simular 8.760 horas, importá una serie de irradiancia en plano, temperatura y
+                consumo.
+              }
+            </div>
+
+            @if (validResult(); as res) {
+              <div class="table-wrap">
+                <table class="pv-table">
+                  <thead>
+                    <tr>
+                      <th>Mes</th>
+                      @if (!res.hourly) {
+                        <th>Recurso horizontal</th>
+                      }
+                      <th>Generación (kWh)</th>
+                      <th>Consumo (kWh)</th>
+                      <th>Balance energético (kWh)</th>
+                      @if (res.hourly) {
+                        <th>Compra</th>
+                        <th>Inyección</th>
+                        <th>No abastecida</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (m of res.monthly; track m.month) {
+                      <tr>
+                        <td>{{ months[m.month] }}</td>
+                        @if (!res.hourly) {
+                          <td>{{ pvService.fmt(m.hsp, 2) }} kWh/m²/día</td>
+                        }
+                        <td>{{ pvService.fmt(m.energy, 1) }}</td>
+                        <td>{{ pvService.fmt(m.load, 1) }}</td>
+                        <td>{{ pvService.fmt(m.energy - m.load, 1) }}</td>
+                        @if (res.hourly) {
+                          <td>{{ pvService.fmt(m.import, 1) }}</td>
+                          <td>{{ pvService.fmt(m.export, 1) }}</td>
+                          <td>{{ pvService.fmt(m.unserved, 1) }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <p class="hint">
+                El balance mensual no equivale a energía autoconsumida.
+                {{ res.hourly ? 'Compra, inyección y demanda no abastecida se calculan hora por hora.' : 'Importá una serie horaria para calcular compra, inyección y demanda no abastecida.' }}
+              </p>
+            }
+          </div>
+
+          <div class="pv-card">
+            <div class="plot-title">
+              <h3>{{ state().hourly ? 'Día de la serie importada' : 'Día tipo ilustrativo' }}</h3>
+              <select
+                aria-label="Mes del día tipo"
+                [ngModel]="state().month"
+                (ngModelChange)="updateRoot('month', $event, true)"
+              >
+                @for (m of months; track m; let idx = $index) {
+                  <option [ngValue]="idx">{{ m }}</option>
+                }
+              </select>
+            </div>
+            <canvas id="daily-canvas" class="pv-canvas" height="310" aria-label="Curvas ilustrativas de generación y consumo de un día"></canvas>
+            <p class="hint">
+              @if (state().hourly) {
+                Día de la serie importada: 15 del mes elegido en UTC. Generación calculada y demanda importada.
+              } @else {
+                Curva solar senoidal normalizada al mes y consumo por perfil elegido. No usa mediciones horarias ni calcula
+                autoconsumo real o estado de carga.
+              }
+            </p>
+          </div>
+
+          <div class="pv-card">
+            <h3>Reserva de energía</h3>
+            @if (state().system === 'grid') {
+              <div class="callout">
+                Seleccioná un sistema híbrido o aislado en “Necesidad y recurso” para calcular la reserva de batería.
+              </div>
+            } @else {
+              <div class="fields">
+                <label class="field">
+                  Consumo crítico diario (kWh)
+                  <input type="number" step="any" [ngModel]="state().critical" (ngModelChange)="updateRoot('critical', $event, true)" />
+                </label>
+                <label class="field">
+                  Días de reserva sin sol
+                  <input type="number" step="any" [ngModel]="state().autonomy" (ngModelChange)="updateRoot('autonomy', $event, true)" />
+                </label>
+                <label class="field">
+                  Tensión nominal batería (V)
+                  <input type="number" step="any" [ngModel]="state().battery.voltage" (ngModelChange)="updateBattery('voltage', $event)" />
+                </label>
+                <label class="field">
+                  Capacidad total del banco (Ah)
+                  <input type="number" step="any" [ngModel]="state().battery.ah" (ngModelChange)="updateBattery('ah', $event)" />
+                </label>
+                <label class="field">
+                  Profundidad de descarga admisible (%)
+                  <input type="number" step="any" [ngModel]="state().battery.dod" (ngModelChange)="updateBattery('dod', $event)" />
+                </label>
+                <label class="field">
+                  Eficiencia descarga batería (%)
+                  <input type="number" step="any" [ngModel]="state().battery.eff" (ngModelChange)="updateBattery('eff', $event)" />
+                </label>
+                <label class="field">
+                  Potencia de respaldo PCS (kW)
+                  <input type="number" step="any" [ngModel]="state().battery.pcs" (ngModelChange)="updateBattery('pcs', $event)" />
+                </label>
+                <label class="field">
+                  Carga máxima banco / BMS (A)
+                  <input type="number" step="any" [ngModel]="state().battery.charge" (ngModelChange)="updateBattery('charge', $event)" />
+                </label>
+                <label class="field">
+                  Descarga máxima banco / BMS (A)
+                  <input type="number" step="any" [ngModel]="state().battery.discharge" (ngModelChange)="updateBattery('discharge', $event)" />
+                </label>
+              </div>
+
+              @if (validResult(); as res) {
+                <div class="minirow-list">
+                  <div class="minirow">
+                    <span>Energía nominal del banco</span>
+                    <b>{{ pvService.fmt(res.batteryKWh, 2) }} kWh</b>
+                  </div>
+                  <div class="minirow">
+                    <span>Energía CA disponible estimada</span>
+                    <b>{{ pvService.fmt(res.usable, 2) }} kWh</b>
+                  </div>
+                  <div class="minirow">
+                    <span>Reserva nominal necesaria</span>
+                    <b>{{ pvService.fmt(res.required, 2) }} kWh</b>
+                  </div>
+                  <div class="minirow">
+                    <span>Reserva sin sol de cargas críticas</span>
+                    <b>{{ pvService.fmt(res.usable / state().critical, 2) }} días</b>
+                  </div>
+                </div>
+              }
+
+              <div class="callout warning">
+                Para un aislado, la producción anual suficiente no garantiza suministro. Se necesita simulación horaria, mes
+                desfavorable, pérdidas de carga y control del BMS.
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VISTA 05: CABLES Y VERIFICACIONES                                   -->
+      <!-- =================================================================== -->
+      @if (activeView() === 'electrical') {
+        <div class="pv-grid">
+          <div class="pv-card">
+            <h3>Cableado y preselección eléctrica</h3>
+            <div class="fields">
+              @for (f of cableFields; track f.key) {
+                <label class="field">
+                  {{ f.label }}
+                  <input
+                    type="number"
+                    step="any"
+                    [ngModel]="state().cable[f.key]"
+                    (ngModelChange)="updateCable(f.key, $event)"
+                  />
+                </label>
+              }
+            </div>
+            <div class="callout">
+              CC: circuito de un string. CA: salida de un inversor. No dimensiona colectores de una planta ni conductores de
+              batería. Ampacidad y factores se cargan desde la tabla aplicable al método de instalación.
+            </div>
+          </div>
+
+          <div class="pv-card">
+            <h3>Revisión documentada del proyecto</h3>
+            <div class="fields">
+              @for (rc of reviewChecks; track rc.key) {
+                <label class="field check-field">
+                  <input
+                    type="checkbox"
+                    [ngModel]="state().checks[rc.key]"
+                    (ngModelChange)="updateCheck(rc.key, $event)"
+                  />
+                  <span>{{ rc.label }}</span>
+                </label>
+              }
+            </div>
+
+            <label class="field mt-20">
+              Notas, normas aplicadas y referencias a estudios
+              <textarea
+                maxlength="20000"
+                [ngModel]="state().notes"
+                (ngModelChange)="updateRoot('notes', $event)"
+              ></textarea>
+            </label>
+
+            <div class="callout warning">
+              Marcar una revisión registra una declaración del responsable. No sustituye los cálculos ni adjunta evidencia
+              automáticamente.
+            </div>
+
+            @if (validResult(); as res) {
+              <div class="minirow-list">
+                <div class="minirow">
+                  <span>Corriente CC para ampacidad</span>
+                  <b>{{ pvService.fmt(res.cables.idesign, 2) }} A</b>
+                </div>
+                <div class="minirow">
+                  <span>Caída CC del string</span>
+                  <b>{{ pvService.fmt(res.cables.dropDC, 2) }} %</b>
+                </div>
+                <div class="minirow">
+                  <span>Corriente CA por inversor</span>
+                  <b>{{ pvService.fmt(res.cables.currentAC, 2) }} A</b>
+                </div>
+                <div class="minirow">
+                  <span>Caída CA resistiva</span>
+                  <b>{{ pvService.fmt(res.cables.dropAC, 2) }} %</b>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="pv-card wide">
+            <h3>Verificaciones del anteproyecto</h3>
+            @if (validResult(); as res) {
+              @for (chk of res.checks; track $index) {
+                <div class="check-row">
+                  <span class="chk-badge" [ngClass]="chk.status">{{ getCheckLabel(chk.status) }}</span>
+                  <div>
+                    <b>{{ chk.title }}</b>
+                    <p>{{ chk.detail }}</p>
+                  </div>
+                </div>
+              }
+            } @else {
+              <p class="muted">Corregir datos para calcular.</p>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- =================================================================== -->
+      <!-- VISTA 06: INFORME TÉCNICO                                           -->
+      <!-- =================================================================== -->
+      @if (activeView() === 'report') {
+        @if (validResult(); as res) {
+          <div class="pv-card report-card">
+            <div class="toolbar no-print">
+              <button type="button" class="pv-btn" (click)="exportStringsCsv()">Exportar strings CSV</button>
+              <button type="button" class="pv-btn" (click)="exportResultsJson()">Exportar cálculos JSON</button>
+              <button type="button" class="pv-btn primary" (click)="printReport()">Imprimir / Guardar PDF</button>
+            </div>
+
+            <div class="report-heading">
+              <span class="eyebrow">TALLER FLEXIBLE · ANTEPROYECTO FV</span>
+              <h2>{{ state().name }}</h2>
+              <p>{{ state().site }} · {{ state().lat }}°, {{ state().lon }}° · {{ todayLabel }}</p>
+              <p>
+                <b>
+                  Estado: {{ hasFailedChecks() ? 'contiene incompatibilidades' : 'requiere verificaciones complementarias' }}.
+                  No es un proyecto ejecutivo aprobado.
+                </b>
+              </p>
+            </div>
+
+            <div class="report-summary">
+              <div>
+                Potencia CC
+                <strong>{{ pvService.fmt(res.kw, 2) }} kWp</strong>
+                <span>{{ pvService.fmt(res.count, 0) }} paneles</span>
+              </div>
+              <div>
+                Potencia CA
+                <strong>{{ pvService.fmt(res.ac, 2) }} kW</strong>
+                <span>{{ res.blocks.length }} inversores</span>
+              </div>
+              <div>
+                Generación preliminar
+                <strong>{{ pvService.fmt(res.annual / 1000, 2) }} MWh/año</strong>
+                <span>{{ res.hourly ? 'Serie horaria importada' : 'Estimación mensual aproximada' }}</span>
+              </div>
+            </div>
+
+            @if (res.hourly; as h) {
+              <div class="callout mt-16">
+                <b>Simulación horaria:</b> {{ h.source }} · {{ state().hourly!.time.length }} horas. SOC inicial: reserva vacía.
+                Sin límite de inyección a red.
+              </div>
+              <div class="report-summary">
+                <div>Compra a red<strong>{{ pvService.fmt(h.gridImport, 1) }} kWh</strong></div>
+                <div>Inyección a red<strong>{{ pvService.fmt(h.gridExport, 1) }} kWh</strong></div>
+                <div>Demanda no abastecida<strong>{{ pvService.fmt(h.unserved, 1) }} kWh</strong></div>
+              </div>
+              <div class="minirow">
+                <span>Energía recortada por potencia CA</span>
+                <b>{{ pvService.fmt(h.clipped, 1) }} kWh</b>
+              </div>
+              @if (state().system !== 'grid') {
+                <div class="minirow">
+                  <span>Reserva útil CC del banco / final</span>
+                  <b>{{ pvService.fmt(h.cap, 2) }} / {{ pvService.fmt(h.socSeries[h.socSeries.length - 1], 2) }} kWh</b>
+                </div>
+                <div class="minirow">
+                  <span>Carga desde excedente FV / descarga CA</span>
+                  <b>{{ pvService.fmt(h.charged, 1) }} / {{ pvService.fmt(h.discharged, 1) }} kWh</b>
+                </div>
+              }
+            }
+
+            <h4>Datos generales y criterio</h4>
+            <p>
+              Sistema: {{ systemLabel(state().system) }}. Objetivo:
+              @if (state().mode === 'power') {
+                {{ pvService.fmt(state().target, 2) }} kWp
+              } @else {
+                {{ pvService.fmt(state().demand, 0) }} kWh/mes y {{ state().coverage }} % de cobertura anual
+              }. Demanda pico: {{ pvService.fmt(state().peak, 2) }} kW.
+            </p>
+            <p>
+              Superficie de referencia: {{ pvService.fmt(res.area, 1) }} m². Área de módulos:
+              {{ pvService.fmt(res.moduleArea, 1) }} m². Masa de paneles: {{ pvService.fmt(res.weight, 0) }} kg, sin estructura.
+              Red: {{ state().phases === 3 ? 'trifásica' : 'monofásica' }} {{ state().voltage }} V; cos φ {{ state().pf }}.
+            </p>
+
+            <h4>Superficies</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Sector</th>
+                    <th>Medidas</th>
+                    <th>Orientación</th>
+                    <th>Capacidad / usados</th>
+                    <th>Retiro / filas / sombra</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (z of state().zones; track z.id; let j = $index) {
+                    <tr>
+                      <td>{{ z.name }}</td>
+                      <td>{{ z.width }} × {{ z.height }} m</td>
+                      <td>{{ z.azimuth }}° azimut; {{ z.tilt }}° inclinación</td>
+                      <td>{{ res.layouts[j].count }} / {{ res.usedByZone[z.id] || 0 }}</td>
+                      <td>{{ z.edge }} m / {{ pvService.fmt(res.layouts[j].rowGap, 2) }} m / {{ z.shade }} %</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Unifilar funcional · detalle de un bloque</h4>
+            <canvas id="unifilar-canvas" class="pv-canvas" height="340" aria-label="Esquema unifilar funcional del sistema"></canvas>
+            <p class="hint">
+              Esquema funcional; protecciones, neutro, PE y equipotencialidad requieren plano ejecutivo. La batería sólo aparece
+              en sistemas híbridos o aislados.
+            </p>
+
+            <h4>Conexión de strings</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Sector</th>
+                    <th>Serie (S)</th>
+                    <th>Paralelo (P)</th>
+                    <th>Bloques MPPT</th>
+                    <th>Paneles</th>
+                    <th>CC (kWp)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (r of res.rows; track $index) {
+                    <tr>
+                      <td>{{ zoneName(r.zone) }}</td>
+                      <td>{{ pvService.fmt(r.series, 0) }}</td>
+                      <td>{{ pvService.fmt(r.parallel, 0) }}</td>
+                      <td>{{ pvService.fmt(r.quantity, 0) }}</td>
+                      <td>{{ pvService.fmt(r.series * r.parallel * r.quantity, 0) }}</td>
+                      <td>{{ pvService.fmt((r.series * r.parallel * r.quantity * state().module.p) / 1000, 2) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <canvas id="report-strings-canvas" class="pv-canvas mt-12" height="450" aria-label="Diagrama de strings"></canvas>
+
+            <h4>Asignación por inversor</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Inversor</th>
+                    <th>Potencia CC</th>
+                    <th>Asignación de cada tracker</th>
+                    <th>MPPT libres</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (b of res.blocks.slice(0, 500); track b.number) {
+                    <tr>
+                      <td>{{ formatInverterCode(b.number) }}</td>
+                      <td>{{ pvService.fmt(b.kw, 2) }} kWp</td>
+                      <td>
+                        @for (r of b.mppts; track $index) {
+                          <div>MPPT {{ r.mppt }}: {{ zoneName(r.zone) }} · {{ r.series }}S × {{ r.parallel }}P</div>
+                        }
+                      </td>
+                      <td>{{ state().inverter.mppts - b.used }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Generación mensual</h4>
+            <canvas id="report-energy-canvas" class="pv-canvas" height="360" aria-label="Generación mensual"></canvas>
+            <div class="table-wrap mt-12">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Mes</th>
+                    @if (!res.hourly) {
+                      <th>Recurso horizontal</th>
+                    }
+                    <th>Generación (kWh)</th>
+                    <th>Consumo (kWh)</th>
+                    <th>Balance energético (kWh)</th>
+                    @if (res.hourly) {
+                      <th>Compra</th>
+                      <th>Inyección</th>
+                      <th>No abastecida</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (m of res.monthly; track m.month) {
+                    <tr>
+                      <td>{{ months[m.month] }}</td>
+                      @if (!res.hourly) {
+                        <td>{{ pvService.fmt(m.hsp, 2) }} kWh/m²/día</td>
+                      }
+                      <td>{{ pvService.fmt(m.energy, 1) }}</td>
+                      <td>{{ pvService.fmt(m.load, 1) }}</td>
+                      <td>{{ pvService.fmt(m.energy - m.load, 1) }}</td>
+                      @if (res.hourly) {
+                        <td>{{ pvService.fmt(m.import, 1) }}</td>
+                        <td>{{ pvService.fmt(m.export, 1) }}</td>
+                        <td>{{ pvService.fmt(m.unserved, 1) }}</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Lista preliminar de materiales</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Elemento</th>
+                    <th>Cantidad preliminar</th>
+                    <th>Especificación / alcance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Módulos FV</td>
+                    <td>{{ pvService.fmt(res.count, 0) }}</td>
+                    <td>{{ state().module.name }} · {{ state().module.p }} W</td>
+                  </tr>
+                  <tr>
+                    <td>Inversores</td>
+                    <td>{{ pvService.fmt(res.blocks.length, 0) }}</td>
+                    <td>{{ state().inverter.name }} · {{ state().inverter.ac }} kW</td>
+                  </tr>
+                  <tr>
+                    <td>Strings / entradas utilizadas</td>
+                    <td>{{ pvService.fmt(res.strings, 0) }}</td>
+                    <td>Conexión directa a las entradas MPPT</td>
+                  </tr>
+                  <tr>
+                    <td>Conductores CC de string</td>
+                    <td>{{ pvService.fmt(res.strings * 2 * state().cable.lengthDC, 0) }} m</td>
+                    <td>Dos polos, {{ state().cable.sectionDC }} mm²; sin holgura ni conexiones internas de módulos</td>
+                  </tr>
+                  <tr>
+                    <td>Circuitos de salida CA</td>
+                    <td>{{ pvService.fmt(res.blocks.length, 0) }}</td>
+                    <td>{{ state().cable.lengthAC }} m de recorrido por circuito; {{ state().cable.sectionAC }} mm²; cantidad de conductores y PE a definir</td>
+                  </tr>
+                  <tr>
+                    <td>Conectores de extremo</td>
+                    <td>{{ pvService.fmt(res.strings * 2, 0) }} terminaciones</td>
+                    <td>Además de los conectores propios del módulo; fabricante y polaridad a verificar</td>
+                  </tr>
+                  @if (state().system !== 'grid') {
+                    <tr>
+                      <td>Banco batería</td>
+                      <td>{{ pvService.fmt(res.batteryKWh, 2) }} kWh</td>
+                      <td>{{ state().battery.voltage }} V · {{ state().battery.ah }} Ah; módulos físicos y BMS pendientes</td>
+                    </tr>
+                  }
+                  <tr>
+                    <td>Estructuras y herrajes</td>
+                    <td>A definir</td>
+                    <td>No hay cómputo estructural de rieles, anclajes ni grampas</td>
+                  </tr>
+                  <tr>
+                    <td>Protecciones, PE, tierra, señalética y colectores</td>
+                    <td>A definir</td>
+                    <td>Requiere proyecto, norma y condiciones de conexión</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            @if (state().system !== 'grid') {
+              <h4>Reserva de batería</h4>
+              <p>
+                Banco {{ state().battery.voltage }} V / {{ state().battery.ah }} Ah: {{ pvService.fmt(res.batteryKWh, 2) }} kWh
+                nominales; {{ pvService.fmt(res.usable, 2) }} kWh CA disponibles. Necesarios
+                {{ pvService.fmt(res.required, 2) }} kWh nominales para {{ state().critical }} kWh diarios críticos durante
+                {{ state().autonomy }} días sin sol.
+              </p>
+            }
+
+            <h4>Verificaciones y pendientes</h4>
+            @for (chk of res.checks; track $index) {
+              <div class="check-row">
+                <span class="chk-badge" [ngClass]="chk.status">{{ getCheckLabel(chk.status) }}</span>
+                <div>
+                  <b>{{ chk.title }}</b>
+                  <p>{{ chk.detail }}</p>
+                </div>
+              </div>
+            }
+
+            <h4>Datos técnicos ingresados · panel</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Parámetro</th>
+                    <th>Dato ingresado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (f of moduleFields; track f.key) {
+                    <tr>
+                      <td>{{ f.label }}</td>
+                      <td>{{ state().module[f.key] }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <p class="source muted">{{ state().module.name }} · fuente: {{ state().module.source }}</p>
+
+            <h4>Datos técnicos ingresados · inversor</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Parámetro</th>
+                    <th>Dato ingresado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (f of inverterFields; track f.key) {
+                    <tr>
+                      <td>{{ f.label }}</td>
+                      <td>{{ state().inverter[f.key] }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <p class="source muted">{{ state().inverter.name }} · fuente: {{ state().inverter.source }}</p>
+
+            <h4>Cables y componentes de preselección</h4>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Parámetro</th>
+                    <th>Dato ingresado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (f of cableFields; track f.key) {
+                    <tr>
+                      <td>{{ f.label }}</td>
+                      <td>{{ state().cable[f.key] }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Condiciones y supuestos</h4>
+            <p>
+              Temperaturas de diseño: {{ state().tmin }} a {{ state().tmax }} °C. Irradiancia máxima {{ state().irrmax }} W/m².
+              Margen tensión {{ state().margin }} %. Pérdidas no térmicas {{ state().losses }} %. Fracción difusa
+              {{ state().diffuse }}; albedo {{ state().albedo }}. Recurso: {{ state().resourceSource }}.
+            </p>
+            <div class="table-wrap">
+              <table class="pv-table">
+                <thead>
+                  <tr>
+                    <th>Mes</th>
+                    @for (m of months; track m) {
+                      <th>{{ m }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th>Horizontal kWh/m²/día</th>
+                    @for (n of state().hsp; track $index) {
+                      <td>{{ pvService.fmt(n, 2) }}</td>
+                    }
+                  </tr>
+                  <tr>
+                    <th>Ambiente °C</th>
+                    @for (n of state().ambient; track $index) {
+                      <td>{{ pvService.fmt(n, 1) }}</td>
+                    }
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4>Notas y evidencia declarada</h4>
+            <p class="notes">{{ state().notes || 'Sin notas ni referencias a estudios.' }}</p>
+
+            <h4>Método y limitaciones</h4>
+            <div class="method-body">
+              <p><b>Versión 1.0 · herramienta de anteproyecto.</b> Dimensiona una familia de paneles y una familia de inversores con MPPT simétricos. Separa sectores y utiliza conexiones directas por entrada. No certifica aptitud de una instalación.</p>
+              <p><b>Tensión:</b> V(T) = V(25 °C) × [1 + β × (T − 25)/100]. Voc frío incorpora tolerancia positiva. La cantidad máxima en serie considera el menor límite del inversor, panel y conector, con margen. La mínima considera Vmp caliente y arranque Voc caliente. No modela la dependencia de tensión con irradiancia.</p>
+              <p><b>Corriente:</b> Isc diseño = Isc STC × Gmáx/1000 × [1 + αIsc × (Tmáx − 25)/100]. Imp diseño = Imp STC × Gmáx/1000; el coeficiente Imp no se dispone. Se verifican entradas, tracker y conectores. La ampacidad CC utiliza además el factor de dimensionamiento declarado; no se impone un valor normativo universal.</p>
+              <p><b>Energía:</b> E mensual = P STC × H horizontal diaria × factor POA × días × factor térmico × factores de pérdida × eficiencia. POA automático: aproximación isotrópica con relación de incidencia directa al mediodía, fracción difusa y albedo constantes. No es transposición horaria validada. Temperatura representativa = Tambiente mensual + (NMOT − 20), equivalente a 800 W/m². No resuelve viento, clipping, mismatch, bifacialidad, degradación ni horizonte. Una fuente POA externa puede reemplazar el factor aproximado de cada sector.</p>
+              <p><b>Geometría:</b> grilla rectangular con retiros y exclusión por intersección de obstáculos. En filas sobre plano horizontal, proyección L cos β y separación mínima L sin β / tan α. α es la altura solar indicada por el usuario; no se calcula un estudio anual de sombras.</p>
+              <p><b>Cables:</b> ρ(T) = ρ20 × [1 + 0,00393 × (T − 20)]. ΔV CC = 2 L ρ I / S. ΔV CA = k L ρ I cos φ / S, con k = 2 o √3. El término reactivo, cortocircuito, capacidad de corte y selectividad no se calculan. Ampacidad ingresada por el usuario según tabla y montaje aplicables.</p>
+              <p><b>Batería:</b> energía nominal = V × Ah / 1000; energía disponible CA = nominal × DoD × eficiencia batería × eficiencia inversor. Con una serie importada se simula el balance y SOC horario, empezando con reserva vacía, eficiencia de carga fija del 95 % y límites de potencia/corriente. No valida BMS, picos subhorarios ni firmware. Dimensionar protección y cableado de batería por separado.</p>
+              <p><b>Escala:</b> admite objetivo hasta 10.000 kWp y agrupación de inversores. Un parque requiere además ingeniería civil, MT, transformadores, red colectora, estudios eléctricos y permisos. No están calculados por esta versión.</p>
+              <p><b>Fuentes técnicas:</b> <a href="https://files.sma.de/downloads/DC-PL-en-11.pdf" target="_blank" rel="noopener">SMA · planificación del generador FV</a>; <a href="https://power.larc.nasa.gov/docs/services/api/temporal/climatology/" target="_blank" rel="noopener">NASA POWER · API climatológica</a>; <a href="https://developer.nlr.gov/docs/solar/pvwatts/v8/" target="_blank" rel="noopener">PVWatts V8 · referencia para futura simulación horaria</a>. PVWatts no está integrado en esta entrega.</p>
+              <p><b>Datos:</b> proyecto y fotos se procesan en este dispositivo. NASA POWER recibe únicamente coordenadas cuando se solicita el recurso. Guardar genera un archivo JSON local; no hay cuenta ni guardado en servidor.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="pv-card">Corregir los datos para generar el informe.</div>
+        }
+      }
+
+      <footer class="pv-footer no-print">
+        Diseñador FV · v1.0 · Cálculos trazables de anteproyecto ·
+        <button type="button" class="footer-link-btn" (click)="showMethodModal.set(true)">Método y alcance</button>
+      </footer>
+    </div>
+  </div>
+</main>
+
+<!-- TOAST FLOTANTE -->
+@if (toastMessage(); as msg) {
+  <div class="toast-feedback animate-fade-in no-print" [ngClass]="'toast-' + toastType()" role="status" aria-live="polite">
+    <span>{{ msg }}</span>
+  </div>
+}
+
+<!-- MODAL: MÉTODO Y ALCANCE -->
+@if (showMethodModal()) {
+  <div class="pv-modal-overlay no-print" (click)="showMethodModal.set(false)">
+    <div class="pv-modal-card animate-fade-in" (click)="$event.stopPropagation()">
+      <div class="pv-modal-head">
+        <h2>Método y alcance</h2>
+        <button type="button" class="pv-modal-close" (click)="showMethodModal.set(false)" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="pv-modal-body method-body">
+        <p><b>Versión 1.0 · herramienta de anteproyecto.</b> Dimensiona una familia de paneles y una familia de inversores con MPPT simétricos. Separa sectores y utiliza conexiones directas por entrada. No certifica aptitud de una instalación.</p>
+        <p><b>Tensión:</b> V(T) = V(25 °C) × [1 + β × (T − 25)/100]. Voc frío incorpora tolerancia positiva. La cantidad máxima en serie considera el menor límite del inversor, panel y conector, con margen. La mínima considera Vmp caliente y arranque Voc caliente. No modela la dependencia de tensión con irradiancia.</p>
+        <p><b>Corriente:</b> Isc diseño = Isc STC × Gmáx/1000 × [1 + αIsc × (Tmáx − 25)/100]. Imp diseño = Imp STC × Gmáx/1000; el coeficiente Imp no se dispone. Se verifican entradas, tracker y conectores. La ampacidad CC utiliza además el factor de dimensionamiento declarado; no se impone un valor normativo universal.</p>
+        <p><b>Energía:</b> E mensual = P STC × H horizontal diaria × factor POA × días × factor térmico × factores de pérdida × eficiencia. POA automático: aproximación isotrópica con relación de incidencia directa al mediodía, fracción difusa y albedo constantes. No es transposición horaria validada. Temperatura representativa = Tambiente mensual + (NMOT − 20), equivalente a 800 W/m². No resuelve viento, clipping, mismatch, bifacialidad, degradación ni horizonte. Una fuente POA externa puede reemplazar el factor aproximado de cada sector.</p>
+        <p><b>Geometría:</b> grilla rectangular con retiros y exclusión por intersección de obstáculos. En filas sobre plano horizontal, proyección L cos β y separación mínima L sin β / tan α. α es la altura solar indicada por el usuario; no se calcula un estudio anual de sombras.</p>
+        <p><b>Cables:</b> ρ(T) = ρ20 × [1 + 0,00393 × (T − 20)]. ΔV CC = 2 L ρ I / S. ΔV CA = k L ρ I cos φ / S, con k = 2 o √3. El término reactivo, cortocircuito, capacidad de corte y selectividad no se calculan. Ampacidad ingresada por el usuario según tabla y montaje aplicables.</p>
+        <p><b>Batería:</b> energía nominal = V × Ah / 1000; energía disponible CA = nominal × DoD × eficiencia batería × eficiencia inversor. Con una serie importada se simula el balance y SOC horario, empezando con reserva vacía, eficiencia de carga fija del 95 % y límites de potencia/corriente. No valida BMS, picos subhorarios ni firmware. Dimensionar protección y cableado de batería por separado.</p>
+        <p><b>Escala:</b> admite objetivo hasta 10.000 kWp y agrupación de inversores. Un parque requiere además ingeniería civil, MT, transformadores, red colectora, estudios eléctricos y permisos. No están calculados por esta versión.</p>
+        <p><b>Fuentes técnicas:</b> <a href="https://files.sma.de/downloads/DC-PL-en-11.pdf" target="_blank" rel="noopener">SMA · planificación del generador FV</a>; <a href="https://power.larc.nasa.gov/docs/services/api/temporal/climatology/" target="_blank" rel="noopener">NASA POWER · API climatológica</a>; <a href="https://developer.nlr.gov/docs/solar/pvwatts/v8/" target="_blank" rel="noopener">PVWatts V8 · referencia para futura simulación horaria</a>. PVWatts no está integrado en esta entrega.</p>
+        <p><b>Datos:</b> proyecto y fotos se procesan en este dispositivo. NASA POWER recibe únicamente coordenadas cuando se solicita el recurso. Guardar genera un archivo JSON local; no hay cuenta ni guardado en servidor.</p>
+      </div>
+      <div class="pv-modal-foot">
+        <button type="button" class="pv-btn primary" (click)="showMethodModal.set(false)">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL: CONFIRMAR NUEVO PROYECTO -->
+@if (showResetModal()) {
+  <div class="pv-modal-overlay no-print" (click)="cancelReset()">
+    <div class="pv-modal-card small-modal animate-fade-in" (click)="$event.stopPropagation()">
+      <div class="pv-modal-head">
+        <h3>Nuevo proyecto</h3>
+        <button type="button" class="pv-modal-close" (click)="cancelReset()" aria-label="Cerrar">&times;</button>
+      </div>
+      <p class="muted">¿Iniciar un proyecto nuevo? Guardá el actual en JSON si necesitás conservarlo.</p>
+      <div class="pv-modal-foot">
+        <button type="button" class="pv-btn" (click)="cancelReset()">Cancelar</button>
+        <button type="button" class="pv-btn primary" (click)="executeReset()">Sí, reiniciar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- TOUR INTERACTIVO -->
+@if (isTourActive()) {
+  <div class="tour-floating-card animate-fade-in no-print" role="dialog" aria-label="Guía interactiva">
+    <div class="tour-card-header">
+      <div class="tour-badge-group">
+        <span class="tour-icon">{{ tourSteps[tourStep()].icon }}</span>
+        <span class="tour-badge">{{ tourSteps[tourStep()].badge }}</span>
+      </div>
+      <button type="button" class="tour-close-btn" (click)="finishTour()" aria-label="Cerrar guía">&times;</button>
+    </div>
+    <h4 class="tour-title">{{ tourSteps[tourStep()].title }}</h4>
+    <p class="tour-desc">{{ tourSteps[tourStep()].description }}</p>
+    @if (tourSteps[tourStep()].hint; as hint) {
+      <p class="tour-hint">💡 {{ hint }}</p>
+    }
+    <div class="tour-footer">
+      <div class="tour-dots">
+        @for (s of tourSteps; track $index) {
+          <button
+            type="button"
+            class="tour-dot"
+            [class.active]="tourStep() === $index"
+            (click)="goToTourStep($index)"
+            [attr.aria-label]="'Paso ' + ($index + 1)"
+          ></button>
+        }
+      </div>
+      <div class="tour-actions">
+        @if (tourStep() > 0) {
+          <button type="button" class="pv-btn small-btn" (click)="prevTourStep()">Anterior</button>
+        }
+        <button type="button" class="pv-btn primary small-btn" (click)="nextTourStep()">
+          {{ tourStep() === tourSteps.length - 1 ? 'Finalizar' : 'Siguiente' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

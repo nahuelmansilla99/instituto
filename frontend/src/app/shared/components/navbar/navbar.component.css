@@ -125,6 +125,10 @@
   box-shadow: 0 0 10px rgba(48, 163, 216, 0.25);
 }
 
+.tools-menu-container {
+  position: relative;
+}
+
 .nav-tool-btn .tool-icon {
   font-size: 1.05rem;
   line-height: 1;
@@ -132,6 +136,81 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.nav-tool-btn .tool-chevron {
+  margin-left: 0;
+}
+
+.tools-dropdown-menu {
+  width: 280px;
+  padding: 8px;
+}
+
+.tool-dropdown-item {
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid transparent;
+  text-decoration: none;
+}
+
+.tool-dropdown-item:hover {
+  background: var(--primary-light);
+  border-color: rgba(48, 163, 216, 0.2);
+}
+
+.tool-dropdown-item.active {
+  background: var(--primary-light);
+  border-color: rgba(48, 163, 216, 0.35);
+}
+
+.tool-dropdown-item.active .tool-item-title {
+  color: var(--primary);
+}
+
+.tool-item-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  background: var(--bg-hover);
+}
+
+.tool-item-badge.solar {
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.tool-item-badge.budget {
+  background: rgba(16, 185, 129, 0.14);
+}
+
+.tool-item-badge.designer {
+  background: rgba(48, 163, 216, 0.15);
+}
+
+.tool-item-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tool-item-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.tool-item-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-top: 2px;
 }
 
 .dropdown-icon-solar {
@@ -270,6 +349,16 @@
 
 
 
+@media (max-width: 960px) {
+  .nav-actions {
+    gap: 10px;
+  }
+  .nav-tool-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width: 640px) {
   .brand-text, .user-info {
     display: none;
@@ -278,10 +367,12 @@
     gap: 10px;
   }
   .nav-tool-btn {
-    padding: 6px 10px;
+    padding: 6px 11px;
+    font-size: 0.8rem;
   }
-  .nav-tool-btn .tool-text {
-    display: none;
+  .tools-dropdown-menu {
+    width: min(270px, calc(100vw - 24px));
+    right: -48px;
   }
 }
 
